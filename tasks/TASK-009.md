@@ -30,11 +30,14 @@ criteria:
     стратегия документирована.
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 4
 blockers: []
 created_at: '2026-10-19T14:00:25Z'
-updated_at: '2026-10-19T14:00:25Z'
+updated_at: '2026-10-19T16:55:52Z'
+next_action: Complete criterion-to-evidence review and scoped task finalization
+progress_note: 27 backend tests, Vue typecheck and UI production build passed; task
+  evidence is ready for review.
 ---
 
 ## Outcome
@@ -46,3 +49,5 @@ updated_at: '2026-10-19T14:00:25Z'
 Уточнить SourceWork identity/deduplication, метаданные, разрешённые форматы/размеры, storage contract, retention и delete/replace; реализовать API и UI списка/деталей.
 
 ## Notes
+
+2026-10-19 owner decision: support manual bibliographic metadata entry and local PDF upload only; no external scholarly lookup or metadata-provider calls. Preserve uploaded file versions while referenced by passages/evidence. Permanent deletion requires an explicit owner action after warning about linked records. Implement version retention and guarded purge semantics against available references; document how future passage/evidence references will be enforced because those domains are not yet implemented.

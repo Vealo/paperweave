@@ -41,6 +41,7 @@ services:
       PW_UI_PORT: ${PW_UI_PORT:?}
     volumes:
       - ${PW_CONFIG_PATH:?run through the PaperWeave CLI}:/app/config.toml:ro
+      - paperweave_files:/app/data/files
     ports:
       - "${PW_BIND_HOST:?}:${PW_API_PORT:?}:${PW_API_PORT:?}"
     depends_on:
@@ -111,3 +112,5 @@ services:
 volumes:
   postgres_data:
     name: ${PW_VOLUME_NAME:?run through the PaperWeave CLI}
+  paperweave_files:
+    name: ${PW_FILE_VOLUME_NAME:-paperweave_files}

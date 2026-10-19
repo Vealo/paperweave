@@ -1,6 +1,8 @@
 """Request-scoped application service and identity dependencies."""
 
 from collections.abc import Iterator
+import os
+from pathlib import Path
 
 from fastapi import Depends, HTTPException, Request, status
 from paperweave.infrastructure.db.identity_repository import IdentityRepository
@@ -9,6 +11,9 @@ from paperweave.infrastructure.db.manuscript_repository import SqlAlchemyManuscr
 from paperweave.modules.identity.security import hash_session_token
 from paperweave.modules.projects.service import ProjectService
 from paperweave.modules.manuscripts.service import ManuscriptService
+from paperweave.infrastructure.db.library_repository import SqlAlchemyLibraryRepository
+from paperweave.infrastructure.storage.local import LocalFileStorage
+from paperweave.modules.library.service import LibraryService
 
 SESSION_COOKIE = "paperweave_session"
 
@@ -43,3 +48,9 @@ def get_project_service(request: Request) -> Iterator[ProjectService]:
 def get_manuscript_service(request: Request) -> Iterator[ManuscriptService]:
     with request.app.state.session_factory() as session:
         yield ManuscriptService(SqlAlchemyManuscriptRepository(session))
+
+
+def get_library_service(request: Request) -> Iterator[LibraryService]:
+    with request.app.state.session_factory() as session:
+        root = Path(os.getenv("PW_FILE_STORAGE", "/app/data/files"))
+        yield LibraryService(SqlAlchemyLibraryRepository(session), LocalFileStorage(root))
