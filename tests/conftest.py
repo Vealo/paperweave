@@ -32,6 +32,9 @@ def database_url() -> str:
 def client(database_url: str) -> Iterator[TestClient]:
     cleanup_engine = create_engine(database_url)
     with cleanup_engine.begin() as connection:
+        connection.execute(text("DELETE FROM review_decisions"))
+        connection.execute(text("DELETE FROM evidence_links"))
+        connection.execute(text("DELETE FROM claims"))
         connection.execute(text("DELETE FROM sessions"))
         connection.execute(text("DELETE FROM source_file_references"))
         connection.execute(text("DELETE FROM source_passages"))

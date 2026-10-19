@@ -129,3 +129,45 @@ class SourcePassageRecord(Base):
     page_number: Mapped[int] = mapped_column(Integer, nullable=False)
     text: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class ClaimRecord(Base):
+    __tablename__ = "claims"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    manuscript_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("manuscripts.id", ondelete="CASCADE"), nullable=False, index=True)
+    block_position: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    manuscript_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+
+class EvidenceLinkRecord(Base):
+    __tablename__ = "evidence_links"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    claim_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("claims.id", ondelete="CASCADE"), nullable=False, index=True)
+    claim_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    passage_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("source_passages.id", ondelete="RESTRICT"), nullable=False, index=True)
+    passage_file_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("source_files.id", ondelete="RESTRICT"), nullable=False)
+    relation: Mapped[str] = mapped_column(String(24), nullable=False)
+    rationale: Mapped[str | None] = mapped_column(Text, nullable=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    review_state: Mapped[str] = mapped_column(String(24), nullable=False, default="unreviewed")
+    manuscript_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+
+class ReviewDecisionRecord(Base):
+    __tablename__ = "review_decisions"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    evidence_link_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("evidence_links.id", ondelete="CASCADE"), nullable=False, index=True)
+    reviewer_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False)
+    link_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    decision: Mapped[str] = mapped_column(String(24), nullable=False)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    decided_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

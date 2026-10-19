@@ -9,6 +9,7 @@ import Skeleton from "primevue/skeleton";
 import { EditorContent, useEditor } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import ProjectLibrary from "../components/ProjectLibrary.vue";
+import ClaimEvidencePanel from "../components/ClaimEvidencePanel.vue";
 
 import { getProject, type Project } from "../api/projects";
 import { createManuscript, getManuscript, updateManuscript, type Manuscript } from "../api/manuscript";
@@ -27,6 +28,7 @@ const selectedHeading = ref<number | null>(null);
 const manuscriptMissing = ref(false);
 const manuscriptLoadFailed = ref(false);
 const apiState = ref<"loading" | "available" | "failed">("loading");
+const claimSelection = ref({ text: "", position: 0 });
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let saveSequence = 0;
 let projectLoadSequence = 0;
@@ -41,6 +43,9 @@ const editor = useEditor({
     saveState.value = "dirty";
     saveError.value = "";
     scheduleSave();
+  },
+  onSelectionUpdate: ({ editor: currentEditor }) => {
+    claimSelection.value = { text: currentEditor.state.doc.textBetween(currentEditor.state.selection.from, currentEditor.state.selection.to, " ").trim(), position: currentEditor.state.selection.from };
   },
 });
 
@@ -64,6 +69,12 @@ function goToHeading(position: number): void {
   if (!currentEditor) return;
   selectedHeading.value = position;
   currentEditor.chain().focus().setTextSelection(position + 1).scrollIntoView().run();
+}
+
+function goToClaim(position: number): void {
+  const currentEditor = editor.value;
+  if (!currentEditor) return;
+  currentEditor.chain().focus().setTextSelection(Math.min(position, currentEditor.state.doc.content.size)).scrollIntoView().run();
 }
 
 function errorMessage(reason: unknown, fallback: string): string {
@@ -240,6 +251,7 @@ onBeforeUnmount(() => {
         <Button label="Список" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleBulletList().run()" />
       </div>
       <EditorContent v-if="editor" :editor="editor" class="manuscript-editor" />
+      <ClaimEvidencePanel v-if="project" :project-id="project.id" :selected-text="claimSelection.text" :block-position="claimSelection.position" :disabled="saveState !== 'saved'" @navigate="goToClaim" />
       <Message v-if="saveState === 'failed'" severity="error" :closable="false" class="manuscript-error">
         <div class="manuscript-error__content"><span>{{ saveError }}</span><Button label="Повторить сохранение" severity="danger" text @click="void saveManuscript()" /></div>
       </Message>

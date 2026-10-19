@@ -18,12 +18,12 @@ implements:
   requirements: []
 baseline_commit: 1aedd023eb89fce799ea75e345cf9035f9aa48a1
 relations:
-  specs: []
+  specs: [spec-2026-002-evidence-workflow]
   adrs: [ADR-0002, ADR-0003, ADR-0004, ADR-0005, ADR-0006, ADR-0007]
   tasks: [TASK-006, TASK-007, TASK-008, TASK-009, TASK-010, TASK-011, TASK-012, TASK-013, TASK-014]
 architecture_review:
   required: true
-  review_id: "imp-2026-002-p2-manuscript"
+  review_id: "imp-2026-002-p6-evidence"
 imp_index_ref: IMP.md
 verification_task_ref: TASK-014
 parent_ref: null
@@ -42,7 +42,7 @@ progress: 5/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
-architecture_ref: ../../evidence/architecture/imp-2026-002-p2-manuscript.json
+architecture_ref: ../../evidence/architecture/imp-2026-002-p6-evidence.json
 finalization_status: pending
 audit_ref: null
 deployment_mode: not_applicable
@@ -274,11 +274,11 @@ flowchart TD
 
 **Expected result:** Автор связывает Claim с passages и явно отмечает supports/contradicts/contextualizes с review state.
 
-**Tasks:** Утвердить Claim scope/version, relation types и review lifecycle; связать Claim с блоком рукописи; обеспечить navigation claim↔passage↔source; показывать reviewer, время и состояние; инвалидировать/review link при изменении версии Claim/Passage.
+**Tasks:** Claim ограничен утверждением рукописи; собственные результаты автора остаются вне P6. Единственный владелец local-only проекта выполняет review. Закрепить Claim/EvidenceLink версии, typed relations и ReviewDecision lifecycle в [SPEC-2026-002](../../specs/spec-2026-002-evidence-workflow.md); связать Claim с manuscript block; обеспечить navigation claim↔passage↔source; показывать reviewer, время и состояние; инвалидировать/review link при изменении Claim/Manuscript и замене версии источника.
 
-**Dependencies:** P2 и P5 verified; отдельный domain Spec; решение по атрибуции авторских результатов и области review.
-**Data/API:** Claim, EvidenceLink, ReviewDecision и version references.
-**Evidence contract:** Правила relation/status; тесты связи/отвязки/версии; UI различает цитату, extraction и проверенное evidence; удалённый источник оставляет понятный unresolved state.
+**Dependencies:** P2 и P5 verified; отдельный domain Spec. Границы авторских результатов и review утверждены владельцем и записаны в SPEC-2026-002.
+**Data/API:** Claim, EvidenceLink, ReviewDecision и version references; авторские/исследовательские результаты исключены из P6.
+**Evidence contract:** Правила relation/status; тесты связи/отвязки/версии; UI различает цитату, extraction и проверенное evidence; недоступный/заменённый источник виден как stale, удаление файла остаётся заблокировано при ссылках.
 **Exit criteria:** Claim, passage, typed relation и review решение прослеживаются; stale links требуют повторной проверки, citation не обозначается как proof.
 
 ## Phase 7: P7 — AI assistance

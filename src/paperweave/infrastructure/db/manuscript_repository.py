@@ -8,7 +8,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from paperweave.infrastructure.db.models import ManuscriptRecord
+from paperweave.infrastructure.db.models import ClaimRecord, EvidenceLinkRecord, ManuscriptRecord
 from paperweave.modules.manuscripts.domain import Manuscript
 from paperweave.modules.manuscripts.errors import ManuscriptAlreadyExistsError
 from paperweave.modules.manuscripts.repository import ManuscriptRepository
@@ -44,6 +44,14 @@ class SqlAlchemyManuscriptRepository(ManuscriptRepository):
         if record_id is None:
             self._session.rollback()
             return None
+        self._session.execute(
+            update(EvidenceLinkRecord)
+            .where(EvidenceLinkRecord.manuscript_version == expected_version,
+                   EvidenceLinkRecord.claim_id.in_(select(ClaimRecord.id).where(
+                       ClaimRecord.manuscript_id == record_id
+                   )))
+            .values(review_state="needs_review", version=EvidenceLinkRecord.version + 1)
+        )
         self._session.commit()
         record = self._session.get(ManuscriptRecord, record_id)
         assert record is not None

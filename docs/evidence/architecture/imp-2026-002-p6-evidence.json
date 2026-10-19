@@ -1,0 +1,41 @@
+{
+  "review_id": "imp-2026-002-p6-evidence",
+  "baseline_commit": "f91c4bd07a808d48e9b936e782b1aff885d5b39a",
+  "scope": "P6 manuscript Claims, versioned EvidenceLinks to exact SourcePassages, owner review decisions, stale-link invalidation, and Vue claim-to-passage UI",
+  "verdict": "pass_with_conditions",
+  "findings": [
+    {
+      "id": "P6-ARCH-01",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P6"],
+      "evidence": "The approved local-only access model has one owner; current Manuscript is a JSONB document with optimistic version; SourcePassage is immutable and points to a concrete SourceFile. User decisions recorded in TASK-011 scope Claims to manuscript assertions and exclude author's research results.",
+      "impact": "Evidence review has one accountable reviewer and remains distinct from citation and extraction. Source file identity and passage provenance are not copied into an inferred proof state.",
+      "owner": "PaperWeave Evidence module",
+      "exit_condition": "TASK-011 acceptance evidence proves owner-scoped operations, typed relations, concrete versions and explicit review decisions.",
+      "next_action": "Keep study results, shared reviewers and role management out of P6."
+    },
+    {
+      "id": "P6-ARCH-02",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P6"],
+      "evidence": "GitNexus impact for SourceFileReferenceRecord is MEDIUM with a lower-bound dispatch boundary; direct imports are document, identity, library, manuscript and project repositories. Source inspection confirms the generic reference table stores per-domain reference type/id and the library replacement flow marks old file references needs_review. ManuscriptService impact is LOW, with the owner-scoped manuscript API as a direct caller.",
+      "impact": "Adding Evidence references must preserve existing passage retention/review behavior. The graph result is not complete across repository interfaces, so the implementation keeps those consumers unchanged and checks source/test behavior directly.",
+      "owner": "PaperWeave Evidence and Library modules",
+      "exit_condition": "Integration tests prove evidence retains its exact file, old file version exposes needs_review, and existing library/document tests pass.",
+      "next_action": "Use the generic reference mechanism and avoid changing library upload/delete semantics."
+    },
+    {
+      "id": "P6-ARCH-03",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P6"],
+      "evidence": "Current Tiptap persistence keeps only one JSONB snapshot and an integer version. P6 uses a selection position anchored to the saved manuscript version; evidence links capture Claim and manuscript versions. Claim or manuscript mutation invalidates the links; explicit owner review binds the decision to current versions.",
+      "impact": "A position is not a stable block identity across edits. Invalidation prevents stale review from being presented as current; historical manuscript snapshots and automatic position migration remain out of scope.",
+      "owner": "Project decision owner",
+      "exit_condition": "The UI displays the anchored version/position and requires review after manuscript changes; later persistent block IDs require a separate contract.",
+      "next_action": "Treat navigation coordinates as version-scoped locators, not permanent block IDs."
+    }
+  ]
+}
