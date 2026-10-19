@@ -30,7 +30,7 @@ parent_ref: null
 change_kind: none
 phases: 8
 phase_statuses:
-  P1: active
+  P1: verified
   P2: pending
   P3: pending
   P4: pending
@@ -38,7 +38,7 @@ phase_statuses:
   P6: pending
   P7: pending
   P8: pending
-progress: 0/8
+progress: 1/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
@@ -65,7 +65,7 @@ deployment_mode: not_applicable
 - AC-7 — Цитирование/экспорт ссылается на источник и выдерживает проверку корректности в целевом формате.
 - AC-8 — Каждая фаза закрывает собственный контракт, миграции, негативные сценарии и локальные evidence; пользовательский/production rollout отдельно авторизуется.
 
-**Authorization boundary:** Explicit user authorization covers local implementation of TASK-005…TASK-014 in sequence. Push, hosted actions, remote/production deployment and external effects are not authorized by this request.
+**Authorization boundary:** This request carries explicit user authorization for local implementation of TASK-005…TASK-014 in sequence. Push, hosted actions, remote/production deployment and external effects are not authorized by this request.
 
 **Non-goals:** Соавторство, приглашения и роли команд, открытая регистрация до отдельного решения, ответы рецензентам, систематический обзор, подбор поставщиков поиска, production deployment, автоматическое принятие AI, автономное доказательство истинности Claim.
 
@@ -130,9 +130,9 @@ deployment_mode: not_applicable
 
 | Uncertainty | Why it matters | Decision owner | Evidence / question | Safe fallback |
 |---|---|---|---|---|
-| Provisioning и вход | Определяет, кто может стать субъектом доступа | Denis Karmalak | Выбрать локальное создание владельцем, открытую регистрацию или приглашения | Не начинать P1 |
+| Provisioning и вход | Определяет, кто может стать субъектом доступа | Denis Karmalak | Решено в ADR-0007: первичный owner setup, дальнейшие аккаунты создаёт owner | Удалённая регистрация и приглашения требуют отдельного решения |
 | Режим первой поставки и session model | Определяет threat model, cookies/CSRF и deployment boundary | Denis Karmalak | Решение зафиксировано в ADR-0007: local-only, owner-managed accounts, server-side session 12h idle/7d absolute | Удалённый multi-user режим требует отдельного ADR |
-| Владение существующими проектами | Без миграции нельзя безопасно вводить фильтрацию доступа | Denis Karmalak | Решить, кому принадлежат уже созданные проекты и как это проверяется | Не мигрировать данные |
+| Владение существующими проектами | Без миграции нельзя безопасно вводить фильтрацию доступа | Denis Karmalak | Решено в ADR-0007: одноразово назначить все существующие проекты единственному owner; проверить на disposable DB | Не переносить проекты между пользователями без отдельного решения |
 | Scope P4/P8 | Источники, форматы файлов и export style неизвестны | Denis Karmalak | Уточнить, когда будут готовы соответствующие доменные фазы | Не выбирать провайдеры/форматы заранее |
 
 ## Fixed decisions and invariants
@@ -176,19 +176,19 @@ flowchart TD
   P7 --> P8
 ```
 
-Фазы в диаграмме — будущие гейты. Приведённый граф не означает, что Tasks готовы или что реализация ими авторизована.
+Фазы в диаграмме — последовательные гейты. Tasks идут по зарегистрированной очереди после выполнения зависимостей и собственных acceptance criteria.
 
 ## Blockers
 
 | ID | Phase | Severity | Status | Evidence | Impact | Owner | Exit condition | Next action |
 |---|---|---|---|---|---|---|---|---|
-| ACF-1 | P1 | blocking | resolved | Владелец утвердил модель; ADR-0007 зафиксировал provisioning, session lifecycle, режим и owner migration | До решения нельзя обещать приватность или фильтровать проекты | Denis Karmalak | Решение зафиксировано в ADR-0007; миграция и проверки выполняются в TASK-006 | Закрыть после acceptance TASK-006 |
+| ACF-1 | P1 | blocking | resolved | Владелец утвердил модель; ADR-0007 зафиксировал provisioning, session lifecycle, режим и owner migration; TASK-006 accepted | До решения нельзя было обещать приватность или фильтровать проекты | Denis Karmalak | Выполнено: migration/backfill/rollback, owner-scoped API и UI подтверждены evidence TASK-006 | Закрыт |
 
 ## Architecture findings and phase gates
 
 | ID | Severity | Scope | Phase | Finding / gate | Owner / exit |
 |---|---|---|---|---|---|
-| ACF-1 | informational | phase | P1 | Решение владельца принято и закреплено ADR-0007; реализация ownership boundary и migration проверяется TASK-006 | Denis Karmalak: подтвердить evidence TASK-006 перед закрытием P1 |
+| ACF-1 | informational | phase | P1 | ADR-0007 принято; TASK-006 accepted с backend/API, UI и disposable migration evidence | Закрыт по acceptance ledger `docs/evidence/verification/TASK-006-acceptance-ledger.yaml` |
 | ACF-2 | informational | phases | P2–P8 | Целевые ADR/data model предложены, но не приняты; контракты уточняются по одной доменной фазе | Владелец проекта: принять нужное решение до начала соответствующей реализации |
 
 ## Numbered phases

@@ -1,0 +1,55 @@
+schema_version: 1
+task_id: TASK-006
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: 1aedd023eb89fce799ea75e345cf9035f9aa48a1
+    task_branch: codex/task-006-identity-access
+    task_commits:
+      - 0c33c0d96e99479c771bdabd929e5dcaf3371b04
+    integration_ref: main
+    merge_commit: 14cd911c7f75d443ba6d9419273c89d77602e52f
+baseline:
+  captured: 2026-10-19
+  staged_paths: []
+  unstaged_paths:
+    - DOCS.md
+    - IMP.md
+    - TODO.md
+    - docs/roadmap.md
+    - tasks/.task-store.json
+    - tasks/TASK-005.md
+  untracked_paths:
+    - docs/evidence/
+    - docs/plans/imp/imp-2026-002-domain-workspace.md
+    - tasks/TASK-006.md through tasks/TASK-014.md
+  ownership_map_ref: docs/evidence/verification/TASK-006-acceptance-ledger.yaml
+  preservation_action: Scoped planning/task files were copied into the task worktree. Before merge, the original main-checkout copies were preserved in a path-limited stash; unrelated user files remain in place.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-006-acceptance-ledger.yaml
+  checks:
+    - command: PAPERWEAVE_CONFIG=config.example.toml make test
+      status: passed (22 passed on task branch and after merge)
+      evidence_ref: docs/evidence/verification/TASK-006-acceptance-ledger.yaml
+    - command: npm ci && npm run typecheck && npm run build
+      status: passed on task branch and after merge
+      evidence_ref: docs/evidence/verification/TASK-006-acceptance-ledger.yaml
+    - command: disposable Compose migration backfill/downgrade/upgrade proof
+      status: passed; project row preserved and reassigned to reserved owner
+      evidence_ref: docs/evidence/architecture/imp-2026-002-p1-identity-access.md
+    - command: task-store, TODO and IMP validation
+      status: passed
+      evidence_ref: tasks/TASK-006.md
+integration:
+  status: merged
+  post_merge_checks:
+    - PAPERWEAVE_CONFIG=config.example.toml make test: 22 passed
+    - frontend npm run typecheck and npm run build: passed
+    - GitNexus index at 14cd911: up-to-date, 910 nodes, 1368 edges, 48 flows
+    - parent reachability: verify_parent_reachability.py reported reachable=true for task commit 0c33c0d against main at 14cd911
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: task-orchestrator
+  next_action: Start ready TASK-007 after committing the TASK-006 finalization records.

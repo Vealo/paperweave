@@ -13,32 +13,34 @@ criteria:
 - id: AC-1
   text: Владелец проекта утвердил provisioning, local/remote режим и жизненный цикл
     сессии; решение связано с актуальным ADR/Spec.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/decisions/ADR-0007-local-identity-and-project-access.md
 - id: AC-2
   text: Для существующих проектов определена и проверена миграция владельца с rollback
     на disposable DB.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/architecture/imp-2026-002-p1-identity-access.md
 - id: AC-3
   text: API list/create/get/update закрыты проверками доступа; тесты подтверждают
     allow/deny и отсутствие межпользовательской утечки.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - tests/integration/test_projects_api.py
 - id: AC-4
   text: UI показывает состояния входа, истечения сессии и отказа отдельно от ошибки
     API.
-  checked: false
-  evidence: []
-status: in_progress
-revision: 6
+  checked: true
+  evidence:
+  - frontend/src/views/LoginView.vue; frontend/src/views/AccessDeniedView.vue
+status: done
+revision: 7
 blockers: []
 created_at: '2026-10-19T14:00:24Z'
-updated_at: '2026-10-19T14:14:00Z'
-progress_note: Утверждены local-only, owner-created users, PostgreSQL session 12h
-  idle/7d max и перенос проектов единственному owner.
-next_action: Зафиксировать решение в ADR/Spec и реализовать auth, ownership migration
-  и UI.
+updated_at: '2026-10-19T14:41:05Z'
+progress_note: Identity, sessions and ownership shipped; migration rollback, 22 backend
+  tests and frontend checks pass.
 ---
 
 ## Outcome

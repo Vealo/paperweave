@@ -38,7 +38,7 @@
 |---|---|---|---|
 | [SPEC-2026-001](docs/specs/spec-2026-001-mvp-foundation.md) | Поведение локального запуска, Projects API/UI и PostgreSQL persistence | Черновик | ADR-0006; IMP-2026-001 |
 | [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Complete; P1–P4 verified, TASK-005 done | TASK-001…TASK-005 |
-| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | План развития по доменам: доступ, рукопись, пространство, источники, evidence, AI, экспорт | In progress; P1 выполняется по принятому ADR-0007; ACF-1 снят | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001 |
+| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | План развития по доменам: доступ, рукопись, пространство, источники, evidence, AI, экспорт | Active; P1 verified; P2 — следующий этап | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001 |
 
 Полные очереди: [TODO.md](TODO.md) и [IMP.md](IMP.md). Черновой Spec не представлен как утверждённый контракт; scope MVP утверждён ADR-0006.
 
