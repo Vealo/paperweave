@@ -35,6 +35,20 @@ make up COMPOSE_PROJECT_NAME=paperweave-dev
 
 Порты по умолчанию: API `127.0.0.1:18741`, UI `127.0.0.1:18742`; PostgreSQL host-порт не публикуется. `deployment.bind_host` принимает только loopback IP. Внутри контейнеров API и UI слушают доступный Compose-интерфейс.
 
+## MVP API
+
+Базовый адрес API — `http://127.0.0.1:18741/api/v1` (порт берётся из `config.toml`). Реализованы:
+
+| Метод и путь | Результат |
+|---|---|
+| `GET /health/live` | `200`, процесс API запущен; БД не проверяется |
+| `GET /health/ready` | `200`, если PostgreSQL доступен, иначе `503` |
+| `POST /projects` | Создаёт проект (`201`); `name` после trim — 1–200 символов, `description` — до 5000 |
+| `GET /projects` | Возвращает проекты от новых к старым |
+| `GET /projects/{uuid}` | Возвращает проект, `404` при отсутствии, `422` для неверного UUID |
+
+Например, создание можно проверить командой `curl -X POST http://127.0.0.1:18741/api/v1/projects -H 'Content-Type: application/json' -d '{"name":"Мой проект","description":"Исследовательский вопрос"}'`. Редактирование, удаление и пагинация в MVP не входят.
+
 ## Данные и безопасная остановка
 
 Compose хранит локальную БД в именованном volume `<COMPOSE_PROJECT_NAME>-postgres-data` (для проекта по умолчанию — `paperweave-postgres-data`). `make down` этот volume сохраняет. В MVP нет команды удаления данных. Для временного тестирования используется отдельный service `test-db` с `tmpfs`, без подключения пользовательского volume.

@@ -33,10 +33,10 @@ change_kind: none
 phases: 4
 phase_statuses:
   P1: verified
-  P2: pending
+  P2: verified
   P3: pending
   P4: pending
-progress: 1/4
+progress: 2/4
 analysis_status: complete
 analysis_ref: artifacts/plan-analysis/imp-2026-001-mvp-foundation-2026-10-19.md
 architecture_status: complete
@@ -273,8 +273,8 @@ API выполняет live/ready и проекты по контракту; д�
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| test | `make test` (backend focused tests) | local/test | unavailable до выполнения | при P2 | TASK-002 evidence |
-| source | migration + API contract | local | unavailable до выполнения | при P2 | TASK-002 evidence |
+| test | `make test` (isolated PostgreSQL, migration twice, API contract) | local/test | passed (16 passed) | 2026-10-19 | TASK-002 evidence |
+| source | migration + API contract | local | passed: projects schema, Alembic revision and endpoints match contract | 2026-10-19 | TASK-002 evidence |
 
 ### Exit criteria
 
