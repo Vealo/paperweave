@@ -40,6 +40,8 @@ class UiSettings(StrictSettings):
         parsed = urlparse(value)
         if parsed.scheme not in {"http", "https"} or not parsed.hostname:
             raise ValueError("must be an absolute HTTP(S) URL")
+        if parsed.username is not None or parsed.password is not None:
+            raise ValueError("must not include user information")
         if parsed.path not in {"", "/"} or parsed.query or parsed.fragment:
             raise ValueError("must not include a path, query, or fragment")
         hostname = parsed.hostname.lower()

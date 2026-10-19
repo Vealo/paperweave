@@ -28,3 +28,6 @@ RUN npm run build
 
 FROM nginx:1.27-alpine AS ui
 COPY --from=ui-build /app/dist/ /usr/share/nginx/html/
+COPY frontend/nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY frontend/nginx/40-runtime-config.sh /docker-entrypoint.d/40-runtime-config.sh
+RUN chmod +x /docker-entrypoint.d/40-runtime-config.sh

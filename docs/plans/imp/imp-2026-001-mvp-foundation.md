@@ -34,7 +34,7 @@ phases: 4
 phase_statuses:
   P1: verified
   P2: verified
-  P3: pending
+  P3: active
   P4: pending
 progress: 2/4
 analysis_status: complete
