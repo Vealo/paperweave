@@ -4,7 +4,7 @@ id: imp-2026-002-domain-workspace
 name: "Доменное развитие PaperWeave как исследовательского пространства"
 type: imp
 version: 1.0.0
-status: active
+status: in_progress
 freeze: false
 date: 2026-10-19
 last_reviewed: 2026-10-19
@@ -37,14 +37,14 @@ phase_statuses:
   P5: verified
   P6: verified
   P7: verified
-  P8: pending
-progress: 7/8
+  P8: verified
+progress: 8/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
 architecture_ref: ../../evidence/architecture/imp-2026-002-p6-evidence.json
 finalization_status: pending
-audit_ref: null
+audit_ref: ../../evidence/verification/TASK-014-audit.md
 deployment_mode: not_applicable
 ---
 
@@ -133,7 +133,7 @@ deployment_mode: not_applicable
 | Provisioning и вход | Определяет, кто может стать субъектом доступа | Denis Karmalak | Решено в ADR-0007: первичный owner setup, дальнейшие аккаунты создаёт owner | Удалённая регистрация и приглашения требуют отдельного решения |
 | Режим первой поставки и session model | Определяет threat model, cookies/CSRF и deployment boundary | Denis Karmalak | Решение зафиксировано в ADR-0007: local-only, owner-managed accounts, server-side session 12h idle/7d absolute | Удалённый multi-user режим требует отдельного ADR |
 | Владение существующими проектами | Без миграции нельзя безопасно вводить фильтрацию доступа | Denis Karmalak | Решено в ADR-0007: одноразово назначить все существующие проекты единственному owner; проверить на disposable DB | Не переносить проекты между пользователями без отдельного решения |
-| Scope P4/P8 | Источники, форматы файлов и export style неизвестны | Denis Karmalak | Уточнить, когда будут готовы соответствующие доменные фазы | Не выбирать провайдеры/форматы заранее |
+| Scope P4/P8 | На старте плана источники, допустимый ввод и export style неизвестны | Denis Karmalak | Разрешено на границах фаз: TASK-009 — ручная библиография + локальный PDF, без external lookup; TASK-013 / ADR-0008 — DOCX и numeric GOST references, см. notes/evidence | Для будущих внешних lookup, типов источников и экспорта требуется отдельная задача/решение |
 
 ## Fixed decisions and invariants
 
@@ -311,6 +311,8 @@ flowchart TD
 **Evidence contract:** golden document fixtures; ссылки/библиография валидны; отсутствующие метаданные видимы; экспорт не меняет исходный manuscript.
 **Exit criteria:** Формат выбран; цитаты разрешаются к источникам; неполные метаданные явно отмечены; экспорт проверен без изменения исходной рукописи.
 
+**Verification (2026-10-19):** TASK-013 accepted and integrated: implementation `15d5462092fe9d441230dff62cab6cc5b764ae8c`, merge `ccb07732330bdf8e0cacccdbdfec4e5251b9357f`; 45 local tests, frontend typecheck/build and LibreOffice DOCX open/render passed. See [acceptance/finalization evidence](../../evidence/verification/TASK-013-finalization.yaml) and [TASK-014 cross-phase audit](../../evidence/verification/TASK-014-audit.md). Bibliographic formatting uses the approved bounded subset; full normative bibliographic completeness is not claimed.
+
 ## Required test matrix
 
 | Граница | Сценарии |
@@ -358,3 +360,5 @@ Before closure, independently compare every phase contract and evidence with AC-
 ## Closure
 
 The IMP may become `complete` only after all mandatory phases and final verification pass. It remains `blocked` only for a concrete unresolved condition with owner, impact, exit condition and next step. If the product scope is replaced, set `superseded` only with a linked successor and preserve phase/task history. The user authorized sequential local implementation of TASK-005 through TASK-014; external and production actions remain outside that authorization.
+
+**Final review in progress (2026-10-19):** The audit mapped standalone AC-1…AC-8 and P1–P8 to phase ledgers, source/contracts and integrated commits. TASK-014 acceptance and finalization remain pending until the audit/documentation reconciliation is committed, integrated and checked on `main`. See [TASK-014 audit](../../evidence/verification/TASK-014-audit.md). CI, deployment and production evidence were not run and are outside scope.
