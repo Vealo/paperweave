@@ -6,14 +6,17 @@ import Card from "primevue/card";
 import Message from "primevue/message";
 import Tag from "primevue/tag";
 import Skeleton from "primevue/skeleton";
+import Select from "primevue/select";
 import { EditorContent, useEditor } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
+import { Citation } from "../editor/Citation";
 import ProjectLibrary from "../components/ProjectLibrary.vue";
 import ClaimEvidencePanel from "../components/ClaimEvidencePanel.vue";
 import AIProposalPanel from "../components/AIProposalPanel.vue";
 
 import { getProject, type Project } from "../api/projects";
-import { createManuscript, getManuscript, updateManuscript, type Manuscript } from "../api/manuscript";
+import { createManuscript, downloadManuscriptDocx, getManuscript, updateManuscript, type Manuscript } from "../api/manuscript";
+import { listSources, type Source } from "../api/library";
 import { formatDate } from "../utils/formatDate";
 
 const route = useRoute();
@@ -30,12 +33,17 @@ const manuscriptMissing = ref(false);
 const manuscriptLoadFailed = ref(false);
 const apiState = ref<"loading" | "available" | "failed">("loading");
 const claimSelection = ref({ text: "", position: 0 });
+const sources = ref<Source[]>([]);
+const selectedSourceId = ref<string | null>(null);
+const sourcesLoadError = ref("");
+const exportError = ref("");
+const exporting = ref(false);
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let saveSequence = 0;
 let projectLoadSequence = 0;
 
 const editor = useEditor({
-  extensions: [StarterKit],
+  extensions: [StarterKit, Citation],
   content: { type: "doc", content: [{ type: "paragraph" }] },
   editable: true,
   onUpdate: () => {
@@ -173,12 +181,17 @@ async function loadProject(projectId: string): Promise<void> {
   error.value = "";
   apiState.value = "loading";
   project.value = null;
+  sources.value = [];
+  selectedSourceId.value = null;
+  sourcesLoadError.value = "";
   if (saveTimer) clearTimeout(saveTimer);
   try {
     const loadedProject = await getProject(projectId);
     if (loadSequence !== projectLoadSequence) return;
     project.value = loadedProject;
     apiState.value = "available";
+    try { sources.value = await listSources(projectId); }
+    catch { sourcesLoadError.value = "Не удалось загрузить библиотеку источников; обновите проект перед вставкой цитат."; }
     await loadManuscript(projectId, loadSequence);
   } catch (reason) {
     if (loadSequence !== projectLoadSequence) return;
@@ -187,6 +200,20 @@ async function loadProject(projectId: string): Promise<void> {
   } finally {
     if (loadSequence === projectLoadSequence) loading.value = false;
   }
+}
+
+function insertCitation(): void {
+  if (!selectedSourceId.value || !editor.value) return;
+  editor.value.chain().focus().insertContent({ type: "citation", attrs: { sourceId: selectedSourceId.value } }).run();
+}
+
+async function exportDocx(): Promise<void> {
+  if (!project.value || saveState.value !== "saved" || !manuscript.value) return;
+  exporting.value = true;
+  exportError.value = "";
+  try { await downloadManuscriptDocx(project.value.id); }
+  catch (reason) { exportError.value = errorMessage(reason, "Не удалось экспортировать рукопись."); }
+  finally { exporting.value = false; }
 }
 
 watch(
@@ -260,7 +287,12 @@ onBeforeUnmount(() => {
         <Button label="Курсив" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleItalic().run()" />
         <Button label="Заголовок" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()" />
         <Button label="Список" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleBulletList().run()" />
+        <Select v-model="selectedSourceId" :options="sources" option-label="title" option-value="id" placeholder="Источник для цитаты" aria-label="Источник для цитаты" size="small" />
+        <Button label="Вставить цитату" severity="secondary" outlined size="small" :disabled="!editor || !selectedSourceId" @click="insertCitation" />
+        <Button label="Экспорт DOCX" severity="primary" size="small" :loading="exporting" :disabled="saveState !== 'saved' || !manuscript" @click="void exportDocx()" />
       </div>
+      <Message v-if="sourcesLoadError" severity="warn" :closable="false" class="workspace-notice">{{ sourcesLoadError }}</Message>
+      <Message v-if="exportError" severity="error" :closable="false" class="workspace-notice">{{ exportError }}</Message>
       <EditorContent v-if="editor" :editor="editor" class="manuscript-editor" />
       <ClaimEvidencePanel v-if="project" :project-id="project.id" :selected-text="claimSelection.text" :block-position="claimSelection.position" :disabled="saveState !== 'saved'" @navigate="goToClaim" />
       <Message v-if="saveState === 'failed'" severity="error" :closable="false" class="manuscript-error">

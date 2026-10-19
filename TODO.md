@@ -7,7 +7,7 @@
 - Низкий приоритет: 0
 - Без приоритета: 0
 - Не утверждён: 0 (только явно `approval_state: pending`)
-- Не указано утверждение: 2
+- Не указано утверждение: 1
 - Не проверено: 0 (`legacy_done_unverified`, весь task-store)
 
 Task-store snapshot: 2026-10-19. Полные статусы, критерии и evidence — в task-store; фазы — в IMP.md.
@@ -18,7 +18,7 @@ Task-store snapshot: 2026-10-19. Полные статусы, критерии �
 
 | Порядок | Задача | Родитель | Последнее подтверждённое движение | Следующий шаг / что ждёт |
 |---:|---|---|---|---|
-| — | Нет задач | — | — |
+| 1 | [TASK-013 — Подготовить цитирование и экспорт рукописи](<tasks/TASK-013.md>) | imp-2026-002-domain-workspace / P8 | DOCX export, citations, owner scope, and final local checks verified | Commit verified P8 changes and integrate into main |
 
 ## К выполнению
 
@@ -42,7 +42,7 @@ Task-store snapshot: 2026-10-19. Полные статусы, критерии �
 
 | Порядок | Задача | Родитель | Последнее подтверждённое движение | Следующий шаг / что ждёт |
 |---:|---|---|---|---|
-| 1 | [TASK-013 — Подготовить цитирование и экспорт рукописи](<tasks/TASK-013.md>) | imp-2026-002-domain-workspace / P8 | P8 reached; export format and citation style await the owner's decision | Уточнить границы TASK-013 |
+| — | Нет задач | — | — |
 
 ## Входящие
 

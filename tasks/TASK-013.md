@@ -29,16 +29,14 @@ criteria:
   text: Экспорт не меняет сохранённую рукопись и её версии.
   checked: false
   evidence: []
-status: todo
-revision: 2
+status: in_progress
+revision: 5
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T18:24:56Z'
-progress_note: P8 reached; export format and citation style await the owner's decision
-todo_lane: clarification
-clarification_question: Какой формат экспорта и стиль цитирования утвердить для P8?
-clarification_source: TASK-013 scope and IMP-2026-002 P8 exit criteria; decision requested
-  from Denis Karmalak
+updated_at: '2026-10-19T19:33:09Z'
+progress_note: DOCX export, citations, owner scope, and final local checks verified
+approval_state: approved
+next_action: Commit verified P8 changes and integrate into main
 ---
 
 ## Outcome
@@ -50,3 +48,5 @@ clarification_source: TASK-013 scope and IMP-2026-002 P8 exit criteria; decision
 Утвердить export format, citation style и поведение для неполных метаданных; связать inline citation markers с SourceWork и реализовать export service.
 
 ## Notes
+
+P8 format and style approved by Denis Karmalak on 2026-10-19: export editable DOCX; use numeric in-text references in square brackets under ГОСТ Р 7.0.5-2008 and format bibliography descriptions under ГОСТ Р 7.0.100-2018. The latter is the active Russian standard for bibliographic descriptions; ГОСТ Р 7.0.5-2008 governs bibliographic references. Use only manually curated Source metadata; missing fields are marked explicitly and never inferred or fabricated. Export is local and owner-scoped; output must not mutate the manuscript or its saved revisions.

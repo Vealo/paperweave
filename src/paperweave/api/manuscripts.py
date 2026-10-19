@@ -3,17 +3,21 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
 
-from paperweave.api.dependencies import get_current_user, get_manuscript_service, get_project_service
+from paperweave.api.dependencies import get_current_user, get_library_service, get_manuscript_service, get_project_service
 from paperweave.api.schemas.manuscripts import ManuscriptResponse, ManuscriptRevisionResponse, ManuscriptWriteRequest
 from paperweave.modules.manuscripts.errors import ManuscriptAlreadyExistsError, ManuscriptConflictError
 from paperweave.modules.manuscripts.service import ManuscriptService
 from paperweave.modules.projects.service import ProjectService
+from paperweave.modules.library.errors import SourceNotFoundError
+from paperweave.modules.library.service import LibraryService
+from paperweave.modules.manuscripts.docx_export import render_docx
 
 router = APIRouter(prefix="/projects/{project_id}/manuscript", tags=["manuscripts"])
 ManuscriptServiceDep = Annotated[ManuscriptService, Depends(get_manuscript_service)]
 ProjectServiceDep = Annotated[ProjectService, Depends(get_project_service)]
+LibraryServiceDep = Annotated[LibraryService, Depends(get_library_service)]
 
 
 def _require_project(projects: ProjectService, user_id: UUID, project_id: UUID) -> None:
@@ -102,3 +106,29 @@ def update_manuscript(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return ManuscriptResponse.model_validate(manuscript)
+
+
+@router.get("/export.docx")
+def export_manuscript_docx(
+    project_id: UUID,
+    service: ManuscriptServiceDep,
+    projects: ProjectServiceDep,
+    library: LibraryServiceDep,
+    user=Depends(get_current_user),
+):
+    _require_project(projects, user.id, project_id)
+    manuscript = service.get(project_id)
+    if manuscript is None:
+        raise HTTPException(status_code=404, detail="Manuscript not found")
+    try:
+        sources = library.list_sources(user.id, project_id)
+        document = render_docx(manuscript.content, sources)
+    except SourceNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="Project not found") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return Response(
+        document,
+        media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        headers={"Content-Disposition": 'attachment; filename="paperweave-manuscript.docx"', "X-Content-Type-Options": "nosniff"},
+    )

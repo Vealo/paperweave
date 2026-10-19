@@ -1,0 +1,38 @@
+schema_version: 1
+task_id: TASK-013
+contract_ref: tasks/TASK-013.md
+baseline_ref: main@12c5b7469bd81182dd82daeabaa3db69b0da4c73
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md; src/paperweave/modules/manuscripts/docx_export.py; tests/integration/test_manuscripts_api.py
+    rationale: Inline source IDs resolve only in the project library. Integration evidence verifies first-use numbering, repeated-reference reuse, exported bibliography and DOCX media type.
+  - id: AC-2
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md; src/paperweave/modules/manuscripts/docx_export.py
+    rationale: Missing author, year and DOI are explicitly labeled; the exporter uses only manually stored metadata and performs no inference or lookup.
+  - id: AC-3
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md; tests/integration/test_manuscripts_api.py
+    rationale: Golden integration checks the OOXML package and content; LibreOffice successfully opens and converts the generated DOCX.
+  - id: AC-4
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md; tests/integration/test_manuscripts_api.py
+    rationale: The test confirms the saved manuscript version and revision count remain unchanged after export.
+required_checks:
+  - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md
+  - command: npm run typecheck && npm run build (frontend/)
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md
+  - command: python3 -m compileall -q src/paperweave
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md
+  - command: git diff --check
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-013-checks.md
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null
