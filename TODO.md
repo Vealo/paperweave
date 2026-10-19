@@ -1,13 +1,13 @@
 # TODO
 
-**Готовы к выполнению: 0 · Открытых задач: 3**
+**Готовы к выполнению: 0 · Открытых задач: 2**
 
-- Высокий приоритет: 3
+- Высокий приоритет: 2
 - Средний приоритет: 0
 - Низкий приоритет: 0
 - Без приоритета: 0
 - Не утверждён: 0 (только явно `approval_state: pending`)
-- Не указано утверждение: 3
+- Не указано утверждение: 2
 - Не проверено: 0 (`legacy_done_unverified`, весь task-store)
 
 Task-store snapshot: 2026-10-19. Полные статусы, критерии и evidence — в task-store; фазы — в IMP.md.
@@ -18,7 +18,7 @@ Task-store snapshot: 2026-10-19. Полные статусы, критерии �
 
 | Порядок | Задача | Родитель | Последнее подтверждённое движение | Следующий шаг / что ждёт |
 |---:|---|---|---|---|
-| 1 | [TASK-003 — Реализовать интерфейс проектов на Vue и PrimeVue](<tasks/TASK-003.md>) | imp-2026-001-mvp-foundation / P3 | P3 criteria evidenced; frontend checks and browser create/detail/outage-recovery passed. | Commit and integrate P3, then run P4 acceptance. |
+| 1 | [TASK-004 — Проверить сквозной запуск и сохранность данных MVP](<tasks/TASK-004.md>) | imp-2026-001-mvp-foundation / P4 | P1–P3 are integrated; P4 runtime acceptance has started. | Verify isolated Compose migration-failure gate and record P4 evidence. |
 
 ## К выполнению
 
@@ -34,8 +34,7 @@ Task-store snapshot: 2026-10-19. Полные статусы, критерии �
 
 | Порядок | Задача | Родитель | Последнее подтверждённое движение | Следующий шаг / что ждёт |
 |---:|---|---|---|---|
-| 1 | [TASK-004 — Проверить сквозной запуск и сохранность данных MVP](<tasks/TASK-004.md>) | imp-2026-001-mvp-foundation / P4 | — | Ждёт TASK-003 |
-| 2 | [TASK-005 — Проверить завершённость MVP и согласованность документации](<tasks/TASK-005.md>) | imp-2026-001-mvp-foundation | — | Ждёт TASK-003, TASK-004 |
+| 1 | [TASK-005 — Проверить завершённость MVP и согласованность документации](<tasks/TASK-005.md>) | imp-2026-001-mvp-foundation | — | Ждёт TASK-004 |
 
 ## Требуют уточнения
 

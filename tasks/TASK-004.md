@@ -37,11 +37,13 @@ criteria:
     не затронуты.
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 2
 blockers: []
 created_at: '2026-10-19T11:59:34Z'
-updated_at: '2026-10-19T11:59:34Z'
+updated_at: '2026-10-19T12:53:20Z'
+next_action: Verify isolated Compose migration-failure gate and record P4 evidence.
+progress_note: P1–P3 are integrated; P4 runtime acceptance has started.
 ---
 
 ## Outcome

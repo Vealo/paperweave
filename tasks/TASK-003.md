@@ -17,6 +17,7 @@ criteria:
   evidence:
   - source:frontend/src/composables/useHealthStatus.ts; browser:initial health UI;
     typecheck/build passed
+  - post-merge:main 41eb96f; backend 17 passed; frontend typecheck/build passed
 - id: AC-2
   text: Форма создаёт проект через POST, блокирует повторный клик во время запроса,
     затем обновляет список; при ошибке введённые данные сохраняются и POST автоматически
@@ -46,14 +47,13 @@ criteria:
   evidence:
   - frontend npm run typecheck and npm run build passed; PrimeVue Aura controls used
     per docs/design-system.md
-status: in_progress
-revision: 3
+  - task commit 5f5c7f2 reachable from main 41eb96f
+status: done
+revision: 4
 blockers: []
 created_at: '2026-10-19T11:59:23Z'
-updated_at: '2026-10-19T12:50:23Z'
-next_action: Commit and integrate P3, then run P4 acceptance.
-progress_note: P3 criteria evidenced; frontend checks and browser create/detail/outage-recovery
-  passed.
+updated_at: '2026-10-19T12:51:48Z'
+progress_note: P3 integrated into main; post-merge backend/frontend checks green.
 ---
 
 ## Outcome
