@@ -14,30 +14,34 @@ depends_on:
 criteria:
 - id: AC-1
   text: Перед вызовом показан фактически передаваемый контекст и целевая версия.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-012-checks.md
 - id: AC-2
   text: Reject не меняет рукопись; accept создаёт новую версию, сохраняя исходник.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-012-checks.md
 - id: AC-3
   text: Timeout/error/stale target обрабатываются явно; повтор не создаёт дублированные
     действия.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-012-checks.md
 - id: AC-4
   text: Провайдер проверен локальными adapter tests с mock; непредусмотренная передача
     данных отсутствует.
-  checked: false
-  evidence: []
-status: in_progress
-revision: 4
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-012-checks.md
+status: done
+revision: 5
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T18:21:32Z'
-progress_note: 'P7 acceptance passed: 43 backend tests, frontend typecheck/build,
-  compileall; graph fallback documented'
-next_action: Commit verified P7 changes, merge into main, run post-integration checks
+updated_at: '2026-10-19T18:23:33Z'
+progress_note: P7 completed and merged at main@4704484; post-merge checks and GitNexus
+  refresh passed
+approval_state: approved
 ---
 
 ## Outcome

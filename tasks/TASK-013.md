@@ -30,10 +30,15 @@ criteria:
   checked: false
   evidence: []
 status: todo
-revision: 1
+revision: 2
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T14:00:26Z'
+updated_at: '2026-10-19T18:24:56Z'
+progress_note: P8 reached; export format and citation style await the owner's decision
+todo_lane: clarification
+clarification_question: Какой формат экспорта и стиль цитирования утвердить для P8?
+clarification_source: TASK-013 scope and IMP-2026-002 P8 exit criteria; decision requested
+  from Denis Karmalak
 ---
 
 ## Outcome

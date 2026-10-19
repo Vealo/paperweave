@@ -1,0 +1,55 @@
+schema_version: 1
+task_id: TASK-012
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: 0a1659a6ef84f7c4151180258b748a6bf1e6fc1a
+    task_branch: codex/task-012-ai-proposals
+    task_commits:
+      - a464d5bd870158d7519cb61f7ffba43f646bb470
+    integration_ref: main
+    merge_commit: 4704484b92d5077a8e07703b8c96d57a38685be4
+baseline:
+  captured: true
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+    - user-owned .claude/, AGENTS.md, CLAUDE.md, TODO backup files and tasks/.lock preserved
+  ownership_map_ref: docs/evidence/verification/TASK-012-checks.md
+  preservation_action: Explicit task-owned paths staged and committed; unrelated untracked files preserved.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-012-acceptance.yaml
+  checks:
+    - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+      status: passed; 43 tests
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    - command: npm run typecheck && npm run build (frontend/)
+      status: passed; existing Vite warnings recorded
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    - command: python3 -m compileall -q src/paperweave tests
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    - command: git diff --cached --check
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+integration:
+  status: merged
+  post_merge_checks:
+    - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+      status: passed; 43 tests
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    - command: npm run typecheck && npm run build (frontend/)
+      status: passed; existing Vite warnings recorded
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    - command: python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit a464d5bd870158d7519cb61f7ffba43f646bb470
+      status: passed; reachable: true; parent HEAD 4704484b92d5077a8e07703b8c96d57a38685be4
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    - command: node .gitnexus/run.cjs status
+      status: up-to-date at parent HEAD; partial graph coverage warnings documented
+      evidence_ref: docs/evidence/verification/TASK-012-checks.md
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: task-store finalization and P8 boundary clarification
+  next_action: Reconcile records and settle TASK-013 export format/citation style

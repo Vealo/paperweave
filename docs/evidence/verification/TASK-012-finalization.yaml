@@ -1,0 +1,38 @@
+schema_version: 1
+task_id: TASK-012
+acceptance_ref: docs/evidence/verification/TASK-012-acceptance.yaml
+commit:
+  required: true
+  created: true
+  id: a464d5bd870158d7519cb61f7ffba43f646bb470
+  reason: Scoped implementation commit on the TASK-012 branch.
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-012-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: 4704484b92d5077a8e07703b8c96d57a38685be4
+  parent_head: 4704484b92d5077a8e07703b8c96d57a38685be4
+  task_commit_reachable: true
+  reason: Non-forced local merge; ancestry verified.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-012.md
+documentation_graph:
+  required_updates:
+    - docs/plans/imp/imp-2026-002-domain-workspace.md P7 status and P8 handoff
+    - IMP.md active phase
+    - DOCS.md IMP index
+    - TODO.md derived task projection
+    - GitNexus index refreshed and checked against parent HEAD
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes:
+  - TASK-013 — format and citation style remain owner decisions
+  - TASK-014 — final IMP audit waits for TASK-013
+result: finalized
+next_action: Begin TASK-013 after the owner selects export format and citation style.

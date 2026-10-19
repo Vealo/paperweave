@@ -36,9 +36,9 @@ phase_statuses:
   P4: verified
   P5: verified
   P6: verified
-  P7: pending
+  P7: verified
   P8: pending
-progress: 6/8
+progress: 7/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
@@ -283,7 +283,7 @@ flowchart TD
 **Evidence contract:** Правила relation/status; тесты связи/отвязки/версии; UI различает цитату, extraction и проверенное evidence; недоступный/заменённый источник виден как stale, удаление файла остаётся заблокировано при ссылках.
 **Exit criteria:** Claim, passage, typed relation и review решение прослеживаются; stale links требуют повторной проверки, citation не обозначается как proof.
 
-## Phase 7: P7 — AI assistance
+## Phase 7: P7 — AI assistance — verified
 
 **Task:** [TASK-012](../../../tasks/TASK-012.md)
 
@@ -295,6 +295,8 @@ flowchart TD
 **Data/API:** AIProposal, target revision/context references и review action.
 **Evidence contract:** Provider adapter tests с mock; timeout/error/stale target; reject не меняет документ; accept создаёт новую редакцию; исходный текст доступен; реально передаваемый контекст виден пользователю.
 **Exit criteria:** Пользователь видит передаваемый контекст и разницу; отклонение не меняет текст; принятие создаёт новую редакцию; provider failure не скрывает исходник.
+
+**Verification:** TASK-012 accepted; implementation `a464d5bd870158d7519cb61f7ffba43f646bb470` integrated at `main@4704484b92d5077a8e07703b8c96d57a38685be4`; post-merge tests and frontend checks passed; [acceptance and finalization evidence](../../evidence/verification/TASK-012-finalization.yaml). GitNexus index refreshed to the integrated HEAD; the analyzer still reports bounded flow/callee truncation, recorded in [verification checks](../../evidence/verification/TASK-012-checks.md).
 
 ## Phase 8: P8 — Citations and export
 

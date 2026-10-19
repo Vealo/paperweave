@@ -40,7 +40,7 @@
 | [SPEC-2026-002](docs/specs/spec-2026-002-evidence-workflow.md) | Claim рукописи, версии evidence links и review владельцем | Черновик | TASK-011; IMP-2026-002/P6 |
 | [SPEC-2026-003](docs/specs/spec-2026-003-ai-proposals.md) | Версионируемые AI-предложения, явный review и mock-only граница передачи данных | Черновик | TASK-012; ADR-0004; ADR-0005; IMP-2026-002/P7 |
 | [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Complete; P1–P4 verified, TASK-005 done | TASK-001…TASK-005 |
-| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | План развития по доменам: доступ, рукопись, пространство, источники, evidence, AI, экспорт | Active; P1–P6 verified; P7 — TASK-012 | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001 |
+| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | План развития по доменам: доступ, рукопись, пространство, источники, evidence, AI, экспорт | Active; P1–P7 verified; P8 — TASK-013 | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001 |
 
 Полные очереди: [TODO.md](TODO.md) и [IMP.md](IMP.md). Черновой Spec не представлен как утверждённый контракт; scope MVP утверждён ADR-0006.
 
