@@ -1,0 +1,59 @@
+schema_version: 1
+task:
+  id: TASK-007
+  canonical_ref: tasks/TASK-007.md
+  source_ref: imp-2026-002-domain-workspace#P2
+  status: in_progress
+goal: Автор ведёт одну рукопись проекта в Tiptap и надёжно сохраняет документ с защитой от устаревшей записи.
+criteria:
+  - id: AC-1
+    exact_text: Manuscript создаётся и читается в пределах проекта; API возвращает версию документа.
+    source_ref: tasks/TASK-007.md#AC-1
+    evidence_domain: local
+    evidence_required: API contract tests for create/read/version and project ownership.
+  - id: AC-2
+    exact_text: Сериализация блоков проходит round-trip; конкурентный/устаревший save не затирает новую версию.
+    source_ref: tasks/TASK-007.md#AC-2
+    evidence_domain: local
+    evidence_required: Tiptap JSON round-trip and stale-version conflict integration test.
+  - id: AC-3
+    exact_text: UI различает dirty/saving/saved/failed и сохраняет введённый текст при сетевой ошибке.
+    source_ref: tasks/TASK-007.md#AC-3
+    evidence_domain: local
+    evidence_required: Editor state transitions and visible retry/error state; failed request leaves current editor content intact.
+  - id: AC-4
+    exact_text: Интеграционная проверка подтверждает сохранность после перезапуска test-owned DB.
+    source_ref: tasks/TASK-007.md#AC-4
+    evidence_domain: local
+    evidence_required: Disposable PostgreSQL test proves document read after API application restart.
+scope:
+  included:
+    - Ровно одна текущая рукопись на проект в первом slice, согласно Outcome TASK-007.
+    - Tiptap JSON как сериализованное тело документа; порядок блоков задаётся структурой JSON.
+    - Монотонная integer version как optimistic concurrency token; успешное сохранение увеличивает её, устаревшая версия получает конфликт.
+    - PostgreSQL persistence, API ownership checks through the TASK-006 project boundary, and Tiptap editing UI.
+    - Состояния dirty/saving/saved/failed и retry без очистки текущего содержимого редактора.
+  excluded:
+    - Исторические snapshots/revision browser и восстановление произвольной прошлой версии.
+    - Несколько рукописей на проект, совместное редактирование и конфликтный merge.
+    - Autosave между перезагрузками или локальное хранение текста браузером.
+    - Структурные разделы, citations, claims/evidence, AI и export.
+dependencies:
+  - task_id: TASK-006
+    relation: completed prerequisite
+    evidence_ref: docs/evidence/verification/TASK-006-acceptance-ledger.yaml
+existing_evidence:
+  - frontend/package.json contains Tiptap Vue 3 and StarterKit dependencies.
+  - frontend/src/views/ProjectDetailView.vue is the project-detail entry point.
+  - src/paperweave/api/dependencies.py provides authenticated current-user and project-service boundaries.
+  - src/paperweave/infrastructure/db/models.py and Alembic revisions define the existing SQLAlchemy/PostgreSQL persistence pattern.
+  - Source search across src/, frontend/src/, tests/ and migrations/ found no current manuscript implementation.
+completion_condition:
+  - All four canonical TASK-007 criteria have current local evidence.
+  - Backend tests, frontend typecheck/build and required disposable persistence checks pass.
+  - Git change analysis, task commit, local integration and canonical task/TODO finalization are complete.
+readiness:
+  state: ready
+  reason: TASK-006 is finalized; the Task outcome defines a single-manuscript first slice, and required backend/editor boundaries are available.
+  revisit_event: null
+next_route: imp-analysis, architecture-control, then task-execution.

@@ -1,0 +1,44 @@
+schema_version: 1
+task_id: TASK-007
+contract_ref: docs/evidence/verification/TASK-007-contract.yaml
+baseline_ref: main@f725a791f4f1bc5d506d8bb918eae63058133c30
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: tests/integration/test_manuscripts_api.py
+    rationale: Authenticated create/read returns manuscript content and version; unknown and foreign projects return 404 and unauthenticated requests return 401.
+  - id: AC-2
+    status: passed
+    evidence_ref: tests/integration/test_manuscripts_api.py
+    rationale: Ordered Tiptap JSON round-trips unchanged; an update advances version 1 to 2 and a stale version 1 request returns 409 without replacing version 2 content.
+  - id: AC-3
+    status: passed
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+    rationale: The editor exposes dirty/saving/saved/failed status and a retry action; a failed request leaves the current Tiptap editor state untouched. Typecheck and production build pass.
+  - id: AC-4
+    status: passed
+    evidence_ref: tests/integration/test_manuscripts_api.py
+    rationale: A second FastAPI app instance reads the same persisted manuscript and version from the isolated Compose test database.
+required_checks:
+  - command: PAPERWEAVE_CONFIG=config.example.toml make test
+    status: passed (25 passed)
+    evidence_ref: tests/integration/test_manuscripts_api.py
+  - command: disposable Node 22 container; npm ci && npm run typecheck && npm run build
+    status: passed; Vite emitted existing runtime-config and large-chunk warnings
+    evidence_ref: frontend/package-lock.json
+  - command: git diff --check
+    status: passed
+    evidence_ref: git diff
+  - command: GitNexus detect_changes --scope all
+    status: passed (fresh worktree index mapped 34 symbols / 9 flows; overall risk high and reviewed)
+    evidence_ref: docs/evidence/verification/TASK-007-acceptance-ledger.yaml
+  - command: GitNexus impact review for requestApi, ManuscriptRecord and changed API/UI flows
+    status: passed with risk accounted for; requestApi itself is unchanged, its shared callers were reviewed, and owner checks and persistence are covered by integration tests
+    evidence_ref: docs/evidence/verification/TASK-007-contract.yaml
+  - command: bounded source fallback for route wiring, ownership, persistence and editor state; focused tests and frontend static checks
+    status: passed; no unresolved safety or data-integrity finding
+    evidence_ref: docs/evidence/verification/TASK-007-contract.yaml
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null

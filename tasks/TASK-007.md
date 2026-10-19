@@ -30,11 +30,14 @@ criteria:
     DB.
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 5
 blockers: []
 created_at: '2026-10-19T14:00:25Z'
-updated_at: '2026-10-19T14:00:25Z'
+updated_at: '2026-10-19T14:57:32Z'
+next_action: Сверить критерии с evidence и подготовить итоговый acceptance ledger
+  перед коммитом.
+progress_note: 'Backend: 25 тестов прошли; frontend typecheck и production build прошли.'
 ---
 
 ## Outcome

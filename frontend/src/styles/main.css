@@ -87,6 +87,68 @@ a {
   text-align: center;
 }
 
+.manuscript-section {
+  margin-top: 36px;
+  padding-top: 28px;
+  border-top: 1px solid var(--p-content-border-color);
+}
+
+.manuscript-heading,
+.manuscript-error__content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.manuscript-heading h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+.manuscript-heading p,
+.manuscript-save-state {
+  color: var(--p-text-muted-color);
+  font-size: 0.875rem;
+}
+
+.manuscript-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 20px 0 0;
+  gap: 8px;
+}
+
+.manuscript-editor {
+  min-height: 340px;
+  margin-top: 12px;
+  padding: 20px 24px;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius);
+  background: var(--p-surface-0);
+}
+
+.manuscript-editor .tiptap {
+  min-height: 298px;
+  outline: none;
+  line-height: 1.7;
+}
+
+.manuscript-editor .tiptap > * + * {
+  margin-top: 0.75em;
+}
+
+.manuscript-editor .tiptap h2 {
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 500;
+}
+
+.manuscript-error {
+  margin-top: 12px;
+}
+
 .page-heading {
   display: flex;
   align-items: flex-end;
