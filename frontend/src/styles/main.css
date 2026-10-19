@@ -325,3 +325,41 @@ a {
     padding-top: 0;
   }
 }
+
+
+.app-header__account {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--p-text-muted-color);
+}
+
+.app-header__account a {
+  color: var(--p-primary-color);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.auth-page {
+  display: grid;
+  min-height: 60vh;
+  place-items: center;
+}
+
+.auth-card {
+  width: min(100%, 520px);
+}
+
+.auth-form {
+  display: grid;
+  gap: 18px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}

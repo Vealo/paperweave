@@ -18,36 +18,35 @@ criteria:
     evidence либо явно указанный пробел.
   checked: true
   evidence:
-  - notes:Spec AC-1…AC-9 mapped to TASK-001…004 evidence; P1–P4 exit gates mapped
-    in final reconciliation
+  - 'docs/plans/imp/imp-2026-001-mvp-foundation.md: Spec AC-1…AC-9 and P1–P4 gates
+    mapped to TASK-001…004 evidence'
 - id: AC-2
   text: Проверены интеграция P1–P4, архитектурные условия, безопасная персистентность
     и отсутствие включения исключённых функций.
   checked: true
   evidence:
-  - source:main branch contains P1–P3 task commits; TASK-004 local runtime; ADR-0006
-    boundaries, persistence, loopback and excluded-feature search checked
+  - tasks/TASK-001.md; tasks/TASK-002.md; tasks/TASK-003.md; tasks/TASK-004.md; docs/decisions/ADR-0006-mvp-boundary.md
 - id: AC-3
   text: IMP.md, DOCS.md и TODO.md согласованы с canonical IMP/task store; каждый открытый
     Task отображён ровно в одной категории.
   checked: true
   evidence:
-  - tasks.py validate; reconcile-todo preview; plan validation; local Markdown links
-    checked; DOCS/IMP/TODO agree with task store
+  - tasks validate (14 valid); reconcile-todo.py preview matches TODO.md; IMP.md and
+    DOCS.md entries inspected
 - id: AC-4
   text: Финальная запись различает локальные проверки и отсутствующие внешние/runtime
     доказательства; IMP закрывается только при выполнении всех обязательных условий.
   checked: true
   evidence:
-  - notes separate local tests/runtime from unrun CI/production/user research and
-    excluded workflows; plan closes only after P1–P4 verified
+  - tasks/TASK-005.md Notes; docs/plans/imp/imp-2026-001-mvp-foundation.md limits
+    and closed gates
 status: done
-revision: 3
+revision: 2
 blockers: []
 created_at: '2026-10-19T11:59:51Z'
-updated_at: '2026-10-19T13:02:37Z'
-progress_note: All MVP Spec and phase gates are mapped; docs and trackers reconcile;
-  limits are explicit.
+updated_at: '2026-10-19T14:10:32Z'
+progress_note: Повторная сверка подтвердила MVP evidence и согласованность индексов;
+  TASK-006 ждёт ACF-1.
 ---
 
 ## Outcome
@@ -60,7 +59,4 @@ progress_note: All MVP Spec and phase gates are mapped; docs and trackers reconc
 
 ## Notes
 
-Final MVP evidence reconciliation at main source commit 5f5c7f2 and current local parent main. Spec AC mapping: AC-1 config/init/secret handling -> TASK-001 AC-1/2; AC-2 migration-before-readiness -> TASK-001 AC-5 and TASK-004 AC-1/3; AC-3 configured loopback API/UI ports -> TASK-001 AC-4 and TASK-004 AC-1 (28741/28742); AC-4 create/list/detail -> TASK-002 AC-3/4 and TASK-003 AC-2/3; AC-5 restart persistence -> TASK-004 AC-2; AC-6 live/ready -> TASK-002 AC-2 and TASK-004 AC-3; AC-7 API outage and retained form values -> TASK-003 AC-2/4 and TASK-004 AC-4; AC-8 TOML port override -> TASK-004 AC-1; AC-9 test DB isolation -> TASK-002 AC-5 and post-merge make test (17 passed).
-Phase gates: P1 TASK-001 done with config, local runtime and volume evidence; P2 TASK-002 done with PostgreSQL/Alembic/API tests; P3 TASK-003 done with Vue checks and browser acceptance; P4 TASK-004 done with Compose ordering, browser/API flow, restart persistence, DB/API outage and owned-resource cleanup. Task commits 403b3004, ba932454 and 5f5c7f2 each pass verify_parent_reachability.py against main; TASK-004 is runtime evidence and has no source commit.
-Architecture review: ADR-0006 is accepted and bounds the MVP; SQLAlchemy/PostgreSQL/Alembic stay behind backend application/API boundaries; loopback host binding and internal DB port were verified by P1 evidence; persistence volume survived down/up; test DB uses a separate tmpfs. Searches of frontend/src, src/paperweave, Compose and Dockerfile found no Tiptap editor, LLM, pgvector, or worker implementation. Documentation now distinguishes the working Projects slice from future proposed domains.
-Limits: evidence is local and test-owned. No CI/hosted pipeline, production deployment, user research, PDF/library/evidence/manuscript/LLM workflow, authentication, collaboration or third-party integration was exercised or claimed. ADR-0006 defines a local MVP, so these are outside the accepted outcome.
+Recheck requested 2026-10-19 before starting IMP-2026-002: verified the committed MVP reconciliation against the current main baseline. Spec AC-1…AC-9 and P1–P4 gate mappings remain recorded above and refer to TASK-001…004 evidence; current plan continues to report P1–P4 verified and IMP-2026-001 complete. Current task-store validation passes for 14 tasks; TODO projection preview matches the canonical snapshot (1 ready, 10 open) with each open task appearing once; IMP.md and DOCS.md register IMP-2026-002 and keep IMP-2026-001 closed. Local-only evidence boundaries and exclusions remain explicit. No new source/runtime check was needed because this task verifies the already finalized MVP and no MVP implementation files changed since its accepted evidence. TASK-006 remains blocked by owner decision ACF-1; this is outside IMP-2026-001 and does not reopen its closed plan.

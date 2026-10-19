@@ -9,6 +9,7 @@ from typing import AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import create_engine
 
 from paperweave.config import load_config
@@ -45,12 +46,25 @@ def create_app(
     if ":" in bind_host:
         bind_host = f"[{bind_host}]"
     ui_port = os.getenv("PW_UI_PORT", "18742")
+    trusted_origins = {f"http://{bind_host}:{ui_port}", f"http://localhost:{ui_port}"}
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[f"http://{bind_host}:{ui_port}", f"http://localhost:{ui_port}"],
-        allow_methods=["GET", "POST"],
+        allow_origins=sorted(trusted_origins),
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Content-Type"],
     )
+
+    @app.middleware("http")
+    async def enforce_local_browser_origin(request, call_next):
+        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+            origin = request.headers.get("origin")
+            if origin not in trusted_origins:
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "Request origin is not allowed for this local workspace"},
+                )
+        return await call_next(request)
     app.include_router(api_router, prefix="/api/v1")
     return app
 

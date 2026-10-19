@@ -8,6 +8,7 @@ from uuid import UUID
 @dataclass(frozen=True, slots=True)
 class Project:
     id: UUID
+    owner_id: UUID
     name: str
     description: str | None
     created_at: datetime

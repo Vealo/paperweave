@@ -28,7 +28,7 @@ relations:
 
 Для первой версии предлагается Python modular monolith. Модули продукта находятся в одной кодовой базе и взаимодействуют через явные внутренние контракты. Отдельный Python worker может запускаться как другой процесс или container, используя тот же пакет и контракты хранения; технология очереди пока не выбрана.
 
-Для начальной среды предлагается Docker Compose с PostgreSQL/pgvector, приложением и worker. Файлы хранятся в локальном volume за интерфейсом storage. Точная топология разработки и production, резервное копирование, аутентификация и управление secrets остаются открытыми вопросами.
+Для локальной среды используется Docker Compose с PostgreSQL и приложением. Файлы будущих доменов хранятся за storage interface. По [ADR-0007](decisions/ADR-0007-local-identity-and-project-access.md) локальная версия использует owner-managed accounts, PostgreSQL server-side sessions и обязательную project ownership. Production deployment, удалённый доступ, резервное копирование и управление secrets остаются открытыми вопросами.
 
 ## Предлагаемый стек
 
@@ -189,7 +189,7 @@ flowchart TD
 
 ## Решения, необходимые до реализации
 
-Модель authentication и tenants; провайдеры научного поиска; PDF parser и стратегия anchors; очередь worker; sync/async-доступ к БД; резервирование и retention БД и файлов; schema запросов/ответов LLM, logging и privacy controls; стили цитирования и формат экспорта; права соавторов; topology deployment. Эти решения нельзя вывести из предложенного стека.
+Модель удалённой authentication и tenants; провайдеры научного поиска; PDF parser и стратегия anchors; очередь worker; sync/async-доступ к БД; резервирование и retention БД и файлов; schema запросов/ответов LLM, logging и privacy controls; стили цитирования и формат экспорта; права соавторов; topology deployment. Локальная authentication и ownership определены в ADR-0007. Остальные решения нельзя вывести из предложенного стека.
 
 ## Подтверждения реализации
 
