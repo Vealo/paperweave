@@ -33,14 +33,13 @@ criteria:
   checked: true
   evidence:
   - docs/evidence/verification/TASK-008-acceptance-ledger.yaml
-status: in_progress
-revision: 4
+status: done
+revision: 5
 blockers: []
 created_at: '2026-10-19T14:00:25Z'
-updated_at: '2026-10-19T15:17:25Z'
-next_action: Review and commit verified task-owned changes.
-progress_note: Acceptance evidence recorded; typecheck/build and browser loaded/error
-  checks pass.
+updated_at: '2026-10-19T15:21:03Z'
+progress_note: P3 merged to main; post-merge checks, GitNexus refresh and reachability
+  passed.
 ---
 
 ## Outcome

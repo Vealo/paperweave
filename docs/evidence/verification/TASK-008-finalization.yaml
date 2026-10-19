@@ -1,0 +1,51 @@
+schema_version: 1
+task_id: TASK-008
+acceptance_ref: docs/evidence/verification/TASK-008-acceptance-ledger.yaml
+commit:
+  required: true
+  created: true
+  id: df8fc5974751f56bc10818d75c524c9db1e86355
+  reason: null
+gitflow:
+  applicable: true
+  repository: /home/denis/Projects/paperweave
+  task_branch: codex/task-008-project-workspace
+  base_ref: main
+  base_sha: 5b070eeddec05c1e39599898b88bb6c31c93f480
+  integrated: true
+  integration_ref: main
+  merge_commit: 1037eb17d2f9c0313c75b2e87a96835c142d79b3
+  parent_head: 1037eb17d2f9c0313c75b2e87a96835c142d79b3
+  task_commit_reachable: true
+  reachability_command: python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit df8fc5974751f56bc10818d75c524c9db1e86355
+baseline:
+  unrelated_changes_preserved: true
+  pre_existing_untracked_files_touched: false
+verification:
+  post_merge_checks:
+    - command: npm run typecheck
+      status: passed
+      evidence_ref: frontend/src/views/ProjectDetailView.vue
+    - command: npm run build
+      status: passed; existing runtime-config and large-chunk warnings remain
+      evidence_ref: frontend/package.json
+    - command: task-store validate and TODO validation
+      status: passed; 14 tasks valid and TASK-008 removed from active TODO after finalization
+      evidence_ref: TODO.md
+    - command: verify_parent_reachability.py
+      status: passed; reachable=true from main at 1037eb17d2f9c0313c75b2e87a96835c142d79b3
+      evidence_ref: docs/evidence/verification/TASK-008-finalization.yaml
+documentation_graph:
+  required: true
+  completed: true
+  refreshed_at_merge: true
+  indexed_commit: 1037eb17d2f9c0313c75b2e87a96835c142d79b3
+  stats: 1046 nodes, 1669 edges, 65 flows
+  note: Refreshed again after finalization records are committed; final status is verified in the task result.
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes: []
+result: finalized
+next_action: Начать TASK-009 — библиотека источников.
