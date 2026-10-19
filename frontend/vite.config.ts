@@ -1,1 +1,6 @@
-// Заглушка конфигурации Vite. Плагины и команды настройки будут добавлены при реализации frontend.
+import { defineConfig } from "vite";
+import vue from "@vitejs/plugin-vue";
+
+export default defineConfig({
+  plugins: [vue()],
+});

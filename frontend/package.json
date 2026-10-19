@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "scripts": {},
+  "scripts": {
+    "build": "vite build"
+  },
   "dependencies": {
     "@tiptap/starter-kit": "^3.0.0",
     "@tiptap/vue-3": "^3.0.0",
