@@ -20,11 +20,11 @@ relations:
 
 # Концептуальная модель данных PaperWeave
 
-> Здесь описана целевая предметная модель и фактически реализованная основа. База проектов появилась в [IMP-2026-001](plans/imp/imp-2026-001-mvp-foundation.md); локальная идентичность и владение проектом добавлены по [ADR-0007](decisions/ADR-0007-local-identity-and-project-access.md) в TASK-006.
+> Здесь описана целевая предметная модель и фактически реализованная основа. База проектов появилась в [IMP-2026-001](plans/imp/imp-2026-001-mvp-foundation.md); локальная идентичность и владение проектом добавлены по [ADR-0007](decisions/ADR-0007-local-identity-and-project-access.md) в TASK-006; первая версионируемая рукопись — в TASK-007.
 
 ## Реализованная модель MVP
 
-В первом срезе сущность проекта минимальна и не включает будущие research question, библиотеку, claims или manuscripts:
+В текущем срезе реализованы проект, локальные пользователи/сессии и одна рукопись на проект. Research question, библиотека и claims остаются будущими доменами:
 
 | Таблица | Поле | Тип / ограничение |
 |---|---|---|
@@ -35,8 +35,13 @@ relations:
 | `projects` | `owner_id` | UUID, обязательный FK на `users.id`; каждый запрос проекта ограничен текущим владельцем |
 | `users` | `id`, `email`, `display_name`, `password_hash`, `role`, `created_at` | Локальная учётная запись; пароль — salted PBKDF2-HMAC-SHA256 hash; role — `owner` или `member` |
 | `sessions` | `id`, `user_id`, `token_hash`, `created_at`, `last_activity_at`, `expires_at` | Серверная сессия в PostgreSQL; база хранит SHA-256 hash случайного cookie token |
+| `manuscripts` | `id` | UUID, primary key |
+| `manuscripts` | `project_id` | Обязательный уникальный FK на `projects.id` с cascade при удалении проекта; MVP допускает одну рукопись на проект |
+| `manuscripts` | `content` | Обязательный PostgreSQL JSONB с корнем Tiptap `doc`; порядок элементов хранится в массиве `content` |
+| `manuscripts` | `version` | Обязательный монотонный integer, начиная с 1; API обновляет только при совпадении `expected_version` |
+| `manuscripts` | `updated_at` | `TIMESTAMPTZ`, время последнего сохранения |
 
-Миграция `20261019_0002` создаёт резервированного владельца, назначает ему существующие проекты и делает `projects.owner_id` обязательным. Откат этой миграции снимает связь владения и identity/session таблицы, сохраняя строки проектов. Изменение схемы применяется только через Alembic. Проектные операции проходят через Projects service и persistence port; identity операции — через IdentityRepository.
+Миграция `20261019_0002` создаёт резервированного владельца, назначает ему существующие проекты и делает `projects.owner_id` обязательным. Миграция `20261019_0003` создаёт `manuscripts`. Откат схемы выполняется только последовательными Alembic downgrade; операции проектов проходят через Projects service и persistence port, identity — через IdentityRepository, рукописи — через ManuscriptService и отдельный persistence adapter.
 
 ## Разделение основных областей
 
@@ -98,4 +103,4 @@ flowchart LR
 - Дубликаты импорта нужно обнаруживать, не объединяя разные издания и не теряя пользовательские заметки.
 - Удаление и retention исходных файлов не должны оставлять видимость того, что утверждения подтверждены недоступными или непрослеживаемыми доказательствами.
 
-Эти вопросы остаются открытыми для будущей полной schema. Текущая таблица `projects` намеренно не моделирует отношения библиотеки, evidence или рукописей.
+Эти вопросы остаются открытыми для будущей полной schema. Текущий документ Tiptap является единым JSONB snapshot с optimistic version token; таблица пока не хранит исторические snapshots, блоки с отдельными ID или связи citations/evidence.

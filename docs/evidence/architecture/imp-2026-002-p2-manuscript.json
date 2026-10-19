@@ -1,0 +1,41 @@
+{
+  "review_id": "imp-2026-002-p2-manuscript",
+  "baseline_commit": "f725a791f4f1bc5d506d8bb918eae63058133c30",
+  "scope": "P2 manuscript persistence and ordered Tiptap editing: one current document per project, versioned saves, ownership, UI error recovery, and disposable persistence verification.",
+  "verdict": "pass_with_conditions",
+  "findings": [
+    {
+      "id": "P2-AC-01",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P2"],
+      "evidence": "TASK-007 Outcome and P2 expected result specify one manuscript per project. AC-1/AC-2 require a version token and rejection of stale saves, but do not request browsing historical snapshots. Tiptap 3 Vue/StarterKit dependencies already exist.",
+      "impact": "A unique project relationship keeps creation and reads unambiguous. An integer optimistic-concurrency version protects saves; it is not presented as historical revision storage. Multi-manuscript projects and historical snapshots require a later contract and migration.",
+      "owner": "TASK-007 implementation",
+      "exit_condition": "Document the one-current-manuscript boundary and version-token semantics in the P2 phase contract; test round-trip and stale-version rejection.",
+      "next_action": "Implement the contract in TASK-007 and report the history limitation in project documentation."
+    },
+    {
+      "id": "P2-AC-02",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P2"],
+      "evidence": "GitNexus local CLI impact for frontend/src/api/projects.ts:requestApi is CRITICAL (18 dependants, 10 affected processes, 2 modules); the MCP graph is three commits behind its reported index, so CLI results and source inspection are used. The manuscript path can call requestApi without changing it. GitNexus impact for api_router is UNKNOWN; source search confirms src/paperweave/main.py imports and mounts api_router from src/paperweave/api/router.py.",
+      "impact": "Changing shared request/error semantics could affect existing project, login, user and sign-out flows. The API router is framework-composed and the graph has no resolved caller edge, so a zero cannot be interpreted as unused.",
+      "owner": "TASK-007 implementation",
+      "exit_condition": "Keep requestApi behavior unchanged; confirm API router composition through source search; run existing and new backend/frontend checks.",
+      "next_action": "Add manuscript API composition at the existing router boundary and reuse requestApi from a new manuscript API adapter."
+    },
+    {
+      "id": "P2-AC-03",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P2"],
+      "evidence": "TASK-006 establishes current_user and project-scoped services; ProjectDetailView loads the selected project through the authenticated API. PostgreSQL and Alembic are the existing persistence path.",
+      "impact": "A manuscript must not be readable or writable when its parent project is not owned by the current user. A failed save must leave the in-memory editor content available for retry; rejected stale saves must preserve the server's newer version.",
+      "owner": "TASK-007 implementation",
+      "exit_condition": "Every nested manuscript operation verifies the authenticated project boundary; tests cover unauthenticated, foreign-project and stale-version cases.",
+      "next_action": "Reuse TASK-006 authorization and add negative access and conflict tests."
+    }
+  ]
+}

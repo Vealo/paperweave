@@ -5,8 +5,10 @@ from collections.abc import Iterator
 from fastapi import Depends, HTTPException, Request, status
 from paperweave.infrastructure.db.identity_repository import IdentityRepository
 from paperweave.infrastructure.db.project_repository import SqlAlchemyProjectRepository
+from paperweave.infrastructure.db.manuscript_repository import SqlAlchemyManuscriptRepository
 from paperweave.modules.identity.security import hash_session_token
 from paperweave.modules.projects.service import ProjectService
+from paperweave.modules.manuscripts.service import ManuscriptService
 
 SESSION_COOKIE = "paperweave_session"
 
@@ -36,3 +38,8 @@ def require_owner(user=Depends(get_current_user)):
 def get_project_service(request: Request) -> Iterator[ProjectService]:
     with request.app.state.session_factory() as session:
         yield ProjectService(SqlAlchemyProjectRepository(session))
+
+
+def get_manuscript_service(request: Request) -> Iterator[ManuscriptService]:
+    with request.app.state.session_factory() as session:
+        yield ManuscriptService(SqlAlchemyManuscriptRepository(session))

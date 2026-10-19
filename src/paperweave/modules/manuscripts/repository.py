@@ -1,0 +1,12 @@
+"""Persistence port for manuscripts."""
+
+from typing import Any, Protocol
+from uuid import UUID
+
+from paperweave.modules.manuscripts.domain import Manuscript
+
+
+class ManuscriptRepository(Protocol):
+    def get(self, project_id: UUID) -> Manuscript | None: ...
+    def create(self, project_id: UUID, content: dict[str, Any]) -> Manuscript: ...
+    def update(self, project_id: UUID, expected_version: int, content: dict[str, Any]) -> Manuscript | None: ...

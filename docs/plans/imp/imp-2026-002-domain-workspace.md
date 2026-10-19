@@ -23,7 +23,7 @@ relations:
   tasks: [TASK-006, TASK-007, TASK-008, TASK-009, TASK-010, TASK-011, TASK-012, TASK-013, TASK-014]
 architecture_review:
   required: true
-  review_id: "imp-2026-002-p1-identity-access"
+  review_id: "imp-2026-002-p2-manuscript"
 imp_index_ref: IMP.md
 verification_task_ref: TASK-014
 parent_ref: null
@@ -31,7 +31,7 @@ change_kind: none
 phases: 8
 phase_statuses:
   P1: verified
-  P2: pending
+  P2: active
   P3: pending
   P4: pending
   P5: pending
@@ -42,7 +42,7 @@ progress: 1/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
-architecture_ref: ../../evidence/architecture/imp-2026-002-p1-identity-access.md
+architecture_ref: ../../evidence/architecture/imp-2026-002-p2-manuscript.json
 finalization_status: pending
 audit_ref: null
 deployment_mode: not_applicable
@@ -83,7 +83,7 @@ deployment_mode: not_applicable
 | Analysis artifact | [Analysis и architecture review](../../evidence/plan-analysis/imp-2026-002-domain-workspace.md) |
 | Analysis verdict | ready_with_blockers initially; ACF-1 resolved by owner decision, P1 now executing |
 | Architecture status | complete |
-| Architecture artifact | [P1 identity architecture-control](../../evidence/architecture/imp-2026-002-p1-identity-access.md); verdict pass_with_conditions |
+| Architecture artifacts | Current P2 review: [manuscript architecture-control](../../evidence/architecture/imp-2026-002-p2-manuscript.json), pass_with_conditions; completed P1 review: [identity architecture-control](../../evidence/architecture/imp-2026-002-p1-identity-access.md) |
 | Open blocker refs | none |
 
 ## Audited context
@@ -215,9 +215,10 @@ flowchart TD
 
 **Tasks:** Выбрать контракт документа/блоков и версии; связать manuscript с project и owner; спроектировать API чтения/сохранения и конфликтов; интегрировать Tiptap только как editor UI; разделить `dirty/saving/saved/failed`; сохранять исходный текст при сетевой ошибке и восстанавливать его после повторной загрузки по принятой политике.
 
-**Dependencies:** P1 verified; отдельный Spec/phase contract; решение о single manuscript vs multiple manuscripts для первого slice.
-**Data/API:** Manuscript, ordered blocks, revision/version token и save result.
-**Evidence contract:** Контракт serialization round-trip; тесты создания/чтения/сохранения/конфликта; UI states и восстановление после сбоя; сохранность после перезапуска test-owned DB.
+**Dependencies:** P1 verified. Для первого slice Task Outcome ограничивает проект одной рукописью; расширение до нескольких рукописей потребует изменения контракта и миграции.
+**Data/API:** `manuscripts` — один документ на `project_id`, `content` хранит полный Tiptap JSON, `version` — монотонная integer revision для optimistic concurrency. Nested GET/POST/PUT endpoints проверяют ownership родительского проекта; stale version возвращает conflict без изменения документа.
+**Phase contract:** [TASK-007 contract](../../evidence/verification/TASK-007-contract.yaml); одна текущая рукопись на проект, без исторического revision browser.
+**Evidence contract:** Контракт serialization round-trip; тесты создания/чтения/сохранения/конфликта; UI states и retry без очистки текущего текста; сохранность после перезапуска test-owned DB.
 **Exit criteria:** Manuscript создаётся и открывается в пределах проекта; сохранённые блоки переживают перезапуск; конфликт не затирает неподтверждённую версию.
 
 ## Phase 3: P3 — Project workspace
