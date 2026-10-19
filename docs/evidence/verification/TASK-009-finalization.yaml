@@ -1,0 +1,36 @@
+schema_version: 1
+task_id: TASK-009
+acceptance_ref: docs/evidence/verification/TASK-009-acceptance.yaml
+commit:
+  required: true
+  created: true
+  id: 947198d36f20f8e3378ff49ccd6e98fc17273046
+  reason: Scoped implementation commit on codex/task-009-library.
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-009-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: 4754833c057918e9d8d0ac37278a388d0fe94563
+  parent_head: 4754833c057918e9d8d0ac37278a388d0fe94563
+  task_commit_reachable: true
+  reason: Normal non-forced local merge; verified by verify_parent_reachability.py.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-009.md
+documentation_graph:
+  required_updates:
+    - docs/data-model.md
+    - docs/architecture.md
+    - docs/plans/imp/imp-2026-002-domain-workspace.md
+    - IMP.md
+    - docs/evidence/verification/TASK-009-acceptance.yaml
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes: []
+result: finalized
+next_action: Prepare and execute ready TASK-010 (P5 document extraction).

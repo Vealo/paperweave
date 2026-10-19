@@ -1,0 +1,50 @@
+schema_version: 1
+task_id: TASK-009
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: a22cfad0b8a3351f38b0cd4defb530f36da07e17
+    task_branch: codex/task-009-library
+    task_commits:
+      - 947198d36f20f8e3378ff49ccd6e98fc17273046
+    integration_ref: main
+    merge_commit: 4754833c057918e9d8d0ac37278a388d0fe94563
+baseline:
+  captured: true
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+    - .claude/
+    - AGENTS.md
+    - CLAUDE.md
+    - TODO.md.before-reconcile-*
+    - tasks/.lock
+  ownership_map_ref: null
+  preservation_action: User untracked baseline remained untouched in main checkout; only task-owned TASK-009/TODO projection was copied to task worktree.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-009-acceptance.yaml
+  checks:
+    - command: isolated Compose backend test profile
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-009-acceptance.yaml
+    - command: Vue TypeScript typecheck
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-009-acceptance.yaml
+    - command: Docker UI production build
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-009-acceptance.yaml
+integration:
+  status: merged
+  post_merge_checks:
+    - command: isolated Compose backend test profile on main@4754833
+      status: passed
+    - command: Vue TypeScript typecheck on main@4754833
+      status: passed
+    - command: Docker UI production build on main@4754833
+      status: passed
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: root
+  next_action: finalize TASK-009 tracker and plan phase state, then prepare ready TASK-010

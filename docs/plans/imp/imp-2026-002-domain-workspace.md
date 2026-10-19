@@ -33,12 +33,12 @@ phase_statuses:
   P1: verified
   P2: verified
   P3: verified
-  P4: pending
+  P4: verified
   P5: pending
   P6: pending
   P7: pending
   P8: pending
-progress: 3/8
+progress: 4/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
@@ -246,6 +246,8 @@ flowchart TD
 **Data/API:** SourceWork, SourceFile/version и storage key.
 **Evidence contract:** Duplicate/ambiguous identity сценарии; MIME/size/path traversal/security checks; пользовательский файл не отдается другому owner; backup/restore стратегия для локального хранилища.
 **Exit criteria:** Источник и его файл связаны с проектом и provenance; duplicate/ambiguous import остаётся управляемым; файл изолирован по owner.
+
+**Completion evidence (2026-10-19):** Verified against [TASK-009 acceptance ledger](../../evidence/verification/TASK-009-acceptance.yaml); implementation commit `947198d36f20f8e3378ff49ccd6e98fc17273046` is integrated into `main` at `4754833c057918e9d8d0ac37278a388d0fe94563`.
 
 ## Phase 5: P5 — Documents and passages
 

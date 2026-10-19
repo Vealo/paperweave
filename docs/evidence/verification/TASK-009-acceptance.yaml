@@ -3,6 +3,11 @@ task_id: TASK-009
 result: accepted
 baseline_ref: main@a22cfad0b8a3351f38b0cd4defb530f36da07e17
 candidate_ref: codex/task-009-library
+integration:
+  task_commit: 947198d36f20f8e3378ff49ccd6e98fc17273046
+  merge_commit: 4754833c057918e9d8d0ac37278a388d0fe94563
+  parent_head: 4754833c057918e9d8d0ac37278a388d0fe94563
+  task_commit_reachable: true
 criteria:
   - id: AC-1
     text: Источник сохраняет стабильный local identity и происхождение метаданных.
@@ -46,8 +51,20 @@ checks:
   - command: direct reference and route registration review
     result: passed
     evidence: api_router includes library_router; dependency/service/route calls and API UI endpoints inspected.
+post_merge_checks:
+  - command: isolated Docker test profile via paperweave.cli test on main@4754833
+    result: passed
+    evidence: 27 passed; test-db container and network removed by runner.
+  - command: npm run typecheck in isolated Node 22 build on main@4754833
+    result: passed
+  - command: Dockerfile UI production target build on main@4754833
+    result: passed
 gitnexus:
   result: incomplete
   evidence: detect_changes saw 25 changed files and mapped 12 existing symbols; newly introduced library files have no nodes in the base-index graph.
   fallback: passed
   fallback_evidence: Exact staged diff reviewed; router/project ownership, storage path handling, imports and route callers searched; targeted/full isolated tests and frontend type/build checks passed.
+  post_integration_refresh: passed
+  indexed_commit: 4754833c057918e9d8d0ac37278a388d0fe94563
+  graph_size: 1262 nodes, 2049 edges, 84 flows
+  warnings: Cross-language property references PAPERWEAVE_CONFIG, query and state remain unresolved by per-language analysis.
