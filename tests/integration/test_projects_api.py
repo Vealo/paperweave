@@ -26,6 +26,28 @@ def test_live_and_ready_report_database_state(client: TestClient, database_url: 
         unavailable_engine.dispose()
 
 
+def test_cors_allows_only_the_configured_local_ui_origin(client: TestClient) -> None:
+    allowed = client.options(
+        "/api/v1/projects",
+        headers={
+            "Origin": "http://127.0.0.1:18742",
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type",
+        },
+    )
+    assert allowed.status_code == 200
+    assert allowed.headers["access-control-allow-origin"] == "http://127.0.0.1:18742"
+
+    denied = client.options(
+        "/api/v1/projects",
+        headers={
+            "Origin": "http://untrusted.example",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert denied.status_code == 400
+
+
 def test_alembic_migration_created_the_expected_postgres_schema(database_url: str) -> None:
     engine = create_engine(database_url)
     try:

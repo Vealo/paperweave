@@ -26,6 +26,8 @@
 | `make migrate` | Убедиться, что PostgreSQL готов, затем выполнить `alembic upgrade head`. |
 | `make test` | Запустить pytest в отдельном Compose-проекте с отдельным PostgreSQL в `tmpfs`; после завершения тестовые контейнеры удаляются. Рабочая БД не подключается. |
 
+Frontend раздаётся через локальный UI-сервис на `http://127.0.0.1:<ui.port>`. SPA загружает `ui.api_base_url` из сгенерированного при старте `runtime-config.js` и обращается к FastAPI напрямую; API разрешает CORS только для настроенного loopback UI-origin. Проверки исходников: `npm --prefix frontend run typecheck` и `npm --prefix frontend run build`.
+
 Путь конфигурации можно переопределить через `PAPERWEAVE_CONFIG=...`, а имя Compose-проекта — через `COMPOSE_PROJECT_NAME=...`, например:
 
 ```sh

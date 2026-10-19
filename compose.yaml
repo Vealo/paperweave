@@ -37,6 +37,8 @@ services:
       ["uv", "run", "--frozen", "uvicorn", "paperweave.main:app", "--host", "${PW_API_HOST:?}", "--port", "${PW_API_PORT:?}"]
     environment:
       PAPERWEAVE_CONFIG_FILE: /app/config.toml
+      PW_BIND_HOST: ${PW_BIND_HOST:?}
+      PW_UI_PORT: ${PW_UI_PORT:?}
     volumes:
       - ${PW_CONFIG_PATH:?run through the PaperWeave CLI}:/app/config.toml:ro
     ports:
@@ -59,6 +61,10 @@ services:
       target: ui
     volumes:
       - ${PW_CONFIG_PATH:?run through the PaperWeave CLI}:/app/config.toml:ro
+    environment:
+      PW_API_BASE_URL: ${PW_API_BASE_URL:?}
+      PW_API_PORT: ${PW_API_PORT:?}
+      NGINX_ENVSUBST_FILTER: "^(PW_API_PORT)$"
     ports:
       - "${PW_BIND_HOST:?}:${PW_UI_PORT:?}:80"
     depends_on:

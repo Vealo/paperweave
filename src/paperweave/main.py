@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import AsyncIterator
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import create_engine
 
 from paperweave.config import load_config
@@ -40,6 +41,16 @@ def create_app(
             engine.dispose()
 
     app = FastAPI(title="PaperWeave", lifespan=lifespan)
+    bind_host = os.getenv("PW_BIND_HOST", "127.0.0.1")
+    if ":" in bind_host:
+        bind_host = f"[{bind_host}]"
+    ui_port = os.getenv("PW_UI_PORT", "18742")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[f"http://{bind_host}:{ui_port}", f"http://localhost:{ui_port}"],
+        allow_methods=["GET", "POST"],
+        allow_headers=["Content-Type"],
+    )
     app.include_router(api_router, prefix="/api/v1")
     return app
 
