@@ -31,17 +31,13 @@ criteria:
   checked: false
   evidence: []
 status: in_progress
-revision: 2
+revision: 4
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T17:53:32Z'
-next_action: Зафиксировать решения по контексту, применению предложения и передаче
-  данных
-progress_note: Зависимости закрыты; решения ADR-0004/0005 и P7 Spec ещё не утверждены
-todo_lane: clarification
-clarification_question: Утвердить для P7 пользовательский контракт AI и границы передачи
-  рукописи провайдеру
-clarification_source: ADR-0004, ADR-0005 и Phase 7 в docs/plans/imp/imp-2026-002-domain-workspace.md
+updated_at: '2026-10-19T18:21:32Z'
+progress_note: 'P7 acceptance passed: 43 backend tests, frontend typecheck/build,
+  compileall; graph fallback documented'
+next_action: Commit verified P7 changes, merge into main, run post-integration checks
 ---
 
 ## Outcome
@@ -53,3 +49,5 @@ AI возвращает предложение для явно выбранно�
 После принятия ADR-0004/0005 и отдельного Spec определить context manifest/privacy, LLMService/provider contract и target revision; реализовать preview/accept/reject без скрытой записи в рукопись.
 
 ## Notes
+
+P7 decisions approved by Denis Karmalak on 2026-10-19: preview/accept/reject over an explicitly selected manuscript block; accept creates a new manuscript version and reject leaves the manuscript unchanged. P7 uses only a deterministic mock LLM adapter; real provider calls and external data transfer are disabled. Before invocation UI shows the exact context manifest. Persist proposal and review metadata for project traceability; do not copy raw prompts/responses into technical logs. See ADR-0004, ADR-0005 and SPEC-2026-003.

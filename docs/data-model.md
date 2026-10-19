@@ -40,6 +40,7 @@ relations:
 | `manuscripts` | `content` | Обязательный PostgreSQL JSONB с корнем Tiptap `doc`; порядок элементов хранится в массиве `content` |
 | `manuscripts` | `version` | Обязательный монотонный integer, начиная с 1; API обновляет только при совпадении `expected_version` |
 | `manuscripts` | `updated_at` | `TIMESTAMPTZ`, время последнего сохранения |
+| `manuscript_revisions` | `manuscript_id`, `version`, `content`, `created_at` | Неизменяемый JSONB snapshot версии; уникальная пара manuscript/version; owner-scoped read API |
 
 Миграция `20261019_0002` создаёт резервированного владельца, назначает ему существующие проекты и делает `projects.owner_id` обязательным. Миграция `20261019_0003` создаёт `manuscripts`. Откат схемы выполняется только последовательными Alembic downgrade; операции проектов проходят через Projects service и persistence port, identity — через IdentityRepository, рукописи — через ManuscriptService и отдельный persistence adapter.
 
@@ -130,3 +131,8 @@ version, Passage ID, SourceFile ID, manuscript version, relation и состоя
 Редактирование Claim либо сохранение новой версии рукописи помечает связанные
 ссылки `needs_review`. Evidence-ссылка удерживает конкретную версию PDF от
 удаления. Подробный контракт: [SPEC-2026-002](specs/spec-2026-002-evidence-workflow.md).
+
+
+## AI proposals (P7)
+
+`ManuscriptRevision` сохраняет неизменяемый JSON snapshot каждой сохранённой версии рукописи и выдаётся только через owner-scoped version API. `AIProposal` принадлежит проекту и конкретной рукописи; уникальный idempotency key scoped к проекту предотвращает дублирование одного действия. Запись сохраняет target manuscript version/position, точный context manifest (выбранный текст и instruction), mock/provider metadata, suggestion, статус и решение reviewer/time/note. Ошибка adapter сохраняет только тип ошибки, без raw prompt/response в технических логах. Удаление проекта каскадно удаляет proposals. В P7 единственный адаптер — deterministic mock; сетевой provider и передача контента выключены. Принятие условно на совпадение target version и текста в locator, создаёт следующую manuscript version и атомарно фиксирует решение; оригинальный selected text остаётся в manifest; исходная полная версия доступна через `manuscript_revisions`.

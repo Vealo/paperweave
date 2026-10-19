@@ -29,3 +29,14 @@ export function updateManuscript(
     body: JSON.stringify({ content, expected_version: expectedVersion }),
   });
 }
+
+
+export interface ManuscriptRevision {
+  version: number;
+  content: Record<string, unknown>;
+  created_at: string;
+}
+
+export function getManuscriptVersion(projectId: string, version: number): Promise<ManuscriptRevision> {
+  return requestApi<ManuscriptRevision>(`/projects/${encodeURIComponent(projectId)}/manuscript/versions/${version}`);
+}

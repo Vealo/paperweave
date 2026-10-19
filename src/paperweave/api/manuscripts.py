@@ -6,7 +6,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from paperweave.api.dependencies import get_current_user, get_manuscript_service, get_project_service
-from paperweave.api.schemas.manuscripts import ManuscriptResponse, ManuscriptWriteRequest
+from paperweave.api.schemas.manuscripts import ManuscriptResponse, ManuscriptRevisionResponse, ManuscriptWriteRequest
 from paperweave.modules.manuscripts.errors import ManuscriptAlreadyExistsError, ManuscriptConflictError
 from paperweave.modules.manuscripts.service import ManuscriptService
 from paperweave.modules.projects.service import ProjectService
@@ -19,6 +19,35 @@ ProjectServiceDep = Annotated[ProjectService, Depends(get_project_service)]
 def _require_project(projects: ProjectService, user_id: UUID, project_id: UUID) -> None:
     if projects.get(user_id, project_id) is None:
         raise HTTPException(status_code=404, detail="Project not found")
+
+
+@router.get("/versions", response_model=list[ManuscriptRevisionResponse])
+def list_manuscript_versions(
+    project_id: UUID,
+    service: ManuscriptServiceDep,
+    projects: ProjectServiceDep,
+    user=Depends(get_current_user),
+):
+    _require_project(projects, user.id, project_id)
+    versions = service.list_versions(project_id)
+    if versions is None:
+        raise HTTPException(status_code=404, detail="Manuscript not found")
+    return versions
+
+
+@router.get("/versions/{version}", response_model=ManuscriptRevisionResponse)
+def get_manuscript_version(
+    project_id: UUID,
+    version: int,
+    service: ManuscriptServiceDep,
+    projects: ProjectServiceDep,
+    user=Depends(get_current_user),
+):
+    _require_project(projects, user.id, project_id)
+    revision = service.get_version(project_id, version)
+    if revision is None:
+        raise HTTPException(status_code=404, detail="Manuscript version not found")
+    return revision
 
 
 @router.get("", response_model=ManuscriptResponse)

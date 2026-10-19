@@ -32,6 +32,7 @@ def database_url() -> str:
 def client(database_url: str) -> Iterator[TestClient]:
     cleanup_engine = create_engine(database_url)
     with cleanup_engine.begin() as connection:
+        connection.execute(text("DELETE FROM ai_proposals"))
         connection.execute(text("DELETE FROM review_decisions"))
         connection.execute(text("DELETE FROM evidence_links"))
         connection.execute(text("DELETE FROM claims"))
@@ -40,6 +41,7 @@ def client(database_url: str) -> Iterator[TestClient]:
         connection.execute(text("DELETE FROM source_passages"))
         connection.execute(text("DELETE FROM extraction_runs"))
         connection.execute(text("DELETE FROM projects"))
+        connection.execute(text("DELETE FROM users WHERE id != :owner_id"), {"owner_id": str(BOOTSTRAP_OWNER_ID)})
         connection.execute(
             text(
                 "UPDATE users SET email='owner@local.invalid', "

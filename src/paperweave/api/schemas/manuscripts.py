@@ -20,3 +20,9 @@ class ManuscriptResponse(BaseModel):
     content: dict[str, Any]
     version: int
     updated_at: datetime
+
+
+class ManuscriptRevisionResponse(BaseModel):
+    version: int
+    content: dict[str, Any]
+    created_at: datetime

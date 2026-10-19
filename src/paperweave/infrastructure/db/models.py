@@ -64,6 +64,40 @@ class ManuscriptRecord(Base):
     )
 
 
+class ManuscriptRevisionRecord(Base):
+    __tablename__ = "manuscript_revisions"
+    __table_args__ = (UniqueConstraint("manuscript_id", "version", name="uq_manuscript_revisions_manuscript_version"),)
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    manuscript_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("manuscripts.id", ondelete="CASCADE"), nullable=False, index=True)
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    content: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class AIProposalRecord(Base):
+    __tablename__ = "ai_proposals"
+    __table_args__ = (UniqueConstraint("project_id", "idempotency_key", name="uq_ai_proposals_project_idempotency"),)
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    project_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("projects.id", ondelete="CASCADE"), nullable=False, index=True)
+    manuscript_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("manuscripts.id", ondelete="CASCADE"), nullable=False, index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    target_version: Mapped[int] = mapped_column(Integer, nullable=False)
+    target_position: Mapped[int] = mapped_column(Integer, nullable=False)
+    context_manifest: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    suggestion: Mapped[str | None] = mapped_column(Text, nullable=True)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    model: Mapped[str] = mapped_column(String(120), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    reviewer_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=True)
+    decision_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decision_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_code: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+
+
 class SourceRecord(Base):
     __tablename__ = "sources"
     __table_args__ = (UniqueConstraint("project_id", "doi", name="uq_sources_project_doi"),)
