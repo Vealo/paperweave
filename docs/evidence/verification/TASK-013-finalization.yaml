@@ -1,0 +1,40 @@
+schema_version: 1
+task_id: TASK-013
+acceptance_ref: docs/evidence/verification/TASK-013-acceptance.yaml
+commit:
+  required: true
+  created: true
+  id: 15d5462092fe9d441230dff62cab6cc5b764ae8c
+  reason: Scoped implementation, test, ADR/Spec and current documentation update.
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-013-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: ccb07732330bdf8e0cacccdbdfec4e5251b9357f
+  parent_head: ccb07732330bdf8e0cacccdbdfec4e5251b9357f
+  task_commit_reachable: true
+  reason: Task commit is an ancestor of the declared local integration branch.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-013.md
+documentation_graph:
+  required_updates:
+    - DOCS.md
+    - docs/architecture.md
+    - docs/data-model.md
+    - docs/roadmap.md
+    - docs/decisions/ADR-0008-citations-and-docx-export.md
+    - docs/specs/spec-2026-004-citations-export.md
+    - docs/evidence/verification/TASK-013-acceptance.yaml
+    - docs/evidence/verification/TASK-013-checks.md
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes:
+  - TASK-014 — final cross-phase review, now structurally ready in TODO.md
+result: finalized
+next_action: Begin TASK-014 using the approved final-verification contract.

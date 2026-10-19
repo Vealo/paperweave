@@ -15,28 +15,31 @@ depends_on:
 criteria:
 - id: AC-1
   text: Цитаты разрешаются к источникам; библиография соответствует выбранному стилю/формату.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-013-checks.md
 - id: AC-2
   text: Неполные метаданные заметно отмечаются и не заменяются вымышленными сведениями.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-013-checks.md
 - id: AC-3
   text: Golden fixtures/round-trip проверяют структуру экспортированного документа.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-013-checks.md
 - id: AC-4
   text: Экспорт не меняет сохранённую рукопись и её версии.
-  checked: false
-  evidence: []
-status: in_progress
-revision: 5
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-013-checks.md
+status: done
+revision: 6
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T19:33:09Z'
-progress_note: DOCX export, citations, owner scope, and final local checks verified
+updated_at: '2026-10-19T19:35:00Z'
+progress_note: P8 integrated in main; acceptance evidence and post-merge checks passed
 approval_state: approved
-next_action: Commit verified P8 changes and integrate into main
 ---
 
 ## Outcome

@@ -1,0 +1,55 @@
+schema_version: 1
+task_id: TASK-013
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: 12c5b7469bd81182dd82daeabaa3db69b0da4c73
+    task_branch: codex/task-013-citations-export
+    task_commits:
+      - 15d5462092fe9d441230dff62cab6cc5b764ae8c
+    integration_ref: main
+    merge_commit: ccb07732330bdf8e0cacccdbdfec4e5251b9357f
+baseline:
+  captured: true
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+    - user-owned .claude/, AGENTS.md, CLAUDE.md, TODO backup files and tasks/.lock preserved
+  ownership_map_ref: docs/evidence/verification/TASK-013-checks.md
+  preservation_action: Staged and committed only the 16 reviewed TASK-013 paths; all untracked baseline files were preserved.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-013-acceptance.yaml
+  checks:
+    - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+      status: passed; 45 tests before and after local integration
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+    - command: npm run typecheck && npm run build (frontend/)
+      status: passed before and after local integration; pre-existing Vite warnings recorded
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+    - command: python3 -m compileall -q src/paperweave && git diff --check
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+    - command: LibreOffice DOCX to PDF conversion
+      status: passed; one page
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+integration:
+  status: merged
+  post_merge_checks:
+    - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+      status: passed; 45 tests
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+    - command: npm run typecheck && npm run build (frontend/)
+      status: passed; existing Vite warnings recorded
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+    - command: python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit 15d5462092fe9d441230dff62cab6cc5b764ae8c
+      status: passed; reachable: true; parent HEAD ccb07732330bdf8e0cacccdbdfec4e5251b9357f
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+    - command: node .gitnexus/run.cjs status
+      status: up-to-date at merge commit ccb07732330bdf8e0cacccdbdfec4e5251b9357f; cross-language/truncation caveats recorded
+      evidence_ref: docs/evidence/verification/TASK-013-checks.md
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: task-store / TASK-014 orchestrator
+  next_action: Independently reconcile P1-P8 phase evidence, plans, task graph and documentation
