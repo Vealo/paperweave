@@ -144,9 +144,15 @@ paperweave/
 - **KISS:** начинать с модульного монолита и одного необходимого пути выполнения; не добавлять брокер, слои или отдельные сервисы без подтверждённой потребности.
 - **Направление зависимостей:** frontend обращается к backend через API; backend координирует прикладные сценарии, доменные модули используют внутренние контракты, а адаптеры реализуют их. Frontend и доменные модули не импортируют инфраструктурные детали друг друга.
 
-Локальная основа реализована в `config.py`, `cli.py`, `api/`, `modules/projects/`, `modules/manuscripts/`, `modules/library/`, `modules/documents/`, `modules/evidence/`, `infrastructure/db/`, миграциях и Vue `api/`, `components/`, `views/`. P7 добавляет `modules/ai_proposals/` и только deterministic mock adapter в `integrations/llm/`; внешние LLM providers остаются выключенными и не входят в этот срез. Worker и scholarly integrations остаются каркасом.
+Локальная основа реализована в `config.py`, `cli.py`, `api/`, `modules/projects/`, `modules/manuscripts/`, `modules/library/`, `modules/documents/`, `modules/evidence/`, `infrastructure/db/`, миграциях и Vue `api/`, `components/`, `views/`. P7 добавляет `modules/ai_proposals/` и только deterministic mock adapter в `integrations/llm/`; внешние LLM providers остаются выключенными и не входят в этот срез. P8 добавляет `modules/manuscripts/docx_export.py` для чистого преобразования сохранённого Tiptap JSON в OOXML DOCX без записи данных; worker и scholarly integrations остаются каркасом.
 
 Project workspace доступен по маршруту `/projects/:projectId` и использует существующие owner-scoped project/manuscript API. Vue shell отделяет навигацию проекта и оглавление, центральный Tiptap editor и правую контекстную область. Оглавление вычисляется из heading nodes текущего JSON документа; переход фокусирует соответствующий узел в редакторе и не создаёт отдельную backend-сущность раздела. Save, API и AI отображаются раздельно. P7 показывает mock-only предложение для выбранного текста, сохраняет context manifest и предлагает accept/reject; внешнего вызова модели нет. Если чтение manuscript завершается ошибкой, редактирование блокируется до повторной загрузки, чтобы не отправить неизвестную/устаревшую версию.
+
+P8 добавляет inline `citation` node со ссылкой на Source ID и доступный только владельцу
+`GET /projects/{project_id}/manuscript/export.docx`. Export читает сохранённый
+manuscript, нумерует ссылки по порядку первого появления и формирует библиографию
+из ручных Source metadata. Неизвестный или недоступный источник завершает экспорт
+ошибкой; manuscript revisions не затрагиваются.
 
 ## Направление зависимостей
 
