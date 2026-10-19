@@ -1,0 +1,37 @@
+schema_version: 1
+task_id: TASK-010
+acceptance_ref: docs/evidence/verification/TASK-010-acceptance.yaml
+commit:
+  required: true
+  created: true
+  id: 5921324ae587b9e2ba3d2b48c0e549aca0df1b34
+  reason: Scoped implementation commit on codex/task-010-document-extraction.
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-010-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: 4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b
+  parent_head: 4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b
+  task_commit_reachable: true
+  reason: Normal non-forced local merge; verified by verify_parent_reachability.py.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-010.md
+documentation_graph:
+  required_updates:
+    - docs/data-model.md
+    - docs/architecture.md
+    - docs/plans/imp/imp-2026-002-domain-workspace.md
+    - IMP.md
+    - docs/evidence/architecture/imp-2026-002-p5-document-extraction.json
+    - docs/evidence/verification/TASK-010-acceptance.yaml
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes: []
+result: finalized
+next_action: Start ready TASK-011 (P6 evidence and claims).

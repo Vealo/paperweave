@@ -34,11 +34,11 @@ phase_statuses:
   P2: verified
   P3: verified
   P4: verified
-  P5: pending
+  P5: verified
   P6: pending
   P7: pending
   P8: pending
-progress: 4/8
+progress: 5/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
@@ -265,6 +265,8 @@ flowchart TD
 **Implementation boundary (2026-10-19):** Вход — только локально загруженный PDF. Используется встроенный адаптер pypdf для text layer без OCR и внешних сервисов; язык не ограничивается, если текст реально извлекается. Сканированные/пустые страницы дают состояние `empty`, а не проверенное evidence. Каждый явный запуск хранится как `ExtractionRun` с версией обработчика; повтор создаёт новый запуск и сохраняет прежние результаты. Обработка синхронная в threadpool FastAPI, без очереди для локального MVP. Каждый `SourcePassage` закреплён за точной версией `SourceFile`; новая версия помечает прежние ссылки `needs_review`, anchor автоматически не переносится.
 
 **Architecture review:** [P5 document extraction](../../evidence/architecture/imp-2026-002-p5-document-extraction.json), `pass_with_conditions`; remote/high-volume processing remains out of scope.
+
+**Completion evidence (2026-10-19):** TASK-010 acceptance ledger verifies all four criteria; implementation commit `5921324ae587b9e2ba3d2b48c0e549aca0df1b34` is integrated into `main` at `4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b`. The P5 slice extracts text and displays page passages; manual editing of extracted passage text is not part of TASK-010 acceptance criteria.
 
 ## Phase 6: P6 — Evidence and claims
 

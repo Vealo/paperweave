@@ -1,0 +1,65 @@
+schema_version: 1
+task_id: TASK-010
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: c2ef059c265abd00355214409b399e16901905f8
+    task_branch: codex/task-010-document-extraction
+    task_commits:
+      - 5921324ae587b9e2ba3d2b48c0e549aca0df1b34
+    integration_ref: main
+    checkpoint_commit: e8bcfc389d5bb96bcb7fc6eacefd7d19897db4a7
+    merge_commit: 4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b
+baseline:
+  captured: true
+  staged_paths: []
+  unstaged_paths:
+    - TODO.md
+    - tasks/TASK-010.md
+  untracked_paths:
+    - .claude/
+    - AGENTS.md
+    - CLAUDE.md
+    - TODO.md.before-reconcile-*
+    - tasks/.lock
+  ownership_map_ref: docs/evidence/verification/TASK-010-finalization.yaml
+  preservation_action: Only TASK-010 and TODO canonical updates were checkpointed on main; all untracked user baseline files remained untouched.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-010-acceptance.yaml
+  checks:
+    - command: PAPERWEAVE_CONFIG=config.example.toml COMPOSE_PROJECT_NAME=paperweave-task010-final2 make test
+      status: passed
+      evidence_ref: 31 passed; isolated tmpfs PostgreSQL container and network removed.
+    - command: Dockerfile ui-build stage plus npm run typecheck
+      status: passed
+      evidence_ref: Node 22; Vite production build and vue-tsc --noEmit passed.
+    - command: Alembic offline upgrade head and downgrade 20261019_0005:20261019_0004
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-010-acceptance.yaml
+    - command: git diff --cached --check
+      status: passed
+integration:
+  status: merged
+  parent_head: 4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b
+  task_commit_reachable: true
+  post_merge_checks:
+    - command: PAPERWEAVE_CONFIG=config.example.toml COMPOSE_PROJECT_NAME=paperweave-task010-postmerge make test
+      status: passed
+      evidence_ref: 31 passed; isolated test containers and network removed.
+    - command: Dockerfile ui-build stage plus npm run typecheck on integrated main
+      status: passed
+      evidence_ref: Vite production build and vue-tsc --noEmit passed.
+  conflict_or_blocker: null
+gitnexus:
+  precommit_change_analysis: incomplete
+  fallback: passed
+  fallback_evidence: MCP and CLI could not resolve unregistered task worktree; pre-edit impact/search bounded upload_pdf, create_file and api_router; post-diff direct search and exact diff review confirmed owner/API/storage call paths; backend/frontend/migration checks passed.
+  post_integration_refresh: passed
+  indexed_commit: 4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b
+  graph_size: 1430 nodes, 2323 edges, 38 clusters, 95 flows
+  warnings: Cross-language fields PAPERWEAVE_CONFIG, query and state remain unresolved by per-language analysis.
+remote_actions: not_authorized
+handoff:
+  next_owner: root
+  next_action: Start ready TASK-011 (P6 evidence and claims).

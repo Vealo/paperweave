@@ -12,31 +12,33 @@ depends_on:
 criteria:
 - id: AC-1
   text: Каждый Passage связан с версией файла и версией метода extraction.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-010-acceptance.yaml#AC-1
 - id: AC-2
   text: Повторная обработка идемпотентна либо создаёт явно новую ExtractionRun; ошибки/partial
     results видимы.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-010-acceptance.yaml#AC-2
 - id: AC-3
   text: Повреждённый/пустой PDF не теряет оригинал и не создаёт видимость проверенного
     evidence.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-010-acceptance.yaml#AC-3
 - id: AC-4
   text: При замене файла непереносимый anchor помечается устаревшим для ручной проверки.
-  checked: false
-  evidence: []
-status: in_progress
-revision: 9
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-010-acceptance.yaml#AC-4
+status: done
+revision: 10
 blockers: []
 created_at: '2026-10-19T14:00:25Z'
-updated_at: '2026-10-19T17:29:17Z'
-next_action: Review task diff and acceptance ledger, then commit and integrate into
-  main
-progress_note: 'P5 acceptance checks pass: 31 backend, UI typecheck/build, reversible
-  migration SQL and architecture review.'
+updated_at: '2026-10-19T17:32:13Z'
+progress_note: P5 complete on main; all criteria verified and post-integration checks
+  passed.
 ---
 
 ## Outcome
