@@ -31,14 +31,14 @@ change_kind: none
 phases: 8
 phase_statuses:
   P1: verified
-  P2: active
+  P2: verified
   P3: pending
   P4: pending
   P5: pending
   P6: pending
   P7: pending
   P8: pending
-progress: 1/8
+progress: 2/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
@@ -81,7 +81,7 @@ deployment_mode: not_applicable
 | Child skill | `imp-analysis` |
 | Analysis status | complete |
 | Analysis artifact | [Analysis и architecture review](../../evidence/plan-analysis/imp-2026-002-domain-workspace.md) |
-| Analysis verdict | ready_with_blockers initially; ACF-1 resolved by owner decision, P1 now executing |
+| Analysis verdict | ACF-1 resolved by owner decision; P1 and P2 verified |
 | Architecture status | complete |
 | Architecture artifacts | Current P2 review: [manuscript architecture-control](../../evidence/architecture/imp-2026-002-p2-manuscript.json), pass_with_conditions; completed P1 review: [identity architecture-control](../../evidence/architecture/imp-2026-002-p1-identity-access.md) |
 | Open blocker refs | none |
@@ -213,7 +213,7 @@ flowchart TD
 
 **Expected result:** Автор создаёт одну рукопись проекта, редактирует упорядоченные блоки в Tiptap и сохраняет версионируемый документ.
 
-**Tasks:** Выбрать контракт документа/блоков и версии; связать manuscript с project и owner; спроектировать API чтения/сохранения и конфликтов; интегрировать Tiptap только как editor UI; разделить `dirty/saving/saved/failed`; сохранять исходный текст при сетевой ошибке и восстанавливать его после повторной загрузки по принятой политике.
+**Tasks:** Реализованы контракт одной рукописи на проект, PostgreSQL JSONB persistence и optimistic version; API чтения/создания/обновления с ownership и conflict checks; Tiptap editor с `dirty/saving/saved/failed` states и retry без очистки документа.
 
 **Dependencies:** P1 verified. Для первого slice Task Outcome ограничивает проект одной рукописью; расширение до нескольких рукописей потребует изменения контракта и миграции.
 **Data/API:** `manuscripts` — один документ на `project_id`, `content` хранит полный Tiptap JSON, `version` — монотонная integer revision для optimistic concurrency. Nested GET/POST/PUT endpoints проверяют ownership родительского проекта; stale version возвращает conflict без изменения документа.
