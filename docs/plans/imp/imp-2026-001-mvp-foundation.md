@@ -4,7 +4,7 @@ id: imp-2026-001-mvp-foundation
 name: "Первый MVP PaperWeave: локальный запуск и проекты"
 type: imp
 version: 1.0.0
-status: ready
+status: active
 freeze: false
 date: 2026-10-19
 last_reviewed: 2026-10-19
@@ -32,11 +32,11 @@ parent_ref: null
 change_kind: none
 phases: 4
 phase_statuses:
-  P1: ready
+  P1: verified
   P2: pending
   P3: pending
   P4: pending
-progress: 0/4
+progress: 1/4
 analysis_status: complete
 analysis_ref: artifacts/plan-analysis/imp-2026-001-mvp-foundation-2026-10-19.md
 architecture_status: complete
@@ -216,8 +216,8 @@ Config source, local service lifecycle, host/container network boundary. Фай�
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| test | `make config-check`; config-focused target из Makefile | local | unavailable до выполнения | при P1 | TASK-001 evidence |
-| source | Compose config/launcher inspection | local | unavailable до выполнения | при P1 | TASK-001 evidence |
+| test | `make config-check`; config-focused target из Makefile | local | passed (`make test`: 8 passed) | 2026-10-19 | TASK-001 evidence |
+| source | Compose config/launcher inspection | local | passed: loopback UI/API; DB без host mapping; `down` сохраняет volume | 2026-10-19 | TASK-001 evidence |
 
 ### Exit criteria
 
