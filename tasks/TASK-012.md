@@ -30,11 +30,18 @@ criteria:
     данных отсутствует.
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 2
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T14:00:26Z'
+updated_at: '2026-10-19T17:53:32Z'
+next_action: Зафиксировать решения по контексту, применению предложения и передаче
+  данных
+progress_note: Зависимости закрыты; решения ADR-0004/0005 и P7 Spec ещё не утверждены
+todo_lane: clarification
+clarification_question: Утвердить для P7 пользовательский контракт AI и границы передачи
+  рукописи провайдеру
+clarification_source: ADR-0004, ADR-0005 и Phase 7 в docs/plans/imp/imp-2026-002-domain-workspace.md
 ---
 
 ## Outcome
