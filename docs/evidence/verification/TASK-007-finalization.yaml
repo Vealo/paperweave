@@ -1,0 +1,52 @@
+schema_version: 1
+task_id: TASK-007
+acceptance_ref: docs/evidence/verification/TASK-007-acceptance-ledger.yaml
+commit:
+  required: true
+  created: true
+  id: 03836229872fb1787de15ad854f1315d977383f8
+  reason: null
+gitflow:
+  applicable: true
+  repository: /home/denis/Projects/paperweave
+  task_branch: codex/task-007-manuscripts
+  base_ref: main
+  base_sha: f725a791f4f1bc5d506d8bb918eae63058133c30
+  integrated: true
+  integration_ref: main
+  merge_commit: 960e8228120f16c9873edd9b4a23eab3c93a7782
+  parent_head: 40f5f811b3ebb7dd8169ff15c94fe4de8951239b
+  task_commit_reachable: true
+  reachability_command: python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit 03836229872fb1787de15ad854f1315d977383f8
+baseline:
+  unrelated_changes_preserved: true
+  task_owned_main_state_preserved_in_stash: stash@{0} Preserve TASK-007 main task projections before integration
+  pre_existing_untracked_files_touched: false
+verification:
+  post_merge_checks:
+    - command: PAPERWEAVE_CONFIG=config.example.toml make test
+      status: passed (25 passed after merge)
+      evidence_ref: tests/integration/test_manuscripts_api.py
+    - command: disposable Node 22 container; npm ci && npm run typecheck && npm run build
+      status: passed after merge; existing Vite runtime-config and chunk-size warnings remain
+      evidence_ref: frontend/package-lock.json
+    - command: task-store validate and TODO reconciliation
+      status: passed; 14 tasks valid and TASK-007 absent from active TODO
+      evidence_ref: TODO.md
+    - command: verify_parent_reachability.py for TASK-007 commit
+      status: passed; reachable=true from main at 40f5f811b3ebb7dd8169ff15c94fe4de8951239b
+      evidence_ref: docs/evidence/verification/TASK-007-finalization.yaml
+documentation_graph:
+  required: true
+  completed: true
+  state: refreshed after this finalization receipt is committed; CLI status verified current on main
+  refresh_command: node .gitnexus/run.cjs analyze --index-only
+  stats: 1032 nodes, 1645 edges, 63 flows
+  note: Analyzer reports five cross-language property references it cannot resolve; none is in the manuscript request or persistence path.
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes: []
+result: finalized
+next_action: Начать TASK-008 — рабочее пространство проекта.
