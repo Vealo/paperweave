@@ -1,0 +1,38 @@
+schema_version: 1
+task_id: TASK-012
+contract_ref: tasks/TASK-012.md
+baseline_ref: main@0a1659a6ef84f7c4151180258b748a6bf1e6fc1a
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    rationale: UI renders the complete target manifest before request; API persists and returns the exact manifest; test verifies response.
+  - id: AC-2
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    rationale: Integration tests prove reject leaves the manuscript unchanged and accept creates a retrievable next version while preserving the prior snapshot.
+  - id: AC-3
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    rationale: Tests cover explicit timeout, stale target, same-key idempotency, conflicting replay, and repeated decisions.
+  - id: AC-4
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+    rationale: The production API is wired to the deterministic mock only; unit and integration tests pass; no real provider/outbound call is wired in P7.
+required_checks:
+  - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+  - command: npm run typecheck && npm run build (frontend/)
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+  - command: python3 -m compileall -q src/paperweave tests
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+  - command: git diff --check
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-012-checks.md
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null

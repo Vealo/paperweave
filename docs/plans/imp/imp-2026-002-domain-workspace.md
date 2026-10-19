@@ -291,7 +291,7 @@ flowchart TD
 
 **Tasks:** Утвердить допустимый context manifest и data-sharing UX; описать внутренний LLM service contract/provider config; target version and idempotency; preview/accept/reject; применение как новая manuscript revision; журналировать состояние без хранения лишнего raw content.
 
-**Dependencies:** P1, P2 и P6 verified для evidence-grounded actions; ADR-0004/0005 пересмотрены и приняты для выбранной политики; отдельный Spec.
+**Dependencies:** P1, P2 и P6 verified для evidence-grounded actions; ADR-0004/0005 приняты владельцем по границе mock-only/no external transfer; [SPEC-2026-003](../../specs/spec-2026-003-ai-proposals.md) задаёт proposal lifecycle и version contract.
 **Data/API:** AIProposal, target revision/context references и review action.
 **Evidence contract:** Provider adapter tests с mock; timeout/error/stale target; reject не меняет документ; accept создаёт новую редакцию; исходный текст доступен; реально передаваемый контекст виден пользователю.
 **Exit criteria:** Пользователь видит передаваемый контекст и разницу; отклонение не меняет текст; принятие создаёт новую редакцию; provider failure не скрывает исходник.

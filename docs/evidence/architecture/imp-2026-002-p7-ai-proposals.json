@@ -1,0 +1,41 @@
+{
+  "review_id": "imp-2026-002-p7-ai-proposals",
+  "baseline_commit": "0a1659a6ef84f7c4151180258b748a6bf1e6fc1a",
+  "scope": "P7 mock-only AI proposal lifecycle for a selected manuscript range, owner review, idempotent request handling, immutable manuscript revision snapshots and UI context disclosure",
+  "verdict": "pass_with_conditions",
+  "findings": [
+    {
+      "id": "P7-ARCH-01",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P7"],
+      "evidence": "ADR-0004 and ADR-0005 are accepted from the owner decision dated 2026-10-19. SPEC-2026-003 defines the manifest, provider boundary, statuses, idempotency key, errors, and accept/reject semantics. The route constructs only MockLLMAdapter; it has no network-backed adapter or provider configuration.",
+      "impact": "P7 can exercise the complete preview and review flow without transferring manuscript text outside the local application. A future real provider would materially alter this trust boundary and is not enabled by this phase.",
+      "owner": "PaperWeave AI proposal module",
+      "exit_condition": "Keep external provider adapters disabled until a new owner decision specifies provider, transfer disclosure, retention, and error/retry contract.",
+      "next_action": "Preserve mock-only wiring and reject undocumented provider configuration."
+    },
+    {
+      "id": "P7-ARCH-02",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P7"],
+      "evidence": "AIProposalRecord has one UUID identity, a project-scoped unique idempotency key, a concrete manuscript/version/position, persisted context manifest and suggestion, and explicit pending/accepted/rejected/stale/failed states. AIProposalRepository checks Project owner and commits proposal decision with manuscript update and evidence invalidation in one SQLAlchemy transaction. ManuscriptRevisionRecord stores each complete JSON snapshot and the version API requires owner-scoped project access.",
+      "impact": "A rejected or stale proposal cannot mutate canonical manuscript content. Accept uses the shared optimistic update operation, increments one version, preserves the prior snapshot, and invalidates evidence links in the same transaction. Existing pre-P7 rows are backfilled as their current version; versions overwritten before migration cannot be reconstructed.",
+      "owner": "PaperWeave Manuscript and AI proposal modules",
+      "exit_condition": "Integration tests prove reject/no-write, accept/version/history, stale target, idempotent repeat, owner-scoped read and migration schema behavior.",
+      "next_action": "Keep historical snapshots immutable and continue to bind each proposal to an exact target version and text range."
+    },
+    {
+      "id": "P7-ARCH-03",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P7"],
+      "evidence": "Pre-edit GitNexus impact for ManuscriptService was LOW, exact epistemic, 9 impacted symbols and 2 direct import dependents. CLI refresh matched main@0a1659a. Graph analysis logs retain scope-resolution omissions and flow truncation warnings; source inspection and backend integration tests cover the changed optimistic update and ownership paths.",
+      "impact": "Graph analysis is useful but incomplete for cross-language flows; verification must rely on source and behavior evidence as well. No high/critical pre-edit impact was reported.",
+      "owner": "PaperWeave implementation owner",
+      "exit_condition": "Pre-commit detect_changes is reviewed and incomplete graph details are retained with the bounded source/test fallback.",
+      "next_action": "Do not describe the graph result as complete or clean."
+    }
+  ]
+}

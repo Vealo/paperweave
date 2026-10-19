@@ -23,6 +23,12 @@ class ManuscriptService:
     def get(self, project_id: UUID) -> Manuscript | None:
         return self._repository.get(project_id)
 
+    def list_versions(self, project_id: UUID):
+        return self._repository.list_versions(project_id)
+
+    def get_version(self, project_id: UUID, version: int):
+        return self._repository.get_version(project_id, version)
+
     def create(self, project_id: UUID, content: dict[str, Any]) -> Manuscript:
         return self._repository.create(project_id, validate_document(content))
 

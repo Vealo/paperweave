@@ -10,6 +10,7 @@ import { EditorContent, useEditor } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
 import ProjectLibrary from "../components/ProjectLibrary.vue";
 import ClaimEvidencePanel from "../components/ClaimEvidencePanel.vue";
+import AIProposalPanel from "../components/AIProposalPanel.vue";
 
 import { getProject, type Project } from "../api/projects";
 import { createManuscript, getManuscript, updateManuscript, type Manuscript } from "../api/manuscript";
@@ -75,6 +76,16 @@ function goToClaim(position: number): void {
   const currentEditor = editor.value;
   if (!currentEditor) return;
   currentEditor.chain().focus().setTextSelection(Math.min(position, currentEditor.state.doc.content.size)).scrollIntoView().run();
+}
+
+function applyAIManuscript(saved: Manuscript): void {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveSequence += 1;
+  manuscript.value = saved;
+  editor.value?.commands.setContent(saved.content, { emitUpdate: false });
+  refreshHeadings();
+  saveState.value = "saved";
+  saveError.value = "";
 }
 
 function errorMessage(reason: unknown, fallback: string): string {
@@ -268,9 +279,10 @@ onBeforeUnmount(() => {
         <h2>Состояние</h2>
         <div class="context-status"><span>API</span><Tag :severity="apiState === 'failed' ? 'danger' : apiState === 'loading' ? 'info' : 'success'" :value="apiState === 'failed' ? 'Ошибка' : apiState === 'loading' ? 'Загрузка' : 'Доступно'" /></div>
         <div class="context-status"><span>Рукопись</span><Tag :severity="manuscriptLoadFailed || saveState === 'failed' ? 'danger' : saveState === 'saving' || saveState === 'dirty' ? 'warn' : 'success'" :value="manuscriptLoadFailed ? 'Ошибка загрузки' : saveState === 'failed' ? 'Ошибка сохранения' : saveState === 'saving' ? 'Сохранение' : saveState === 'dirty' ? 'Не сохранено' : manuscript ? `Версия ${manuscript.version}` : 'Новая'" /></div>
-        <div class="context-status"><span>AI</span><Tag severity="secondary" value="Не подключён" /></div>
-        <p class="context-hint">AI-помощник появится после подключения сервиса. Текст сейчас редактируется вручную.</p>
+        <div class="context-status"><span>AI</span><Tag severity="warn" value="Только mock" /></div>
+        <p class="context-hint">Mock-предложение доступно для выделенного текста сохранённой рукописи; внешней передачи нет.</p>
       </section>
+      <AIProposalPanel v-if="project" :project-id="project.id" :selected-text="claimSelection.text" :target-position="claimSelection.position" :manuscript-version="manuscript?.version ?? null" :disabled="saveState !== 'saved' || !manuscript" @applied="applyAIManuscript" />
     </aside>
     <ProjectLibrary :project-id="project.id" />
   </section>

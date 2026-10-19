@@ -27,8 +27,8 @@
 | [ADR-0001](docs/decisions/ADR-0001-project-identity.md) | Предварительное название продукта и пакета | Предложено | Не указан | — |
 | [ADR-0002](docs/decisions/ADR-0002-modular-monolith-and-stack.md) | Модульный монолит, границы модулей и стек | Предложено | Не указан | — |
 | [ADR-0003](docs/decisions/ADR-0003-evidence-provenance.md) | Доказательства и их происхождение | Предложено | Не указан | — |
-| [ADR-0004](docs/decisions/ADR-0004-author-controlled-ai.md) | Контекстные AI-действия и контроль автора | Предложено | Не указан | — |
-| [ADR-0005](docs/decisions/ADR-0005-user-owned-data.md) | Данные пользователя, хранение и передача провайдерам | Предложено | Не указан | — |
+| [ADR-0004](docs/decisions/ADR-0004-author-controlled-ai.md) | Контекстные AI-действия и контроль автора | Принято | Denis Karmalak | — |
+| [ADR-0005](docs/decisions/ADR-0005-user-owned-data.md) | Данные пользователя, хранение и передача провайдерам | Принято | Denis Karmalak | — |
 | [ADR-0006](docs/decisions/ADR-0006-mvp-boundary.md) | Узкая основа текущего MVP для последующего наращивания отдельными ADR | Принято | Denis Karmalak | — |
 | [ADR-0007](docs/decisions/ADR-0007-local-identity-and-project-access.md) | Локальные учётные записи, сессии и ownership проектов | Принято | Denis Karmalak | TASK-006 |
 
@@ -38,8 +38,9 @@
 |---|---|---|---|
 | [SPEC-2026-001](docs/specs/spec-2026-001-mvp-foundation.md) | Поведение локального запуска, Projects API/UI и PostgreSQL persistence | Черновик | ADR-0006; IMP-2026-001 |
 | [SPEC-2026-002](docs/specs/spec-2026-002-evidence-workflow.md) | Claim рукописи, версии evidence links и review владельцем | Черновик | TASK-011; IMP-2026-002/P6 |
+| [SPEC-2026-003](docs/specs/spec-2026-003-ai-proposals.md) | Версионируемые AI-предложения, явный review и mock-only граница передачи данных | Черновик | TASK-012; ADR-0004; ADR-0005; IMP-2026-002/P7 |
 | [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Complete; P1–P4 verified, TASK-005 done | TASK-001…TASK-005 |
-| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | План развития по доменам: доступ, рукопись, пространство, источники, evidence, AI, экспорт | Active; P1–P2 verified; P3 — следующий этап | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001 |
+| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | План развития по доменам: доступ, рукопись, пространство, источники, evidence, AI, экспорт | Active; P1–P6 verified; P7 — TASK-012 | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001 |
 
 Полные очереди: [TODO.md](TODO.md) и [IMP.md](IMP.md). Черновой Spec не представлен как утверждённый контракт; scope MVP утверждён ADR-0006.
 

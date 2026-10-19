@@ -38,7 +38,7 @@ relations:
 | HTTP API | FastAPI + Pydantic | Используются в MVP; health и Projects API определены реализацией и контрактом MVP |
 | Frontend | Vue 3 + TypeScript + PrimeVue 4 + Vue Router | Реализованы проекты UI и редактор рукописи; оформление использует Aura и готовые PrimeVue controls по [дизайн-коду](design-system.md) |
 | Редактор рукописи | Tiptap Vue 3 + StarterKit | Используется в TASK-007 для блочного rich-text редактирования; текущий документ сохраняется целиком как JSONB snapshot |
-| Хранение данных | PostgreSQL; pgvector — возможное будущее расширение | PostgreSQL хранит проекты, local identity/session и текущий manuscript snapshot; векторы и их индексация не входят в текущий scope |
+| Хранение данных | PostgreSQL; pgvector — возможное будущее расширение | PostgreSQL хранит проекты, local identity/session, текущую рукопись, immutable manuscript revisions и AI proposals; векторы и их индексация не входят в текущий scope |
 | Доступ к данным | SQLAlchemy + psycopg | Используются синхронно; отдельные repository adapters обслуживают проекты и рукописи |
 | Изменение схемы | Alembic | Используется для последовательных миграций MVP |
 | Интеграция с моделями | Внутренний `LLMService` со сменными adapters | Будущее предложение; providers, retries, budgets и structured output не реализованы |
@@ -120,7 +120,8 @@ paperweave/
 | `src/paperweave/modules/projects/` | Владеть проектами исследования, настройками и их жизненным циклом | Не владеть публикациями, рукописью или глобальным подключением к БД |
 | `src/paperweave/modules/library/` | Владеть библиографическими записями, файлами источников и их импортом | Не решать, подтверждает ли источник утверждение |
 | `src/paperweave/modules/evidence/` | Владеть утверждениями, связями доказательств и состоянием проверки | Не принимать extraction или ответ AI за проверенный результат |
-| `src/paperweave/modules/manuscripts/` | Владеть структурой рукописи, блоками, редакциями и правилами цитирования | Не управлять библиотекой или поставщиками моделей |
+| `src/paperweave/modules/manuscripts/` | Владеть структурой рукописи и неизменяемыми версиями документа | Не управлять библиотекой или поставщиками моделей |
+| `src/paperweave/modules/ai_proposals/` | Владеть lifecycle proposal, target revision и explicit author decision | Не вызывать внешний provider самостоятельно и не менять рукопись вне её versioned repository operation |
 | `src/paperweave/modules/jobs/` | Владеть состояниями, прогрессом и правилами повтора заданий | Не запускать процессы инфраструктуры; обработку вызывает `worker.py` |
 | `src/paperweave/integrations/llm/` | Реализовать внутренний контракт модели и адаптеры провайдеров | Не раскрывать типы SDK вендора предметным модулям и не менять текст без решения автора |
 | `src/paperweave/integrations/scholarly/` | Преобразовывать внешние API научных источников во внутренние контракты | Не определять правила владения библиотекой и дедупликации |
@@ -143,9 +144,9 @@ paperweave/
 - **KISS:** начинать с модульного монолита и одного необходимого пути выполнения; не добавлять брокер, слои или отдельные сервисы без подтверждённой потребности.
 - **Направление зависимостей:** frontend обращается к backend через API; backend координирует прикладные сценарии, доменные модули используют внутренние контракты, а адаптеры реализуют их. Frontend и доменные модули не импортируют инфраструктурные детали друг друга.
 
-Локальная основа реализована в `config.py`, `cli.py`, `api/`, `modules/projects/`, `modules/manuscripts/`, `modules/library/`, `modules/documents/`, `modules/evidence/`, `infrastructure/db/`, миграциях и Vue `api/`, `components/`, `views/`. Остальные предметные каталоги, scholarly/LLM интеграции и worker остаются каркасом.
+Локальная основа реализована в `config.py`, `cli.py`, `api/`, `modules/projects/`, `modules/manuscripts/`, `modules/library/`, `modules/documents/`, `modules/evidence/`, `infrastructure/db/`, миграциях и Vue `api/`, `components/`, `views/`. P7 добавляет `modules/ai_proposals/` и только deterministic mock adapter в `integrations/llm/`; внешние LLM providers остаются выключенными и не входят в этот срез. Worker и scholarly integrations остаются каркасом.
 
-Project workspace доступен по маршруту `/projects/:projectId` и использует существующие owner-scoped project/manuscript API. Vue shell отделяет навигацию проекта и оглавление, центральный Tiptap editor и правую контекстную область. Оглавление вычисляется из heading nodes текущего JSON документа; переход фокусирует соответствующий узел в редакторе и не создаёт отдельную backend-сущность раздела. Save, API и AI отображаются раздельно; AI пока явно помечен как не подключённый. Если чтение manuscript завершается ошибкой, редактирование блокируется до повторной загрузки, чтобы не отправить неизвестную/устаревшую версию.
+Project workspace доступен по маршруту `/projects/:projectId` и использует существующие owner-scoped project/manuscript API. Vue shell отделяет навигацию проекта и оглавление, центральный Tiptap editor и правую контекстную область. Оглавление вычисляется из heading nodes текущего JSON документа; переход фокусирует соответствующий узел в редакторе и не создаёт отдельную backend-сущность раздела. Save, API и AI отображаются раздельно. P7 показывает mock-only предложение для выбранного текста, сохраняет context manifest и предлагает accept/reject; внешнего вызова модели нет. Если чтение manuscript завершается ошибкой, редактирование блокируется до повторной загрузки, чтобы не отправить неизвестную/устаревшую версию.
 
 ## Направление зависимостей
 
