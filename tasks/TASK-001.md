@@ -48,14 +48,13 @@ criteria:
     API/UI up; runbook-local.md documents command semantics
   - make logs streamed running services under bounded timeout; make migrate completed;
     make down retained volume
-status: in_progress
-revision: 4
+status: done
+revision: 5
 blockers: []
 created_at: '2026-10-19T11:59:01Z'
-updated_at: '2026-10-19T12:23:58Z'
-next_action: Commit verified P1 and integrate into main
-progress_note: 'Final focused suite: 8 passed; command set and isolated Compose lifecycle
-  verified.'
+updated_at: '2026-10-19T12:25:41Z'
+progress_note: All P1 criteria accepted; task commit integrated into main and post-merge
+  gates passed.
 ---
 
 ## Outcome
@@ -68,3 +67,13 @@ progress_note: 'Final focused suite: 8 passed; command set and isolated Compose 
 
 ## Notes
 
+## Finalization receipt — 2026-10-19
+
+- Acceptance: TASK-001 AC-1…AC-5 passed; isolated `make test` passed 8 tests.
+- Task branch: `codex/task-001-mvp-runtime-config`, based on `main` at `c9f8194`.
+- Task commit: `403b3004f935eb76b4dda78583bcc411687770cf` (`feat(TASK-001): add validated local runtime configuration`).
+- Parent integration: merge commit `7fea5ffc8086d591a7e4ed8a2ee4abbbe8474d29` on `main`; parent HEAD recorded by reachability verifier; `reachable: true`.
+- Post-integration checks: `make test` — 8 passed; plan, phase, IMP contract, task-store and TODO validators passed; `git diff --check` passed.
+- Local runtime evidence: `up`, API/UI health, `restart`, `logs`, `migrate`, `down`; temporary project ports loopback-bound, DB has no host port, config mount `RW=false`, named volume survived `down`.
+- GitNexus: incomplete/unavailable, not a pass. Post-integration `node .gitnexus/run.cjs analyze` failed writing `/home/denis/.gitnexus/registry.json.tmp...` with `EROFS`; MCP change report observed 16 changed files but zero changed symbols. Pre-commit direct source/reference review, staged diff review, required tests and checks passed; no concrete unresolved P1 safety or data-integrity risk found.
+- External actions: no push, hosted CI, PR, or deployment performed.
