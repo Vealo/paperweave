@@ -102,4 +102,30 @@ class SourceFileReferenceRecord(Base):
     file_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("source_files.id", ondelete="RESTRICT"), nullable=False, index=True)
     reference_type: Mapped[str] = mapped_column(String(40), nullable=False)
     reference_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), nullable=False)
+    review_state: Mapped[str] = mapped_column(String(24), nullable=False, default="active", server_default="active")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class ExtractionRunRecord(Base):
+    __tablename__ = "extraction_runs"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    file_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("source_files.id", ondelete="RESTRICT"), nullable=False, index=True)
+    processor: Mapped[str] = mapped_column(String(80), nullable=False)
+    processor_version: Mapped[str] = mapped_column(String(40), nullable=False)
+    status: Mapped[str] = mapped_column(String(24), nullable=False)
+    page_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class SourcePassageRecord(Base):
+    __tablename__ = "source_passages"
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    run_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("extraction_runs.id", ondelete="RESTRICT"), nullable=False, index=True)
+    file_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("source_files.id", ondelete="RESTRICT"), nullable=False, index=True)
+    page_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())

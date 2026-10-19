@@ -48,7 +48,17 @@ class SqlAlchemyLibraryRepository:
         version = (self.session.scalar(select(func.max(SourceFileRecord.version)).where(SourceFileRecord.source_id == source_id)) or 0) + 1
         record = SourceFileRecord(id=file_id, source_id=source_id, version=version, original_name=original_name, media_type="application/pdf", size_bytes=size, sha256=digest, storage_key=key)
         self.session.add(record)
-        try: self.session.commit()
+        try:
+            self.session.flush()
+            self.session.query(SourceFileReferenceRecord).filter(
+                SourceFileReferenceRecord.file_id.in_(
+                    select(SourceFileRecord.id).where(
+                        SourceFileRecord.source_id == source_id,
+                        SourceFileRecord.id != file_id,
+                    )
+                )
+            ).update({SourceFileReferenceRecord.review_state: "needs_review"}, synchronize_session=False)
+            self.session.commit()
         except IntegrityError:
             self.session.rollback()
             if self.has_checksum(source_id, digest): raise DuplicateFileError("This file version already exists")

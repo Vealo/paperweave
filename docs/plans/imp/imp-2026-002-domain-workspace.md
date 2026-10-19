@@ -257,10 +257,14 @@ flowchart TD
 
 **Tasks:** Выбрать PDF extraction adapter; определить ExtractionRun/version/state; сохранять Passage только относительно конкретной версии SourceFile; отличать extracted/unreviewed от проверенного; предусмотреть retry и partial failure; добавить просмотр текста/страницы и ручное исправление метаданных.
 
-**Dependencies:** P4 verified; решение по формату/языкам PDF, extraction versioning и jobs requirement.
+**Dependencies:** P4 verified; граница реализации TASK-010 зафиксирована ниже (2026-10-19).
 **Data/API:** ExtractionRun, SourcePassage, page/location anchor и processor version.
 **Evidence contract:** Fixture PDFs и повреждённый/пустой PDF; повтор без дубликатов; ошибочный extraction сохраняет исходный файл; anchors после замены file требуют проверки.
 **Exit criteria:** У Passage есть provenance на конкретную версию файла и метод обработки; extraction failure не создаёт видимость проверенного evidence.
+
+**Implementation boundary (2026-10-19):** Вход — только локально загруженный PDF. Используется встроенный адаптер pypdf для text layer без OCR и внешних сервисов; язык не ограничивается, если текст реально извлекается. Сканированные/пустые страницы дают состояние `empty`, а не проверенное evidence. Каждый явный запуск хранится как `ExtractionRun` с версией обработчика; повтор создаёт новый запуск и сохраняет прежние результаты. Обработка синхронная в threadpool FastAPI, без очереди для локального MVP. Каждый `SourcePassage` закреплён за точной версией `SourceFile`; новая версия помечает прежние ссылки `needs_review`, anchor автоматически не переносится.
+
+**Architecture review:** [P5 document extraction](../../evidence/architecture/imp-2026-002-p5-document-extraction.json), `pass_with_conditions`; remote/high-volume processing remains out of scope.
 
 ## Phase 6: P6 — Evidence and claims
 

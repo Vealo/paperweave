@@ -5,14 +5,17 @@ import Card from "primevue/card";
 import FileUpload from "primevue/fileupload";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
-import { createSource, deleteSourceFile, downloadSourceFile, listSources, uploadSourceFile, type Source } from "../api/library";
+import { createSource, deleteSourceFile, downloadSourceFile, extractSourceFile, listExtractions, listPassages, listSources, uploadSourceFile, type ExtractionRun, type Source, type SourcePassage } from "../api/library";
 const props = defineProps<{ projectId: string }>();
 const sources = ref<Source[]>([]); const title = ref(""); const authors = ref(""); const year = ref(""); const doi = ref(""); const error = ref(""); const busy = ref(false);
+const fileResults = ref<Record<string, { runs: ExtractionRun[]; passages: SourcePassage[] }>>({}); const extracting = ref<string | null>(null);
 async function refresh() { sources.value = await listSources(props.projectId); }
 async function submit() { busy.value = true; error.value = ""; try { await createSource(props.projectId, { title: title.value, authors: authors.value || undefined, year: year.value ? Number(year.value) : undefined, doi: doi.value || undefined }); title.value = ""; authors.value = ""; year.value = ""; doi.value = ""; await refresh(); } catch (reason) { error.value = reason instanceof Error ? reason.message : "Не удалось сохранить источник"; } finally { busy.value = false; } }
 async function onUpload(source: Source, event: { files: File | File[] }) { const file = Array.isArray(event.files) ? event.files[0] : event.files; if (!file) return; try { await uploadSourceFile(props.projectId, source.id, file); await refresh(); } catch (reason) { error.value = reason instanceof Error ? reason.message : "Не удалось загрузить PDF"; } }
 async function downloadFile(source: Source, file: Source["files"][number]) { try { await downloadSourceFile(props.projectId, source.id, file.id); } catch (reason) { error.value = reason instanceof Error ? reason.message : "Не удалось скачать PDF"; } }
 async function removeFile(source: Source, file: Source["files"][number]) { if (!window.confirm(`Удалить PDF «${file.original_name}»? Связанные фрагменты и evidence требуют сохранения этой версии.`)) return; try { await deleteSourceFile(props.projectId, source.id, file.id); await refresh(); } catch (reason) { error.value = reason instanceof Error ? reason.message : "Не удалось удалить PDF"; } }
+async function showResults(source: Source, file: Source["files"][number]) { try { const [runs, passages] = await Promise.all([listExtractions(props.projectId, source.id, file.id), listPassages(props.projectId, source.id, file.id)]); fileResults.value[file.id] = { runs, passages }; } catch (reason) { error.value = reason instanceof Error ? reason.message : "Не удалось загрузить фрагменты"; } }
+async function extract(source: Source, file: Source["files"][number]) { extracting.value = file.id; error.value = ""; try { await extractSourceFile(props.projectId, source.id, file.id); await showResults(source, file); } catch (reason) { error.value = reason instanceof Error ? reason.message : "Не удалось извлечь текст"; } finally { extracting.value = null; } }
 onMounted(() => void refresh().catch(reason => { error.value = reason instanceof Error ? reason.message : "Не удалось загрузить библиотеку"; }));
 </script>
 <template>
@@ -31,7 +34,16 @@ onMounted(() => void refresh().catch(reason => { error.value = reason instanceof
       <template #content>
         <p>{{ [source.authors, source.year, source.doi].filter(Boolean).join(" · ") || "Метаданные добавлены вручную" }}</p>
         <p v-if="source.files.length === 0">PDF ещё не загружен.</p>
-        <ul v-else><li v-for="file in source.files" :key="file.id"><Button :label="`${file.original_name} · версия ${file.version}`" text @click="downloadFile(source, file)" /><Button label="Удалить" severity="danger" text @click="removeFile(source, file)" /></li></ul>
+        <ul v-else><li v-for="file in source.files" :key="file.id"><Button :label="`${file.original_name} · версия ${file.version}`" text @click="downloadFile(source, file)" /><Button label="Извлечь текст" :loading="extracting === file.id" :disabled="extracting !== null" @click="extract(source, file)" /><Button label="Фрагменты и запуски" text @click="showResults(source, file)" /><Button label="Удалить" severity="danger" text @click="removeFile(source, file)" />
+          <div v-if="fileResults[file.id]" class="extraction-results">
+            <p v-for="run in fileResults[file.id].runs" :key="run.id">Запуск {{ run.status }} · {{ run.processor }} {{ run.processor_version }} · страниц: {{ run.page_count }}<span v-if="run.error"> — {{ run.error }}</span></p>
+            <Message v-if="fileResults[file.id].runs.some(run => run.status === 'empty')" severity="warn">Текстовый слой не найден. Для сканированных страниц OCR не выполняется.</Message>
+            <article v-for="passage in fileResults[file.id].passages" :key="passage.id" class="passage">
+              <strong>Страница {{ passage.page_number }} · {{ passage.review_state === 'needs_review' ? 'нужна ручная проверка' : 'не проверено' }}</strong>
+              <p>{{ passage.text }}</p>
+            </article>
+          </div>
+        </li></ul>
         <FileUpload name="file" accept="application/pdf,.pdf" :max-file-size="26214400" choose-label="Выбрать PDF" upload-label="Загрузить" :show-cancel-button="false" :custom-upload="true" @uploader="event => onUpload(source, event)" />
       </template>
     </Card>
@@ -40,4 +52,5 @@ onMounted(() => void refresh().catch(reason => { error.value = reason instanceof
 <style scoped>
 .library-panel{display:grid;gap:1rem;margin-top:1.5rem;padding:1.25rem;border:1px solid var(--p-content-border-color);border-radius:var(--p-content-border-radius);background:var(--p-surface-0)}
 .library-panel h2{margin:0}.source-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));align-items:end;gap:.8rem}.source-form label{display:grid;gap:.35rem;font-size:.85rem}.source-card p{margin:.25rem 0 .75rem}
+.extraction-results{padding:.75rem;border-inline-start:3px solid var(--p-primary-color)}.passage{margin-block:.75rem;padding:.75rem;background:var(--p-surface-50);white-space:pre-wrap}.passage p{line-height:1.5}
 </style>

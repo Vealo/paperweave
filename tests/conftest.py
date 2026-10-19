@@ -33,6 +33,9 @@ def client(database_url: str) -> Iterator[TestClient]:
     cleanup_engine = create_engine(database_url)
     with cleanup_engine.begin() as connection:
         connection.execute(text("DELETE FROM sessions"))
+        connection.execute(text("DELETE FROM source_file_references"))
+        connection.execute(text("DELETE FROM source_passages"))
+        connection.execute(text("DELETE FROM extraction_runs"))
         connection.execute(text("DELETE FROM projects"))
         connection.execute(
             text(

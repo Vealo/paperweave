@@ -1,6 +1,8 @@
 import { ApiError } from "./projects";
 
 export interface SourceFile { id: string; version: number; original_name: string; media_type: string; size_bytes: number; sha256: string; created_at: string }
+export interface ExtractionRun { id: string; file_id: string; processor: string; processor_version: string; status: "running" | "complete" | "empty" | "partial" | "failed"; page_count: number; error: string | null; created_at: string; completed_at: string | null }
+export interface SourcePassage { id: string; run_id: string; file_id: string; page_number: number; text: string; review_state: "unreviewed" | "needs_review"; created_at: string }
 export interface Source { id: string; project_id: string; title: string; authors: string | null; year: number | null; doi: string | null; metadata_provenance: string; created_at: string; files: SourceFile[] }
 const apiBaseUrl = window.PAPERWEAVE_CONFIG?.apiBaseUrl;
 function endpoint(path: string): string {
@@ -31,4 +33,16 @@ export async function downloadSourceFile(projectId: string, sourceId: string, fi
 }
 export function deleteSourceFile(projectId: string, sourceId: string, fileId: string): Promise<void> {
   return fetch(endpoint(`/projects/${encodeURIComponent(projectId)}/sources/${encodeURIComponent(sourceId)}/files/${encodeURIComponent(fileId)}?confirmed=true`), { method: "DELETE", credentials: "include" }).then(parse<void>);
+}
+function fileEndpoint(projectId: string, sourceId: string, fileId: string): string {
+  return `/projects/${encodeURIComponent(projectId)}/sources/${encodeURIComponent(sourceId)}/files/${encodeURIComponent(fileId)}`;
+}
+export function extractSourceFile(projectId: string, sourceId: string, fileId: string): Promise<ExtractionRun> {
+  return fetch(endpoint(`${fileEndpoint(projectId, sourceId, fileId)}/extractions`), { method: "POST", credentials: "include" }).then(parse<ExtractionRun>);
+}
+export function listExtractions(projectId: string, sourceId: string, fileId: string): Promise<ExtractionRun[]> {
+  return fetch(endpoint(`${fileEndpoint(projectId, sourceId, fileId)}/extractions`), { credentials: "include" }).then(parse<ExtractionRun[]>);
+}
+export function listPassages(projectId: string, sourceId: string, fileId: string): Promise<SourcePassage[]> {
+  return fetch(endpoint(`${fileEndpoint(projectId, sourceId, fileId)}/passages`), { credentials: "include" }).then(parse<SourcePassage[]>);
 }

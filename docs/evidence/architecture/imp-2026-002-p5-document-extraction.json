@@ -1,0 +1,41 @@
+{
+  "review_id": "IMP-2026-002-P5-document-extraction",
+  "baseline_commit": "c2ef059c265abd00355214409b399e16901905f8",
+  "scope": "P5 local text-layer PDF extraction, persistent ExtractionRun and SourcePassage records, owner-scoped API/UI, and stale reference review when a newer source file version is uploaded",
+  "verdict": "pass_with_conditions",
+  "findings": [
+    {
+      "id": "P5-ARCH-01",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P5"],
+      "evidence": "DocumentService validates project ownership through SqlAlchemyDocumentRepository before reading local storage; every run and passage points at the exact SourceFile id; ExtractionRun stores processor and pypdf version; current API is owner-authenticated and mounted once through api_router.",
+      "impact": "Extraction provenance and ownership remain attached to the library's stable file-version identity; no cross-domain content copy or network lookup is introduced.",
+      "owner": "PaperWeave Documents module",
+      "exit_condition": "Covered by owner-scoped API integration tests and AC-1 provenance evidence.",
+      "next_action": "Keep extraction text-only and owner-scoped in this phase."
+    },
+    {
+      "id": "P5-ARCH-02",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P5"],
+      "evidence": "SourcePassage stores page-level anchors only; new file upload changes references to earlier versions to needs_review in the same database transaction. Extraction runs are append-only and repeat attempts create new records.",
+      "impact": "The system preserves both original files and prior extraction output while avoiding unsupported automatic anchor migration.",
+      "owner": "PaperWeave Library and Documents modules",
+      "exit_condition": "Replacement test proves passage reference review_state changes while the old bytes remain downloadable.",
+      "next_action": "Require human review before future evidence workflows rely on passages from old file versions."
+    },
+    {
+      "id": "P5-ARCH-03",
+      "severity": "informational",
+      "scope": "phase",
+      "phase_ids": ["P5"],
+      "evidence": "The approved local-only boundary caps PDF upload size at 25 MiB, runs pypdf in FastAPI's synchronous worker thread, performs no OCR/external calls/background retry, and records failed/partial/empty outcomes.",
+      "impact": "The local MVP has bounded upload size and observable per-run outcomes; large-scale or remote processing capacity is not claimed.",
+      "owner": "Project decision owner",
+      "exit_condition": "Any remote or high-volume processing mode receives a separate capacity, timeout and queue design before implementation.",
+      "next_action": "Keep remote processing, OCR and job queue outside P5."
+    }
+  ]
+}
