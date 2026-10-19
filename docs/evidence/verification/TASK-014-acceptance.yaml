@@ -1,0 +1,45 @@
+schema_version: 1
+task_id: TASK-014
+contract_ref: tasks/TASK-014.md
+baseline_ref: main@6c081072225d88f287d109a162ac6fd6e03b61dc
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-audit.md
+    rationale: Standalone AC-1…AC-8 and phase gates are mapped to accepted phase ledgers, contracts, source behavior and limits.
+  - id: AC-2
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-audit.md
+    rationale: TASK-006…TASK-013 IDs/statuses, dependencies, decisions, owners and future-scope exit conditions are recorded.
+  - id: AC-3
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-audit.md
+    rationale: Local results are distinguished from CI/deployment/production; excluded provider, OCR, collaboration and operational capabilities are not claimed.
+  - id: AC-4
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-checks.md
+    rationale: Indexes match the canonical task snapshot; all non-terminal tasks are represented once; links and validators pass.
+  - id: AC-5
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-audit.md
+    rationale: Audit and documentation reconciliation are complete; external CI, deployment and production actions are explicitly recorded as not performed.
+required_checks:
+  - command: python3 /home/denis/.agents/skills/task-store/scripts/tasks.py --store tasks validate
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-checks.md
+  - command: python3 /home/denis/.agents/skills/todo/scripts/reconcile-todo.py --store tasks TODO.md
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-checks.md
+  - command: Local Markdown link checker with URL-decoding over 9 files
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-checks.md
+  - command: git diff --check
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-014-checks.md
+  - command: node .gitnexus/run.cjs analyze --index-only
+    status: passed_with_coverage_caveats
+    evidence_ref: docs/evidence/verification/TASK-014-checks.md
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null

@@ -38,16 +38,20 @@ criteria:
   checked: false
   evidence: []
 - id: AC-5
-  text: Изменения финализации закоммичены ограниченным набором путей и интегрированы
-    в declared parent; post-integration checks и GitNexus state записаны; внешних
-    действий без отдельного разрешения нет.
+  text: Итоговый аудит и согласованная документация по P1–P8 подготовлены; в evidence
+    явно отделены локальные результаты от CI, deployment и production действий, которые
+    не выполнялись.
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 5
 blockers: []
 created_at: '2026-10-19T14:00:38Z'
-updated_at: '2026-10-19T14:00:38Z'
+updated_at: '2026-10-19T19:43:48Z'
+next_action: Commit scoped audit and documentation changes; then check the integrated
+  main baseline
+progress_note: Audit and P1–P8 documentation reconciliation complete; scoped diff
+  and indexes under review
 ---
 
 ## Outcome

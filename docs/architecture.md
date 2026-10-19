@@ -22,13 +22,13 @@ relations:
 
 > Документ описывает целевую архитектуру и явно отмечает проверенную границу MVP. Реализация не означает принятие всех предложений: обязательными остаются решения из принятых ADR и MVP-контракт.
 
-Основа MVP реализована по [IMP-2026-001](plans/imp/imp-2026-001-mvp-foundation.md): локальные TOML/Compose runtime, Vue + PrimeVue 4 + TypeScript, FastAPI и PostgreSQL. TASK-006 добавляет local-only identity и ownership проектов. TASK-007 добавляет одну Tiptap-рукопись на проект с PostgreSQL JSONB, optimistic version token и повторным сохранением в UI; полный history browser и совместное редактирование не входят в этот срез. Остальные домены и производственные возможности остаются целевыми предложениями; финальная проверка согласованности первого MVP записана в TASK-005.
+Начальная основа реализована по [IMP-2026-001](plans/imp/imp-2026-001-mvp-foundation.md): локальные TOML/Compose runtime, Vue + PrimeVue 4 + TypeScript, FastAPI и PostgreSQL. Затем [IMP-2026-002](plans/imp/imp-2026-002-domain-workspace.md) добавил local-only identity/ownership, одну Tiptap-рукопись на проект с версионируемым JSONB, workspace UI, ручную PDF-библиотеку, extraction, Claim/Evidence review, mock-only AI proposals и DOCX export. Полный history browser, совместное редактирование, реальные внешние providers и production deployment остаются вне этого среза; итоговая сверка P1–P8 зафиксирована в TASK-014.
 
 ## Архитектурный стиль и развёртывание
 
 Для первой версии предлагается Python modular monolith. Модули продукта находятся в одной кодовой базе и взаимодействуют через явные внутренние контракты. Отдельный Python worker может запускаться как другой процесс или container, используя тот же пакет и контракты хранения; технология очереди пока не выбрана.
 
-Для локальной среды используется Docker Compose с PostgreSQL и приложением. Файлы будущих доменов хранятся за storage interface. По [ADR-0007](decisions/ADR-0007-local-identity-and-project-access.md) локальная версия использует owner-managed accounts, PostgreSQL server-side sessions и обязательную project ownership. Production deployment, удалённый доступ, резервное копирование и управление secrets остаются открытыми вопросами.
+Для локальной среды используется Docker Compose с PostgreSQL и приложением; PDF хранятся через `LocalFileStorage` в отдельном volume. По [ADR-0007](decisions/ADR-0007-local-identity-and-project-access.md) используется owner-managed accounts, PostgreSQL server-side sessions и обязательная project ownership. Production deployment, удалённый доступ, автоматическое резервное копирование и управление secrets не входят в текущую границу.
 
 ## Предлагаемый стек
 
@@ -41,8 +41,8 @@ relations:
 | Хранение данных | PostgreSQL; pgvector — возможное будущее расширение | PostgreSQL хранит проекты, local identity/session, текущую рукопись, immutable manuscript revisions и AI proposals; векторы и их индексация не входят в текущий scope |
 | Доступ к данным | SQLAlchemy + psycopg | Используются синхронно; отдельные repository adapters обслуживают проекты и рукописи |
 | Изменение схемы | Alembic | Используется для последовательных миграций MVP |
-| Интеграция с моделями | Внутренний `LLMService` со сменными adapters | Будущее предложение; providers, retries, budgets и structured output не реализованы |
-| Файловое хранилище | Локальный volume за интерфейсом storage | Будущее предложение; MVP не хранит пользовательские файлы |
+| Интеграция с моделями | Внутренний `LLMService` со сменными adapters | P7 использует детерминированный mock; реальные providers, внешние вызовы, provider retries/budgets и structured output не реализованы |
+| Файловое хранилище | Локальный volume за интерфейсом storage | P4/P5 хранят owner-scoped PDF и извлечённые фрагменты; object storage и автоматический production backup не реализованы |
 | Фоновые задачи | Отдельный Python worker | Будущее предложение; очередь/broker и фоновые jobs не входят в MVP |
 | Локальная оркестрация | Docker Compose | Используется для локальных сервисов и изолированных тестов |
 | Тесты | pytest, unit и integration | Используются; `make test` поднимает отдельную PostgreSQL в `tmpfs` |
@@ -144,7 +144,7 @@ paperweave/
 - **KISS:** начинать с модульного монолита и одного необходимого пути выполнения; не добавлять брокер, слои или отдельные сервисы без подтверждённой потребности.
 - **Направление зависимостей:** frontend обращается к backend через API; backend координирует прикладные сценарии, доменные модули используют внутренние контракты, а адаптеры реализуют их. Frontend и доменные модули не импортируют инфраструктурные детали друг друга.
 
-Локальная основа реализована в `config.py`, `cli.py`, `api/`, `modules/projects/`, `modules/manuscripts/`, `modules/library/`, `modules/documents/`, `modules/evidence/`, `infrastructure/db/`, миграциях и Vue `api/`, `components/`, `views/`. P7 добавляет `modules/ai_proposals/` и только deterministic mock adapter в `integrations/llm/`; внешние LLM providers остаются выключенными и не входят в этот срез. P8 добавляет `modules/manuscripts/docx_export.py` для чистого преобразования сохранённого Tiptap JSON в OOXML DOCX без записи данных; worker и scholarly integrations остаются каркасом.
+Локальная основа P1–P8 реализована в `config.py`, `cli.py`, `api/`, `modules/projects/`, `modules/manuscripts/`, `modules/library/`, `modules/documents/`, `modules/evidence/`, `modules/ai_proposals/`, `infrastructure/db/`, миграциях и Vue `api/`, `components/`, `editor/`, `views/`. P7 использует только deterministic mock adapter в `integrations/llm/`; внешних LLM-вызовов нет. P8 добавляет `modules/manuscripts/docx_export.py` для чистого преобразования сохранённого Tiptap JSON в OOXML DOCX без записи данных; worker и scholarly integrations остаются каркасом.
 
 Project workspace доступен по маршруту `/projects/:projectId` и использует существующие owner-scoped project/manuscript API. Vue shell отделяет навигацию проекта и оглавление, центральный Tiptap editor и правую контекстную область. Оглавление вычисляется из heading nodes текущего JSON документа; переход фокусирует соответствующий узел в редакторе и не создаёт отдельную backend-сущность раздела. Save, API и AI отображаются раздельно. P7 показывает mock-only предложение для выбранного текста, сохраняет context manifest и предлагает accept/reject; внешнего вызова модели нет. Если чтение manuscript завершается ошибкой, редактирование блокируется до повторной загрузки, чтобы не отправить неизвестную/устаревшую версию.
 
@@ -193,16 +193,16 @@ flowchart TD
 - Записывать ошибки провайдеров, не заменяя корректные пользовательские данные частичным результатом.
 - Делать AI-действия идемпотентными или безопасно повторяемыми, где это возможно; если повтор создаёт новый результат, задавать ему новый request ID.
 - Делать передачу данных внешнему провайдеру видимой и связанной с конкретным провайдером и действием.
-- Сохранять возможность экспорта материалов проекта; форматы обмена ещё предстоит выбрать.
+- Сохранять возможность экспорта материалов проекта: P8 задаёт начальный редактируемый DOCX; дополнительные форматы и расширенная библиографическая схема остаются будущими решениями.
 - Соблюдать архитектурные gates репозитория из `.agents/AGENTS.md`; не дробить модули только ради размера файлов.
 
 ## Решения, необходимые до реализации
 
-Модель удалённой authentication и tenants; провайдеры научного поиска; OCR, дополнительные форматы документов и точность anchors; очередь worker; sync/async-доступ к БД; резервирование и retention БД и файлов; schema запросов/ответов LLM, logging и privacy controls; стили цитирования и формат экспорта; права соавторов; topology deployment. Локальная authentication и ownership определены в ADR-0007. Остальные решения нельзя вывести из предложенного стека.
+Модель удалённой authentication/tenants; провайдеры научного поиска; OCR, дополнительные форматы документов и точность anchors; очередь worker; sync/async-доступ к БД; автоматическое резервирование/retention для production; schema и privacy controls реального LLM-провайдера; права соавторов; topology deployment. Локальная authentication/ownership определены в ADR-0007. Начальные DOCX и citation rules определены ADR-0008; дополнительные export formats и полное bibliographic metadata schema требуют будущего решения.
 
 ## Подтверждения реализации
 
-Реализуемый срез включает local runtime, Projects-сценарий, первую версию редактирования рукописи, ручную библиотеку источников и локальное извлечение текстового слоя PDF; фактическое состояние и оставшиеся гейты ведутся в [IMP.md](../IMP.md) и task-store. LLM, evidence workflow и worker не входят в этот slice и не подразумеваются текущим кодом.
+Реализованный локальный срез P1–P8 включает local runtime, Projects, manuscript/workspace, ручную библиотеку и PDF text extraction, Claim/Evidence review, mock-only AI proposals и DOCX export. Фактическое состояние и ограничения зафиксированы в [IMP.md](../IMP.md), [TASK-014 audit](evidence/verification/TASK-014-audit.md) и task-store. Реальный LLM provider, background worker/jobs, scholarly lookup и production deployment не подразумеваются кодом.
 
 ### Хранилище PDF библиотеки
 
