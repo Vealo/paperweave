@@ -20,38 +20,41 @@ criteria:
 - id: AC-1
   text: AC-1…AC-8 и каждый фазовый gate сопоставлены с актуальными исходниками, контрактами
     и проверяемыми evidence; пробелы указаны явно.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-014-audit.md
 - id: AC-2
   text: P1…P8 проверены по реальным Task IDs и dependency graph; открытые решения
     и архитектурные блокеры имеют владельца и exit condition.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-014-audit.md
 - id: AC-3
   text: Результат отделяет локальные проверки от непроведённых CI, deployment и production
     evidence; исключённые функции не заявлены завершёнными.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-014-audit.md
 - id: AC-4
   text: IMP.md, DOCS.md, TODO.md, IMP и Task store согласованы; все non-terminal Tasks
     отображены ровно один раз; ссылки и валидаторы пройдены.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-014-checks.md
 - id: AC-5
   text: Итоговый аудит и согласованная документация по P1–P8 подготовлены; в evidence
     явно отделены локальные результаты от CI, deployment и production действий, которые
     не выполнялись.
-  checked: false
-  evidence: []
-status: in_progress
-revision: 5
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-014-audit.md; docs/evidence/verification/TASK-014-checks.md
+status: done
+revision: 6
 blockers: []
 created_at: '2026-10-19T14:00:38Z'
-updated_at: '2026-10-19T19:43:48Z'
-next_action: Commit scoped audit and documentation changes; then check the integrated
-  main baseline
-progress_note: Audit and P1–P8 documentation reconciliation complete; scoped diff
-  and indexes under review
+updated_at: '2026-10-19T19:46:08Z'
+progress_note: P1–P8 audit accepted; TASK-014 commit integrated and post-merge checks
+  passed
 ---
 
 ## Outcome

@@ -1,13 +1,13 @@
 # TODO
 
-**Готовы к выполнению: 0 · Открытых задач: 1**
+**Готовы к выполнению: 0 · Открытых задач: 0**
 
-- Высокий приоритет: 1
+- Высокий приоритет: 0
 - Средний приоритет: 0
 - Низкий приоритет: 0
 - Без приоритета: 0
 - Не утверждён: 0 (только явно `approval_state: pending`)
-- Не указано утверждение: 1
+- Не указано утверждение: 0
 - Не проверено: 0 (`legacy_done_unverified`, весь task-store)
 
 Task-store snapshot: 2026-10-19. Полные статусы, критерии и evidence — в task-store; фазы — в IMP.md.
@@ -18,7 +18,7 @@ Task-store snapshot: 2026-10-19. Полные статусы, критерии �
 
 | Порядок | Задача | Родитель | Последнее подтверждённое движение | Следующий шаг / что ждёт |
 |---:|---|---|---|---|
-| 1 | [TASK-014 — Проверить завершённость доменного развития PaperWeave](<tasks/TASK-014.md>) | imp-2026-002-domain-workspace | Audit and P1–P8 documentation reconciliation complete; scoped diff and indexes under review | Commit scoped audit and documentation changes; then check the integrated main baseline |
+| — | Нет задач | — | — |
 
 ## К выполнению
 

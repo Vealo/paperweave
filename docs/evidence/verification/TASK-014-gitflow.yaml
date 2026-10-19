@@ -1,0 +1,49 @@
+schema_version: 1
+task_id: TASK-014
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: 6c081072225d88f287d109a162ac6fd6e03b61dc
+    task_branch: codex/task-014-domain-final-review
+    task_commits:
+      - 1a21df7d82a13a23e37e79e6dfc2c3301973e5d2
+    integration_ref: main
+    merge_commit: a3c3e9be6d221a929a0b5e86f2a760b0020bd146
+baseline:
+  captured: true
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+    - user-owned .claude/, AGENTS.md, CLAUDE.md, TODO backup files and tasks/.lock preserved
+  ownership_map_ref: docs/evidence/verification/TASK-014-checks.md
+  preservation_action: Staged only the 12 reviewed TASK-014 deliverables; all untracked baseline files remained outside the commit.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-014-acceptance.yaml
+  checks:
+    - command: python3 /home/denis/.agents/skills/task-store/scripts/tasks.py --store tasks validate
+      status: "passed; valid: 14 task(s)"
+      evidence_ref: docs/evidence/verification/TASK-014-checks.md
+    - command: URL-decoded Markdown local-link check
+      status: passed; 9 files before merge, 10 files post-merge, 0 missing links
+      evidence_ref: docs/evidence/verification/TASK-014-checks.md
+    - command: git diff --check
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-014-checks.md
+integration:
+  status: merged
+  post_merge_checks:
+    - command: python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit 1a21df7d82a13a23e37e79e6dfc2c3301973e5d2
+      status: "passed; reachable: true; parent HEAD a3c3e9be6d221a929a0b5e86f2a760b0020bd146"
+      evidence_ref: docs/evidence/verification/TASK-014-checks.md
+    - command: node .gitnexus/run.cjs analyze --index-only && node .gitnexus/run.cjs status
+      status: up-to-date at a3c3e9be6d221a929a0b5e86f2a760b0020bd146; 245 files; coverage caveats recorded
+      evidence_ref: docs/evidence/verification/TASK-014-checks.md
+    - command: python3 /home/denis/.agents/skills/task-store/scripts/tasks.py --store tasks validate && git diff --check
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-014-checks.md
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: complete
+  next_action: null

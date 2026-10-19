@@ -4,7 +4,7 @@ id: imp-2026-002-domain-workspace
 name: "Доменное развитие PaperWeave как исследовательского пространства"
 type: imp
 version: 1.0.0
-status: in_progress
+status: complete
 freeze: false
 date: 2026-10-19
 last_reviewed: 2026-10-19
@@ -43,7 +43,7 @@ analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
 architecture_ref: ../../evidence/architecture/imp-2026-002-p6-evidence.json
-finalization_status: pending
+finalization_status: complete
 audit_ref: ../../evidence/verification/TASK-014-audit.md
 deployment_mode: not_applicable
 ---
@@ -361,4 +361,4 @@ Before closure, independently compare every phase contract and evidence with AC-
 
 The IMP may become `complete` only after all mandatory phases and final verification pass. It remains `blocked` only for a concrete unresolved condition with owner, impact, exit condition and next step. If the product scope is replaced, set `superseded` only with a linked successor and preserve phase/task history. The user authorized sequential local implementation of TASK-005 through TASK-014; external and production actions remain outside that authorization.
 
-**Final review in progress (2026-10-19):** The audit mapped standalone AC-1…AC-8 and P1–P8 to phase ledgers, source/contracts and integrated commits. TASK-014 acceptance and finalization remain pending until the audit/documentation reconciliation is committed, integrated and checked on `main`. See [TASK-014 audit](../../evidence/verification/TASK-014-audit.md). CI, deployment and production evidence were not run and are outside scope.
+**Closure record (2026-10-19):** TASK-014 accepted standalone AC-1…AC-8 and P1–P8 against each phase ledger, source/contracts and integrated commit. All phase Task commits and TASK-014 audit commit are reachable from `main`; canonical records and indexes are reconciled. See [TASK-014 audit](../../evidence/verification/TASK-014-audit.md), [acceptance](../../evidence/verification/TASK-014-acceptance.yaml), [gitflow](../../evidence/verification/TASK-014-gitflow.yaml) and [finalization receipt](../../evidence/verification/TASK-014-finalization.yaml). CI, deployment and production evidence were not run and are outside scope.

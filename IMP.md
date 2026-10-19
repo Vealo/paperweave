@@ -6,11 +6,11 @@ IMP.md — индекс фазовых планов. Статусы и гейт�
 
 | Порядок | IMP | Contract source | Цель | Статус | Активная фаза | Зависит от | Блокер | Task package |
 |---:|---|---|---|---|---|---|---|---|
-| 1 | [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | Standalone contract и пользовательская концепция | Завершить сверку P1–P8 и согласованность документации | Final review in progress | Финализация TASK-014 | TASK-006…TASK-013 завершены | — | [TASK-014](tasks/TASK-014.md) |
+| — | Нет активных IMP | — | — | — | — | — | — | — |
 
 ## Зарегистрированные пакеты; ожидают зависимостей
 
-Фазы P1–P8 завершены; открытая финальная проверка TASK-014 отображается в [TODO](TODO.md).
+Незавершённых фазовых пакетов нет. Все non-terminal Tasks отображаются в [TODO](TODO.md).
 
 ## Готовые к разворачиванию
 
@@ -28,6 +28,7 @@ IMP.md — индекс фазовых планов. Статусы и гейт�
 
 | IMP | Результат | Фазы | Финальная проверка | Task package |
 |---|---|---|---|---|
+| [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | Локальное исследовательское workspace: доступ, рукопись, источники/evidence, mock AI и DOCX export | P1–P8 verified | [TASK-014 accepted](docs/evidence/verification/TASK-014-acceptance.yaml); [finalization](docs/evidence/verification/TASK-014-finalization.yaml); local commits integrated, future/production scope отделён | TASK-006…TASK-014 |
 | [imp-2026-001-mvp-foundation](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Локальный MVP: runtime, проекты UI/API и PostgreSQL persistence | P1–P4 verified | Закрыта; Spec, evidence, ограничения и документы сверены | TASK-001…TASK-005 |
 
 ## Входящие Spec без готового IMP

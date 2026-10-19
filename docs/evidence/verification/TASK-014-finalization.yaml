@@ -1,0 +1,41 @@
+schema_version: 1
+task_id: TASK-014
+acceptance_ref: docs/evidence/verification/TASK-014-acceptance.yaml
+commit:
+  required: true
+  created: true
+  id: 1a21df7d82a13a23e37e79e6dfc2c3301973e5d2
+  reason: Scoped audit, documentation reconciliation and acceptance evidence.
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-014-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: a3c3e9be6d221a929a0b5e86f2a760b0020bd146
+  parent_head: a3c3e9be6d221a929a0b5e86f2a760b0020bd146
+  task_commit_reachable: true
+  reason: Task commit is an ancestor of the declared local integration branch.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-014.md
+documentation_graph:
+  required_updates:
+    - IMP.md
+    - DOCS.md
+    - TODO.md
+    - docs/vision.md
+    - docs/roadmap.md
+    - docs/architecture.md
+    - docs/data-model.md
+    - docs/plans/imp/imp-2026-002-domain-workspace.md
+    - docs/evidence/verification/TASK-014-audit.md
+    - docs/evidence/verification/TASK-014-checks.md
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes: []
+result: finalized
+next_action: null

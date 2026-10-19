@@ -16,6 +16,18 @@
 
 Изменения TASK-014 только документальные и индексные. Backend/frontend test suites повторно не запускались: поведение приложения и код не менялись. CI, deployment, staging и production не выполнялись.
 
+## Post-integration checks
+
+Проверены на `main@a3c3e9be6d221a929a0b5e86f2a760b0020bd146` после merge commit `a3c3e9be6d221a929a0b5e86f2a760b0020bd146`:
+
+- `python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit 1a21df7d82a13a23e37e79e6dfc2c3301973e5d2` — passed; `reachable: true`.
+- `python3 /home/denis/.agents/skills/task-store/scripts/tasks.py --store tasks validate` — passed; `valid: 14 task(s)`.
+- `git diff --check` — passed.
+- URL-decoded Markdown local-link check — passed; 10 Markdown files, 0 missing links.
+- `node .gitnexus/run.cjs analyze --index-only` followed by `node .gitnexus/run.cjs status` — passed; indexed commit equals parent HEAD and all 245 covered files match. Coverage warnings above remain in effect.
+
+After TASK-014 was marked `done` with its criterion evidence, task-store validation passed again and deterministic TODO reconciliation produced 0 open tasks.
+
 ## Объём task-owned изменений
 
 Проверенный набор для TASK-014: `DOCS.md`, `IMP.md`, `TODO.md`, `docs/vision.md`, `docs/roadmap.md`, `docs/architecture.md`, `docs/data-model.md`, `docs/plans/imp/imp-2026-002-domain-workspace.md`, `docs/evidence/verification/TASK-014-audit.md`, `docs/evidence/verification/TASK-014-checks.md`, `tasks/TASK-014.md`. Прочие baseline untracked-файлы, включая пользовательские `AGENTS.md`, `CLAUDE.md`, `.claude/`, TODO backup-копии и `tasks/.lock`, остаются вне этого изменения.
