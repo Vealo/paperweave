@@ -35,10 +35,10 @@ phase_statuses:
   P3: verified
   P4: verified
   P5: verified
-  P6: pending
+  P6: verified
   P7: pending
   P8: pending
-progress: 5/8
+progress: 6/8
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-002-domain-workspace.md
 architecture_status: complete
@@ -268,7 +268,7 @@ flowchart TD
 
 **Completion evidence (2026-10-19):** TASK-010 acceptance ledger verifies all four criteria; implementation commit `5921324ae587b9e2ba3d2b48c0e549aca0df1b34` is integrated into `main` at `4e4a7c100c8595d5ee5c8bdd5782f5ac2f18735b`. The P5 slice extracts text and displays page passages; manual editing of extracted passage text is not part of TASK-010 acceptance criteria.
 
-## Phase 6: P6 — Evidence and claims
+## Phase 6: P6 — Evidence and claims — verified
 
 **Task:** [TASK-011](../../../tasks/TASK-011.md)
 
@@ -278,6 +278,8 @@ flowchart TD
 
 **Dependencies:** P2 и P5 verified; отдельный domain Spec. Границы авторских результатов и review утверждены владельцем и записаны в SPEC-2026-002.
 **Data/API:** Claim, EvidenceLink, ReviewDecision и version references; авторские/исследовательские результаты исключены из P6.
+
+**Verification:** TASK-011 accepted; implementation `1e6a8217fa5ed052984f6623073fa8d46ae66f1f` integrated at `main@60af46f7408b93b81b2e624be9082726e8f4e481`; acceptance and post-merge evidence: [TASK-011 finalization](../../evidence/verification/TASK-011-finalization.yaml).
 **Evidence contract:** Правила relation/status; тесты связи/отвязки/версии; UI различает цитату, extraction и проверенное evidence; недоступный/заменённый источник виден как stale, удаление файла остаётся заблокировано при ссылках.
 **Exit criteria:** Claim, passage, typed relation и review решение прослеживаются; stale links требуют повторной проверки, citation не обозначается как proof.
 

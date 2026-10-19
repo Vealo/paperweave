@@ -17,31 +17,34 @@ criteria:
   checked: true
   evidence:
   - docs/evidence/verification/TASK-011-acceptance.yaml
+  - docs/evidence/verification/TASK-011-finalization.yaml
 - id: AC-2
   text: supports/contradicts/contextualizes и review status не выводятся из наличия
     цитаты.
   checked: true
   evidence:
   - docs/evidence/verification/TASK-011-acceptance.yaml
+  - docs/evidence/verification/TASK-011-finalization.yaml
 - id: AC-3
   text: Изменение Claim/Passage помечает связь на повторную проверку, если её валидность
     устарела.
   checked: true
   evidence:
   - docs/evidence/verification/TASK-011-acceptance.yaml
+  - docs/evidence/verification/TASK-011-finalization.yaml
 - id: AC-4
   text: UI различает source citation, extracted passage и проверенное автором evidence.
   checked: true
   evidence:
   - docs/evidence/verification/TASK-011-acceptance.yaml
-status: in_progress
-revision: 4
+  - docs/evidence/verification/TASK-011-finalization.yaml
+status: done
+revision: 5
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T17:47:48Z'
-next_action: Подготовить scoped task-коммит и локальную интеграцию в main
-progress_note: TASK-011 AC-1–AC-4 приняты; 35 backend тестов и UI build/typecheck
-  прошли
+updated_at: '2026-10-19T17:53:08Z'
+progress_note: P6 принят и влит в main; 35 тестов, UI build/typecheck, ancestry и
+  graph refresh подтверждены
 ---
 
 ## Outcome

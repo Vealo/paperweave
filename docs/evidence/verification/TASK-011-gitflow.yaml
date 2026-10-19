@@ -1,0 +1,52 @@
+schema_version: 1
+task_id: TASK-011
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: f91c4bd07a808d48e9b936e782b1aff885d5b39a
+    task_branch: codex/task-011-evidence-claims
+    task_commits:
+      - 1e6a8217fa5ed052984f6623073fa8d46ae66f1f
+    integration_ref: main
+    merge_commit: 60af46f7408b93b81b2e624be9082726e8f4e481
+baseline:
+  captured: true
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+    - user-owned untracked files preserved; see initial git status for full list
+  ownership_map_ref: docs/evidence/verification/TASK-011-checks.md
+  preservation_action: Scoped task commit and merge; unrelated untracked files left untouched
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-011-acceptance.yaml
+  checks:
+    - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+    - command: docker build --target ui-build -t paperweave-task-011-ui .
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+    - command: docker run --rm paperweave-task-011-ui npm run typecheck
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+integration:
+  status: merged
+  post_merge_checks:
+    - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+    - command: docker build --target ui-build -t paperweave-task-011-ui .
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+    - command: docker run --rm paperweave-task-011-ui npm run typecheck
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+    - command: python3 /home/denis/.agents/skills/todo/task-gitflow/scripts/verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit 1e6a8217fa5ed052984f6623073fa8d46ae66f1f
+      status: "passed; reachable: true; parent HEAD 60af46f7408b93b81b2e624be9082726e8f4e481"
+      evidence_ref: docs/evidence/verification/TASK-011-checks.md
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: task-store finalization
+  next_action: close TASK-011 and advance TODO to TASK-012

@@ -1,0 +1,35 @@
+schema_version: 1
+task_id: TASK-011
+acceptance_ref: docs/evidence/verification/TASK-011-acceptance.yaml
+commit:
+  required: true
+  created: true
+  id: 1e6a8217fa5ed052984f6623073fa8d46ae66f1f
+  reason: Scoped implementation commit on the task branch
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-011-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: 60af46f7408b93b81b2e624be9082726e8f4e481
+  parent_head: 60af46f7408b93b81b2e624be9082726e8f4e481
+  task_commit_reachable: true
+  reason: Non-forced local merge; ancestry verified
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-011.md
+documentation_graph:
+  required_updates:
+    - docs/plans/imp/imp-2026-002-domain-workspace.md P6 phase status
+    - IMP.md active phase
+    - TODO.md derived task projection
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md
+linked_open_outcomes:
+  - TASK-012 — start P7 after P6 finalization
+result: finalized
+next_action: Prepare and execute ready TASK-012

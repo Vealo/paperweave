@@ -12,3 +12,11 @@
 - Fallback verdict: passed; конкретного неразрешённого риска по ownership, сохранению файла или invalidation не обнаружено.
 - Build сообщает о существующем non-module runtime-config script и bundle больше 500 kB; ошибок сборки нет.
 - Проверки локальные; remote/hosted CI не запускался.
+
+## Post-integration finalization
+
+- Integrated parent: `main@60af46f7408b93b81b2e624be9082726e8f4e481`; task commit `1e6a8217fa5ed052984f6623073fa8d46ae66f1f` is reachable (`verify_parent_reachability.py` — `reachable: true`).
+- Post-merge `UV_CACHE_DIR=/tmp/paperweave-uv-cache make test` — 35 passed.
+- Post-merge `docker build --target ui-build -t paperweave-task-011-ui .` and `npm run typecheck` — passed.
+- GitNexus refreshed after integration; status bound the indexed commit to `60af46f7408b93b81b2e624be9082726e8f4e481`, 202/202 covered files matched. The change-analysis result remains incomplete as detailed above; source/test fallback passed, not a clean graph verdict.
+- GitFlow details: [TASK-011-gitflow.yaml](TASK-011-gitflow.yaml).
