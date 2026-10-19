@@ -1,0 +1,16 @@
+[project]
+name = "paperweave"
+version = "0.1.0"
+description = "Research workspace for evidence-linked scholarly writing"
+requires-python = ">=3.12"
+dependencies = [
+  "alembic>=1.14,<2",
+  "fastapi>=0.115,<1",
+  "litellm>=1,<2",
+  "psycopg[binary]>=3.2,<4",
+  "pydantic>=2.10,<3",
+  "sqlalchemy>=2.0,<3",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10"]

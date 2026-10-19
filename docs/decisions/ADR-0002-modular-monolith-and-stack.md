@@ -45,9 +45,9 @@ relations:
 
 ## Предлагаемое решение
 
-Начать с Python modular monolith. Предлагаемые компоненты: FastAPI + Pydantic для HTTP, NiceGUI для первой GUI, PostgreSQL + pgvector через SQLAlchemy + psycopg, migrations на Alembic, LiteLLM SDK за внутренним `LLMService`, локальное файловое хранилище за storage-интерфейсом, отдельный Python worker, Docker Compose и pytest.
+Начать с Python modular monolith для backend и отдельного frontend-приложения на Vue 3, TypeScript и PrimeVue 4. Для редактирования рукописей использовать Tiptap как редактор на Vue; его schema/extensions и сериализацию определить отдельно. Предлагаемые backend-компоненты: FastAPI + Pydantic для HTTP, PostgreSQL + pgvector через SQLAlchemy + psycopg, migrations на Alembic, LiteLLM SDK за внутренним `LLMService`, локальное файловое хранилище за storage-интерфейсом, отдельный Python worker, Docker Compose и pytest.
 
-Предлагаемая структура пакета разделяет `api`, `ui`, `modules` (projects, library, evidence, manuscripts, jobs), `integrations` (LLM, научные источники, разбор документов), `infrastructure` (база данных и storage) и `worker.py`. Менеджер пакетов/build backend, поддерживаемая версия Python, sync/async-режим БД, очередь и точные версии зависимостей не выбраны.
+Предлагаемая структура разделяет `frontend/` (Vue, PrimeVue, Tiptap, TypeScript) и `src/paperweave/` (API, прикладные services, доменные modules, integrations, infrastructure и `worker.py`). Frontend и worker используют одну и ту же границу прикладных сценариев на backend. В `pyproject.toml` записаны предварительные диапазоны Python-зависимостей; build backend, поддерживаемая версия Python, sync/async-режим БД и очередь не выбраны.
 
 ## Область действия
 
@@ -55,15 +55,15 @@ relations:
 
 ## Последствия и компромиссы
 
-Приложение может стартовать как единая кодовая база, а worker — как дополнительный процесс/container. PostgreSQL и pgvector позволяют сначала не вводить отдельную vector database, но сам сценарий векторного поиска ещё нужно подтвердить. NiceGUI ускоряет создание начального UI, но может не подойти для сложного редактора в будущем. Более развитый редактор можно добавить позднее, если контракты API и данных останутся стабильными.
+Backend может стартовать как единая кодовая база, а worker — как дополнительный процесс/container; frontend собирается отдельным приложением и общается с backend по HTTP API. PostgreSQL и pgvector позволяют сначала не вводить отдельную vector database, но сам сценарий векторного поиска ещё нужно подтвердить. Vue/PrimeVue/Tiptap дают специализированную browser UI и редактор; это увеличивает начальную стоимость frontend-сборки и требует явного API-контракта.
 
 ## Переход и совместимость
 
-Сохранять доменные контракты независимыми от типов NiceGUI и LiteLLM SDK, SQLAlchemy sessions и путей файловой системы. Менять adapters за этими контрактами, когда появится подтверждённая необходимость. Не разделять систему на сервисы, пока независимое масштабирование, надёжность или владение не оправдают дополнительные издержки.
+Сохранять доменные контракты независимыми от Vue-компонентов, PrimeVue и Tiptap, LiteLLM SDK, SQLAlchemy sessions и путей файловой системы. Backend API — единственная граница связи frontend с предметными сценариями. Не разделять backend на сервисы, пока независимое масштабирование, надёжность или владение не оправдают дополнительные издержки.
 
 ## Риски и основания
 
-Кода, manifests зависимостей, migrations, конфигурации Compose и runtime-подтверждений нет. Предложение нужно проверить на небольшом vertical slice.
+Рабочей реализации нет: в коде только заглушки, а `compose.yaml` и `Dockerfile` не готовы к запуску. Диапазоны frontend- и Python-зависимостей зафиксированы манифестами и lock-файлами; совместимость сборки, миграции и runtime не проверены. Предложение нужно проверить на небольшом сквозном сценарии.
 
 ## Принятие решения
 
