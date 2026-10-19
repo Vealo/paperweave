@@ -14,27 +14,34 @@ criteria:
 - id: AC-1
   text: Claim и EvidenceLink имеют отдельные identity/lifecycle и ссылаются на конкретные
     версии.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-011-acceptance.yaml
 - id: AC-2
   text: supports/contradicts/contextualizes и review status не выводятся из наличия
     цитаты.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-011-acceptance.yaml
 - id: AC-3
   text: Изменение Claim/Passage помечает связь на повторную проверку, если её валидность
     устарела.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-011-acceptance.yaml
 - id: AC-4
   text: UI различает source citation, extracted passage и проверенное автором evidence.
-  checked: false
-  evidence: []
-status: todo
-revision: 1
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-011-acceptance.yaml
+status: in_progress
+revision: 4
 blockers: []
 created_at: '2026-10-19T14:00:26Z'
-updated_at: '2026-10-19T14:00:26Z'
+updated_at: '2026-10-19T17:47:48Z'
+next_action: Подготовить scoped task-коммит и локальную интеграцию в main
+progress_note: TASK-011 AC-1–AC-4 приняты; 35 backend тестов и UI build/typecheck
+  прошли
 ---
 
 ## Outcome
@@ -46,3 +53,5 @@ updated_at: '2026-10-19T14:00:26Z'
 Утвердить Claim scope/version, типы relation и ReviewDecision lifecycle; связать Claim с manuscript block и показать навигацию между утверждением, фрагментом и источником.
 
 ## Notes
+
+Зафиксированы решения владельца для P6: Claim ограничен утверждением внутри рукописи; собственные/исследовательские результаты автора исключены. В local-only MVP review выполняет единственный владелец проекта; ReviewDecision хранит reviewer, время, решение и заметку. Эти границы уточняют прежний открытый вопрос плана без изменения outcome TASK-011.

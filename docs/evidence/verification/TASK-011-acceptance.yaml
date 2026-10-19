@@ -1,0 +1,38 @@
+schema_version: 1
+task_id: TASK-011
+contract_ref: tasks/TASK-011.md
+baseline_ref: main@f91c4bd07a808d48e9b936e782b1aff885d5b39a
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-011-checks.md; migrations/versions/20261019_0006_evidence.py; src/paperweave/infrastructure/db/models.py; tests/integration/test_evidence_api.py
+    rationale: Claim and EvidenceLink have separate UUID identities and versions; links bind Claim version, manuscript version, immutable Passage ID and exact SourceFile ID. The migration and API tests exercise persisted identity and round-trip.
+  - id: AC-2
+    status: passed
+    evidence_ref: src/paperweave/api/evidence.py; frontend/src/components/ClaimEvidencePanel.vue; tests/integration/test_evidence_api.py
+    rationale: Only three typed relations are accepted. Link creation is unreviewed; only an explicit owner review creates ReviewDecision and changes the link state. Citation/extraction alone does not create a decision.
+  - id: AC-3
+    status: passed
+    evidence_ref: src/paperweave/infrastructure/db/manuscript_repository.py; src/paperweave/infrastructure/db/evidence_repository.py; tests/integration/test_evidence_api.py
+    rationale: Claim edits and manuscript version changes move links to needs_review. Explicit review rebinds current Claim/manuscript versions and appends a decision; source file replacement projects stale reference state for review.
+  - id: AC-4
+    status: passed
+    evidence_ref: frontend/src/components/ClaimEvidencePanel.vue; frontend/src/api/evidence.ts; docs/specs/spec-2026-002-evidence-workflow.md
+    rationale: UI separately renders the manuscript Claim, typed relation, exact source/page/passage text, review state and reviewer timestamp; it exposes navigation to the manuscript locator and explicit review/retraction actions.
+required_checks:
+  - command: UV_CACHE_DIR=/tmp/paperweave-uv-cache make test
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-011-checks.md
+  - command: docker build --target ui-build -t paperweave-task-011-ui .
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-011-checks.md
+  - command: docker run --rm paperweave-task-011-ui npm run typecheck
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-011-checks.md
+  - command: git diff --check
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-011-checks.md
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null
