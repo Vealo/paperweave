@@ -13,27 +13,34 @@ depends_on:
 criteria:
 - id: AC-1
   text: Из проекта можно открыть рукопись и перейти к разделу с сохранением контекста.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-008-acceptance-ledger.yaml
 - id: AC-2
   text: Левая навигация, центральный редактор и правая контекстная область разделяют
     свои роли.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-008-acceptance-ledger.yaml
 - id: AC-3
   text: Loading/empty/error и responsive состояния работают; save/API/AI статусы визуально
     различимы.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-008-acceptance-ledger.yaml
 - id: AC-4
   text: Typecheck/build и ручная browser-проверка основных состояний проходят.
-  checked: false
-  evidence: []
-status: todo
-revision: 1
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-008-acceptance-ledger.yaml
+status: in_progress
+revision: 4
 blockers: []
 created_at: '2026-10-19T14:00:25Z'
-updated_at: '2026-10-19T14:00:25Z'
+updated_at: '2026-10-19T15:17:25Z'
+next_action: Review and commit verified task-owned changes.
+progress_note: Acceptance evidence recorded; typecheck/build and browser loaded/error
+  checks pass.
 ---
 
 ## Outcome
