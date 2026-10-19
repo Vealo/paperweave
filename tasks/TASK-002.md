@@ -45,14 +45,13 @@ criteria:
   evidence:
   - make test 16 passed; Compose test-db uses tmpfs; tests/conftest.py rejects any
     TEST_DATABASE_URL not targeting test-db
-status: in_progress
-revision: 3
+status: done
+revision: 4
 blockers: []
 created_at: '2026-10-19T11:59:13Z'
-updated_at: '2026-10-19T12:33:55Z'
-next_action: Review exact P2 diff, commit TASK-002 and integrate into main
-progress_note: 'Projects API, PostgreSQL migration and isolated API integration suite
-  pass: 16 tests.'
+updated_at: '2026-10-19T12:35:36Z'
+progress_note: All P2 criteria accepted; task commit integrated into main and post-merge
+  checks passed.
 ---
 
 ## Outcome
@@ -65,3 +64,13 @@ FastAPI предоставляет health и создание/чтение пр�
 
 ## Notes
 
+## Finalization receipt — 2026-10-19
+
+- Acceptance: TASK-002 AC-1…AC-5 passed; isolated `make test` passed 16 tests.
+- Task branch: `codex/task-002-projects-api-db`, based on `main` at `4fa9bc85bb8ad42f2dbdb2af8ba8844235f1248b`.
+- Task commit: `ba932454ce617c5dfe080caeaafe448dfdc68139` (`feat(TASK-002): add projects API and PostgreSQL persistence`).
+- Parent integration: merge commit `09cc5156b6c85450ef2470d3fd2b1bc0b9df2a19` on `main`; reachability verifier returned `reachable: true` at that parent HEAD.
+- Post-integration checks: `make test` — 16 passed; plan, phase, IMP contract, task-store and TODO validators passed; `git diff --check` passed.
+- Test isolation: Compose test profile uses a dedicated PostgreSQL `tmpfs`; test fixture rejects any database URL that does not target `test-db`; migration ran twice and schema/revision were inspected.
+- GitNexus: incomplete/unavailable, not a pass. MCP detected 13 changed files but zero symbols on stale/empty graph; prior post-integration CLI refresh failed on read-only `/home/denis/.gitnexus/registry.json`. Direct source/reference and diff review plus required checks passed; no unresolved P2 data-integrity risk found.
+- External actions: no push, hosted CI, PR, or deployment performed.

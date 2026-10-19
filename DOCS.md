@@ -36,7 +36,7 @@
 | Документ | Контракт / цель | Статус | Связи |
 |---|---|---|---|
 | [SPEC-2026-001](docs/specs/spec-2026-001-mvp-foundation.md) | Поведение локального запуска, Projects API/UI и PostgreSQL persistence | Черновик | ADR-0006; IMP-2026-001 |
-| [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Active; P1 проверена, P2 готова | TASK-001…TASK-005 |
+| [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Active; P1/P2 проверены, P3 готова | TASK-001…TASK-005 |
 
 Полные очереди: [TODO.md](TODO.md) и [IMP.md](IMP.md). Черновой Spec не представлен как утверждённый контракт; scope MVP утверждён ADR-0006.
 

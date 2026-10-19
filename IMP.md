@@ -6,15 +6,15 @@
 
 | Порядок | IMP | Contract source | Цель | Статус | Готовая фаза | Зависит от | Блокер | Task package |
 |---:|---|---|---|---|---|---|---|---|
-| 1 | [imp-2026-001-mvp-foundation](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Самостоятельный запрос + ADR-0006 | Локальный запуск, health, проекты и PostgreSQL persistence | active | P2 выполняется | — | — | TASK-001…TASK-005 |
+| 1 | [imp-2026-001-mvp-foundation](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Самостоятельный запрос + ADR-0006 | Локальный запуск, health, проекты и PostgreSQL persistence | active | P3 готова | — | — | TASK-001…TASK-005 |
 
 ## Готовые к разворачиванию
 
-Все numbered phases уже развёрнуты в реальные задачи; P1 проверена, P2 выполняется. Последующие фазы ждут predecessors.
+Все numbered phases уже развёрнуты в реальные задачи; P1 и P2 проверены, P3 готова. Последующие фазы ждут predecessors.
 
 | IMP | Фаза | Предусловия и exit gate | Уже созданные Task |
 |---|---|---|---|
-| imp-2026-001-mvp-foundation | P2 | TASK-001 integrated; DB/model/API checks | TASK-002 |
+| imp-2026-001-mvp-foundation | P3 | TASK-002 integrated; Vue/PrimeVue typecheck/build and API consumer checks | TASK-003 |
 
 ## Заблокированные IMP
 
