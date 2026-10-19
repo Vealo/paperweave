@@ -208,7 +208,7 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
     engine = create_engine(database_url)
     try:
         inspector = inspect(engine)
-        assert {"alembic_version", "projects", "users", "sessions", "manuscripts", "sources", "source_files", "source_file_references"} <= set(inspector.get_table_names())
+        assert {"alembic_version", "projects", "users", "sessions", "manuscripts", "sources", "source_files", "source_file_references", "extraction_runs", "source_passages"} <= set(inspector.get_table_names())
         columns = {column["name"]: column for column in inspector.get_columns("projects")}
         assert set(columns) == {"owner_id", "id", "name", "description", "created_at"}
         assert columns["owner_id"]["nullable"] is False
@@ -216,9 +216,15 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
         assert columns["name"]["type"].length == 200
         assert columns["description"]["nullable"] is True
         assert columns["created_at"]["type"].timezone is True
+        reference_columns = {column["name"] for column in inspector.get_columns("source_file_references")}
+        assert "review_state" in reference_columns
+        extraction_columns = {column["name"] for column in inspector.get_columns("extraction_runs")}
+        assert {"file_id", "processor", "processor_version", "status", "page_count", "error"} <= extraction_columns
+        passage_columns = {column["name"] for column in inspector.get_columns("source_passages")}
+        assert {"run_id", "file_id", "page_number", "text"} <= passage_columns
         with engine.connect() as connection:
             revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-        assert revision == "20261019_0004"
+        assert revision == "20261019_0005"
     finally:
         engine.dispose()
 

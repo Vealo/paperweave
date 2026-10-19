@@ -1,0 +1,52 @@
+schema_version: 1
+task_id: TASK-010
+result: accepted
+baseline_ref: main@c2ef059c265abd00355214409b399e16901905f8
+candidate_ref: codex/task-010-document-extraction
+criteria:
+  - id: AC-1
+    text: Каждый Passage связан с версией файла и версией метода extraction.
+    result: verified
+    evidence:
+      - src/paperweave/infrastructure/db/models.py: SourcePassageRecord.file_id -> source_files.id and run_id -> extraction_runs.id.
+      - src/paperweave/infrastructure/db/models.py: ExtractionRunRecord stores processor and processor_version.
+      - tests/integration/test_documents_api.py: passage file_id/run_id match exact file and run; run exposes pypdf processor version.
+  - id: AC-2
+    text: Повторная обработка идемпотентна либо создаёт явно новую ExtractionRun; ошибки/partial results видимы.
+    result: verified
+    evidence:
+      - src/paperweave/modules/documents/service.py: each explicit extraction creates a persisted run; statuses complete, empty, partial, failed are returned.
+      - tests/integration/test_documents_api.py: retry produces distinct retained runs; partial-page and malformed-PDF results expose status/error and preserve readable pages.
+  - id: AC-3
+    text: Повреждённый/пустой PDF не теряет оригинал и не создаёт видимость проверенного evidence.
+    result: verified
+    evidence:
+      - tests/integration/test_documents_api.py: empty PDF returns empty with no passages; malformed PDF returns failed and original bytes remain downloadable.
+      - src/paperweave/infrastructure/db/document_repository.py: new passage references start unreviewed; API/UI display this as not checked, never as evidence approval.
+  - id: AC-4
+    text: При замене файла непереносимый anchor помечается устаревшим для ручной проверки.
+    result: verified
+    evidence:
+      - src/paperweave/infrastructure/db/library_repository.py: new SourceFile version marks references to earlier source file versions needs_review in the same transaction.
+      - tests/integration/test_documents_api.py: new upload marks old passage reference needs_review and old file bytes remain readable.
+required_checks:
+  - command: PAPERWEAVE_CONFIG=config.example.toml COMPOSE_PROJECT_NAME=paperweave-task010-accept make test
+    status: passed
+    evidence_ref: Isolated Compose PostgreSQL test profile; 31 passed; test container and network removed.
+  - command: Dockerfile ui-build target; docker run <image> npm run typecheck
+    status: passed
+    evidence_ref: Node 22 image; vue-tsc --noEmit and vite production build succeeded.
+  - command: Alembic offline upgrade head and downgrade 20261019_0005:20261019_0004
+    status: passed
+    evidence_ref: Upgrade creates extraction_runs, source_passages and review_state; downgrade removes only P5 tables/column.
+  - command: git diff --check
+    status: passed
+  - command: GitNexus detect_changes via MCP and CLI
+    status: incomplete
+    evidence_ref: Both interfaces could not resolve the new unregistered worktree; CLI index registry lists main and a different PaperWeave worktree only.
+gitnexus:
+  result: incomplete
+  fallback: passed
+  fallback_evidence: Pre-edit impact/search bounded upload_pdf, create_file and api_router paths; post-diff rg confirms API/router/dependency/UI wiring; exact diff, tests, typecheck and migration checks reviewed. No unresolved ownership or data-integrity issue found.
+  post_integration_refresh: pending
+next_route: task-finalize

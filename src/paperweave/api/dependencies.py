@@ -14,6 +14,8 @@ from paperweave.modules.manuscripts.service import ManuscriptService
 from paperweave.infrastructure.db.library_repository import SqlAlchemyLibraryRepository
 from paperweave.infrastructure.storage.local import LocalFileStorage
 from paperweave.modules.library.service import LibraryService
+from paperweave.infrastructure.db.document_repository import SqlAlchemyDocumentRepository
+from paperweave.modules.documents.service import DocumentService
 
 SESSION_COOKIE = "paperweave_session"
 
@@ -54,3 +56,9 @@ def get_library_service(request: Request) -> Iterator[LibraryService]:
     with request.app.state.session_factory() as session:
         root = Path(os.getenv("PW_FILE_STORAGE", "/app/data/files"))
         yield LibraryService(SqlAlchemyLibraryRepository(session), LocalFileStorage(root))
+
+
+def get_document_service(request: Request) -> Iterator[DocumentService]:
+    with request.app.state.session_factory() as session:
+        root = Path(os.getenv("PW_FILE_STORAGE", "/app/data/files"))
+        yield DocumentService(SqlAlchemyDocumentRepository(session), LocalFileStorage(root))

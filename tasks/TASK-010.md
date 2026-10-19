@@ -28,11 +28,15 @@ criteria:
   text: При замене файла непереносимый anchor помечается устаревшим для ручной проверки.
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 9
 blockers: []
 created_at: '2026-10-19T14:00:25Z'
-updated_at: '2026-10-19T14:00:25Z'
+updated_at: '2026-10-19T17:29:17Z'
+next_action: Review task diff and acceptance ledger, then commit and integrate into
+  main
+progress_note: 'P5 acceptance checks pass: 31 backend, UI typecheck/build, reversible
+  migration SQL and architecture review.'
 ---
 
 ## Outcome
@@ -44,3 +48,5 @@ PDF источника обрабатывается с provenance, страни�
 После Library определить extraction adapter/version, состояния, retry/partial failure и требование к jobs; связать Passage с конкретной версией SourceFile и показать результат в UI.
 
 ## Notes
+
+P5 implementation boundary (2026-10-19): user-approved source input is local PDF only. Use pypdf as an in-process text-layer extractor, with no OCR and no external service; process any language only when extractable text is present. Image-only/scanned or text-empty pages are recorded as empty, not as verified evidence. Persist an ExtractionRun and processor/library version for every explicit attempt; retry creates a new run and preserves earlier runs/passages. Run one file synchronously in the API process (FastAPI sync worker thread); do not add a background queue for this local MVP. Passage anchors remain bound to the exact SourceFile version. When a newer file version is stored, existing references to older versions become needs_review; no automatic anchor transfer is attempted because page/text offsets are not proven portable.
