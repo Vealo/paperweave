@@ -8,6 +8,7 @@ import Tag from "primevue/tag";
 import Skeleton from "primevue/skeleton";
 import { EditorContent, useEditor } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
+import ProjectLibrary from "../components/ProjectLibrary.vue";
 
 import { getProject, type Project } from "../api/projects";
 import { createManuscript, getManuscript, updateManuscript, type Manuscript } from "../api/manuscript";
@@ -259,6 +260,7 @@ onBeforeUnmount(() => {
         <p class="context-hint">AI-помощник появится после подключения сервиса. Текст сейчас редактируется вручную.</p>
       </section>
     </aside>
+    <ProjectLibrary :project-id="project.id" />
   </section>
 </template>
 
@@ -268,6 +270,10 @@ onBeforeUnmount(() => {
   grid-template-columns: minmax(205px, 245px) minmax(360px, 1fr) minmax(220px, 270px);
   align-items: start;
   gap: 22px;
+}
+
+.project-workspace :deep(.library-panel) {
+  grid-column: 1 / -1;
 }
 
 .workspace-rail {

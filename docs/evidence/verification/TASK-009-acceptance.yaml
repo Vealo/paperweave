@@ -1,0 +1,53 @@
+schema_version: 1
+task_id: TASK-009
+result: accepted
+baseline_ref: main@a22cfad0b8a3351f38b0cd4defb530f36da07e17
+candidate_ref: codex/task-009-library
+criteria:
+  - id: AC-1
+    text: Источник сохраняет стабильный local identity и происхождение метаданных.
+    result: verified
+    evidence:
+      - src/paperweave/infrastructure/db/models.py: UUID primary key; metadata_provenance persisted.
+      - tests/integration/test_library_api.py: manual provenance returned; source remains addressable after creation/list.
+  - id: AC-2
+    text: Duplicate/ambiguous записи обрабатываются по явным правилам без потери пользовательских данных.
+    result: verified
+    evidence:
+      - src/paperweave/modules/library/service.py: DOI normalization; deterministic title/authors/year duplicate rule; conflicts identify existing source.
+      - tests/integration/test_library_api.py: normalized DOI and equivalent manual metadata both return 409 with existing_source_id.
+  - id: AC-3
+    text: Загрузка проверяет тип/размер/безопасное имя; файл хранится через storage adapter.
+    result: verified
+    evidence:
+      - src/paperweave/modules/library/service.py: 25 MiB bound, MIME and PDF signature validation, SHA-256, basename sanitization.
+      - src/paperweave/infrastructure/storage/local.py: generated UUID storage key, resolved-root traversal check.
+      - tests/integration/test_library_api.py: valid upload, traversal name, duplicate bytes, MIME/signature and over-limit rejection.
+  - id: AC-4
+    text: Права проекта ограничивают чтение/скачивание файла; локальная backup/restore стратегия документирована.
+    result: verified
+    evidence:
+      - src/paperweave/modules/library/service.py: project ownership checked for list/upload/download/delete use cases.
+      - tests/integration/test_projects_api.py: another account receives 404 for project library and file download.
+      - docs/architecture.md: coordinated PostgreSQL and file volume snapshot/restore procedure and operational limitation.
+checks:
+  - command: isolated Docker test profile via paperweave.cli test
+    result: passed
+    evidence: 27 passed; ephemeral test-db container and network removed by runner.
+  - command: npm run typecheck in isolated Node 22 build
+    result: passed
+  - command: Dockerfile UI production target build
+    result: passed
+    notes: Existing Vite warnings for runtime-config.js and bundle size over 500 KiB.
+  - command: Alembic upgrade head --sql with config.example.toml
+    result: passed
+  - command: git diff --cached --check
+    result: passed
+  - command: direct reference and route registration review
+    result: passed
+    evidence: api_router includes library_router; dependency/service/route calls and API UI endpoints inspected.
+gitnexus:
+  result: incomplete
+  evidence: detect_changes saw 25 changed files and mapped 12 existing symbols; newly introduced library files have no nodes in the base-index graph.
+  fallback: passed
+  fallback_evidence: Exact staged diff reviewed; router/project ownership, storage path handling, imports and route callers searched; targeted/full isolated tests and frontend type/build checks passed.

@@ -1,0 +1,17 @@
+schema_version: 1
+task_id: TASK-009
+baseline_ref: main@a22cfad0b8a3351f38b0cd4defb530f36da07e17
+scope:
+  - Store manually entered bibliographic records with provenance and project ownership.
+  - Accept local PDF uploads only, capped at 25 MiB, validate MIME and PDF signature, calculate SHA-256, and store bytes behind a local storage adapter.
+  - Preserve immutable source file versions; reject duplicate DOI/metadata records and duplicate bytes without merging user data.
+  - Enforce project access for list, upload and download; require explicit confirmation for file purge and retain referenced files.
+  - Provide a PrimeVue UI for metadata entry, PDF upload, download and confirmed deletion.
+  - Document a coordinated PostgreSQL and file-volume backup/restore strategy.
+non_goals:
+  - External scholarly lookup or metadata providers.
+  - PDF text extraction, passages, evidence, citation generation, or automated backup service.
+verification:
+  - Isolated Docker test profile: migration, metadata provenance, duplicate conflicts, PDF MIME/signature/size, file versions, download, references and owner isolation.
+  - Vue TypeScript typecheck and production UI image build.
+  - Alembic offline SQL generation, source review, direct-reference search and git diff --check.

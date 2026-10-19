@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, inspect, text
@@ -137,7 +138,8 @@ def test_session_expires_after_seven_day_absolute_lifetime(client: TestClient, d
     assert response.json()["detail"] == "Session expired"
 
 
-def test_owner_manages_users_and_project_access_is_isolated(client: TestClient, database_url: str) -> None:
+def test_owner_manages_users_and_project_access_is_isolated(client: TestClient, database_url: str, tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("PW_FILE_STORAGE", str(tmp_path))
     created = client.post(
         "/api/v1/auth/users",
         headers={"Origin": TEST_ORIGIN},
@@ -172,6 +174,13 @@ def test_owner_manages_users_and_project_access_is_isolated(client: TestClient, 
         owner_project = client.post(
             "/api/v1/projects", json={"name": "Owner project", "description": "Private"}
         ).json()
+        private_source = client.post(
+            f"/api/v1/projects/{owner_project['id']}/sources", json={"title": "Private source"}
+        ).json()
+        private_file = client.post(
+            f"/api/v1/projects/{owner_project['id']}/sources/{private_source['id']}/files",
+            files={"file": ("private.pdf", b"%PDF-1.7 private", "application/pdf")},
+        ).json()
         member_project_response = member.post("/api/v1/projects", json={"name": "Member project"})
         assert member_project_response.status_code == 201
         member_project = member_project_response.json()
@@ -179,6 +188,10 @@ def test_owner_manages_users_and_project_access_is_isolated(client: TestClient, 
         assert [item["id"] for item in client.get("/api/v1/projects").json()] == [owner_project["id"]]
         assert [item["id"] for item in member.get("/api/v1/projects").json()] == [member_project["id"]]
         assert member.get(f"/api/v1/projects/{owner_project['id']}").status_code == 404
+        assert member.get(f"/api/v1/projects/{owner_project['id']}/sources").status_code == 404
+        assert member.get(
+            f"/api/v1/projects/{owner_project['id']}/sources/{private_source['id']}/files/{private_file['id']}"
+        ).status_code == 404
         assert client.get(f"/api/v1/projects/{member_project['id']}").status_code == 404
         assert member.put(
             f"/api/v1/projects/{owner_project['id']}", json={"name": "stolen"}
@@ -195,7 +208,7 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
     engine = create_engine(database_url)
     try:
         inspector = inspect(engine)
-        assert {"alembic_version", "projects", "users", "sessions", "manuscripts"} <= set(inspector.get_table_names())
+        assert {"alembic_version", "projects", "users", "sessions", "manuscripts", "sources", "source_files", "source_file_references"} <= set(inspector.get_table_names())
         columns = {column["name"]: column for column in inspector.get_columns("projects")}
         assert set(columns) == {"owner_id", "id", "name", "description", "created_at"}
         assert columns["owner_id"]["nullable"] is False
@@ -205,7 +218,7 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
         assert columns["created_at"]["type"].timezone is True
         with engine.connect() as connection:
             revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-        assert revision == "20261019_0003"
+        assert revision == "20261019_0004"
     finally:
         engine.dispose()
 
