@@ -18,6 +18,10 @@ class ProjectCreateRequest(BaseModel):
         return value.strip() if isinstance(value, str) else value
 
 
+class ProjectUpdateRequest(ProjectCreateRequest):
+    pass
+
+
 class ProjectResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 

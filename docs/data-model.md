@@ -20,7 +20,7 @@ relations:
 
 # Концептуальная модель данных PaperWeave
 
-> Здесь описана целевая предметная модель, а не полная схема БД. Узкий MVP уже имеет отдельную начальную таблицу `projects`; детали и миграция зафиксированы в коде и [IMP-2026-001](plans/imp/imp-2026-001-mvp-foundation.md). Остальные сущности и их поля остаются предложениями.
+> Здесь описана целевая предметная модель и фактически реализованная основа. База проектов появилась в [IMP-2026-001](plans/imp/imp-2026-001-mvp-foundation.md); локальная идентичность и владение проектом добавлены по [ADR-0007](decisions/ADR-0007-local-identity-and-project-access.md) в TASK-006.
 
 ## Реализованная модель MVP
 
@@ -32,8 +32,11 @@ relations:
 | `projects` | `name` | `VARCHAR(200)`, обязательное; trim и проверка 1–200 символов выполняются до сохранения |
 | `projects` | `description` | nullable `TEXT`, максимум 5000 символов на API boundary |
 | `projects` | `created_at` | `TIMESTAMPTZ`, обязательное, задаётся PostgreSQL |
+| `projects` | `owner_id` | UUID, обязательный FK на `users.id`; каждый запрос проекта ограничен текущим владельцем |
+| `users` | `id`, `email`, `display_name`, `password_hash`, `role`, `created_at` | Локальная учётная запись; пароль — salted PBKDF2-HMAC-SHA256 hash; role — `owner` или `member` |
+| `sessions` | `id`, `user_id`, `token_hash`, `created_at`, `last_activity_at`, `expires_at` | Серверная сессия в PostgreSQL; база хранит SHA-256 hash случайного cookie token |
 
-Изменение схемы применяется только через Alembic. В рабочем коде операции проходят через Projects service и persistence port; SQLAlchemy adapter переводит запись БД в transport-независимую сущность.
+Миграция `20261019_0002` создаёт резервированного владельца, назначает ему существующие проекты и делает `projects.owner_id` обязательным. Откат этой миграции снимает связь владения и identity/session таблицы, сохраняя строки проектов. Изменение схемы применяется только через Alembic. Проектные операции проходят через Projects service и persistence port; identity операции — через IdentityRepository.
 
 ## Разделение основных областей
 

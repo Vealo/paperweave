@@ -1,0 +1,41 @@
+schema_version: 1
+task_id: TASK-006
+contract_ref: tasks/TASK-006.md
+baseline_ref: main@1aedd023eb89fce799ea75e345cf9035f9aa48a1
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: docs/decisions/ADR-0007-local-identity-and-project-access.md
+    rationale: Owner approved local-only mode, owner-created accounts, PostgreSQL sessions with 12-hour idle and 7-day absolute lifetime, and one-time assignment of existing projects to the sole owner.
+  - id: AC-2
+    status: passed
+    evidence_ref: docs/evidence/architecture/imp-2026-002-p1-identity-access.md
+    rationale: Disposable Compose test-db on tmpfs proved legacy owner backfill, project-row preservation on downgrade, and successful upgrade afterward.
+  - id: AC-3
+    status: passed
+    evidence_ref: tests/integration/test_projects_api.py
+    rationale: Integration coverage proves unauthenticated denial, authenticated create/list/get/update, and cross-owner filtering with 404 for foreign projects; all 22 backend tests passed.
+  - id: AC-4
+    status: passed
+    evidence_ref: frontend/src/views/LoginView.vue
+    rationale: Login/setup, expired-session warning, API-unavailable message, and access-denied route are distinct UI states; TypeScript and production build pass.
+required_checks:
+  - command: PAPERWEAVE_CONFIG=config.example.toml make test
+    status: passed (22 passed)
+    evidence_ref: tests/integration/test_projects_api.py
+  - command: npm ci && npm run typecheck && npm run build
+    status: passed
+    evidence_ref: frontend/package-lock.json
+  - command: disposable Compose migration backfill/downgrade/upgrade proof
+    status: passed
+    evidence_ref: docs/evidence/architecture/imp-2026-002-p1-identity-access.md
+  - command: git diff --check
+    status: passed
+    evidence_ref: git diff
+  - command: GitNexus detect_changes --scope all
+    status: passed with high risk reviewed
+    evidence_ref: docs/evidence/architecture/imp-2026-002-p1-identity-access.md
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null

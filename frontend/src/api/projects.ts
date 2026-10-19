@@ -29,11 +29,12 @@ function endpoint(path: string): string {
   return `${apiBaseUrl.replace(/\/$/, "")}/api/v1${path}`;
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
+export async function requestApi<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
     response = await fetch(endpoint(path), {
       ...init,
+      credentials: "include",
       headers: {
         ...(init?.body ? { "Content-Type": "application/json" } : {}),
         ...init?.headers,
@@ -44,6 +45,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   }
 
   if (!response.ok) {
+    if (response.status === 401 && !["/auth/login", "/auth/bootstrap", "/auth/status", "/auth/me"].includes(path)) {
+      window.dispatchEvent(new Event("paperweave:session-expired"));
+    }
     let message = "Не удалось выполнить запрос.";
     try {
       const body = (await response.json()) as { detail?: string };
@@ -54,6 +58,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
     throw new ApiError(message, response.status);
   }
 
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 
@@ -70,16 +75,23 @@ export async function getReadiness(): Promise<boolean> {
 }
 
 export function listProjects(): Promise<Project[]> {
-  return request<Project[]>("/projects");
+  return requestApi<Project[]>("/projects");
 }
 
 export function createProject(input: CreateProjectInput): Promise<Project> {
-  return request<Project>("/projects", {
+  return requestApi<Project>("/projects", {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
 export function getProject(projectId: string): Promise<Project> {
-  return request<Project>(`/projects/${encodeURIComponent(projectId)}`);
+  return requestApi<Project>(`/projects/${encodeURIComponent(projectId)}`);
+}
+
+export function updateProject(projectId: string, input: CreateProjectInput): Promise<Project> {
+  return requestApi<Project>("/projects/" + encodeURIComponent(projectId), {
+    method: "PUT",
+    body: JSON.stringify(input),
+  });
 }
