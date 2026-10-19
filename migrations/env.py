@@ -9,20 +9,21 @@ from sqlalchemy import engine_from_config, pool
 from sqlalchemy.engine import URL
 
 from paperweave.config import load_config
+from paperweave.infrastructure.db.base import Base
+from paperweave.infrastructure.db.connection import build_database_url
+from paperweave.infrastructure.db import models  # noqa: F401
 
 
 config = context.config
 settings = load_config(os.getenv("PAPERWEAVE_CONFIG_FILE", "config.toml"))
-database_url = URL.create(
-    "postgresql+psycopg",
-    username=settings.database.user,
-    password=settings.database.password,
-    host=settings.database.host,
-    port=settings.database.port,
-    database=settings.database.name,
+database_url = os.getenv("TEST_DATABASE_URL") or build_database_url(settings)
+rendered_database_url = (
+    database_url.render_as_string(hide_password=False)
+    if isinstance(database_url, URL)
+    else database_url
 )
-config.set_main_option("sqlalchemy.url", database_url.render_as_string(hide_password=False).replace("%", "%%"))
-target_metadata = None
+config.set_main_option("sqlalchemy.url", rendered_database_url.replace("%", "%%"))
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
