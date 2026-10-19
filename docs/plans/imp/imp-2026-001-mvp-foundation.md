@@ -4,7 +4,7 @@ id: imp-2026-001-mvp-foundation
 name: "Первый MVP PaperWeave: локальный запуск и проекты"
 type: imp
 version: 1.0.0
-status: active
+status: complete
 freeze: false
 date: 2026-10-19
 last_reviewed: 2026-10-19
@@ -35,13 +35,13 @@ phase_statuses:
   P1: verified
   P2: verified
   P3: verified
-  P4: active
-progress: 3/4
+  P4: verified
+progress: 4/4
 analysis_status: complete
 analysis_ref: artifacts/plan-analysis/imp-2026-001-mvp-foundation-2026-10-19.md
 architecture_status: complete
 architecture_ref: artifacts/architecture/imp-2026-001-mvp-foundation-2026-10-19.md
-finalization_status: pending
+finalization_status: closed
 audit_ref: null
 deployment_mode: not_applicable
 ---
