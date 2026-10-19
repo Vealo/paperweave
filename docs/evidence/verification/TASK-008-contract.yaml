@@ -1,0 +1,15 @@
+schema_version: 1
+task_id: TASK-008
+baseline_ref: main@5b070eeddec05c1e39599898b88bb6c31c93f480
+scope:
+  - Build the project workspace shell from existing project and manuscript APIs.
+  - Derive section navigation from the current Tiptap document without adding backend state.
+  - Keep loading, empty, error, responsive, save, API, and AI states distinguishable.
+non_goals:
+  - Multiple manuscripts or persisted section entities.
+  - AI provider integration or new backend/API behavior.
+  - Changes to authentication, project ownership, or manuscript persistence contracts.
+verification:
+  - Frontend TypeScript typecheck and Vite production build.
+  - Manual in-app browser inspection using isolated mock API responses.
+  - Diff review, direct-reference search, and git diff --check; GitNexus fallback recorded if complete graph analysis is unavailable.

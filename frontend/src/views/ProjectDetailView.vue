@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from "vue-router";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import Message from "primevue/message";
+import Tag from "primevue/tag";
 import Skeleton from "primevue/skeleton";
 import { EditorContent, useEditor } from "@tiptap/vue-3";
 import StarterKit from "@tiptap/starter-kit";
@@ -20,6 +21,11 @@ const manuscript = ref<Manuscript | null>(null);
 const editorReady = ref(false);
 const saveState = ref<"clean" | "dirty" | "saving" | "saved" | "failed">("clean");
 const saveError = ref("");
+const headings = ref<Array<{ id: number; level: number; text: string }>>([]);
+const selectedHeading = ref<number | null>(null);
+const manuscriptMissing = ref(false);
+const manuscriptLoadFailed = ref(false);
+const apiState = ref<"loading" | "available" | "failed">("loading");
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let saveSequence = 0;
 let projectLoadSequence = 0;
@@ -30,11 +36,39 @@ const editor = useEditor({
   editable: true,
   onUpdate: () => {
     if (!editorReady.value) return;
+    refreshHeadings();
     saveState.value = "dirty";
     saveError.value = "";
     scheduleSave();
   },
 });
+
+function refreshHeadings(): void {
+  const currentEditor = editor.value;
+  if (!currentEditor) {
+    headings.value = [];
+    return;
+  }
+  const nextHeadings: Array<{ id: number; level: number; text: string }> = [];
+  currentEditor.state.doc.descendants((node, position) => {
+    if (node.type.name !== "heading") return;
+    const text = node.textContent.trim();
+    if (text) nextHeadings.push({ id: position, level: Number(node.attrs.level) || 1, text });
+  });
+  headings.value = nextHeadings;
+}
+
+function goToHeading(position: number): void {
+  const currentEditor = editor.value;
+  if (!currentEditor) return;
+  selectedHeading.value = position;
+  currentEditor.chain().focus().setTextSelection(position + 1).scrollIntoView().run();
+}
+
+function errorMessage(reason: unknown, fallback: string): string {
+  if (reason instanceof SyntaxError) return fallback;
+  return reason instanceof Error ? reason.message : fallback;
+}
 
 function scheduleSave(): void {
   if (saveTimer) clearTimeout(saveTimer);
@@ -55,6 +89,7 @@ async function saveManuscript(): Promise<void> {
       : await createManuscript(currentProject.id, content);
     if (sequence !== saveSequence) return;
     manuscript.value = saved;
+    apiState.value = "available";
     const latestContent = currentEditor.getJSON() as Record<string, unknown>;
     if (JSON.stringify(latestContent) !== JSON.stringify(content)) {
       saveState.value = "dirty";
@@ -64,29 +99,44 @@ async function saveManuscript(): Promise<void> {
     }
   } catch (reason) {
     if (sequence !== saveSequence) return;
+    apiState.value = "failed";
     saveState.value = "failed";
-    saveError.value = reason instanceof Error ? reason.message : "Не удалось сохранить рукопись.";
+    saveError.value = errorMessage(reason, "Не удалось сохранить рукопись.");
   }
 }
 
 async function loadManuscript(projectId: string, loadSequence: number): Promise<void> {
   editorReady.value = false;
   manuscript.value = null;
+  manuscriptMissing.value = false;
+  manuscriptLoadFailed.value = false;
+  headings.value = [];
+  selectedHeading.value = null;
   saveState.value = "clean";
   saveError.value = "";
   try {
     const loaded = await getManuscript(projectId);
     if (loadSequence !== projectLoadSequence) return;
     manuscript.value = loaded;
+    apiState.value = "available";
+    manuscriptLoadFailed.value = false;
+    editor.value?.setEditable(true);
     editor.value?.commands.setContent(manuscript.value.content);
+    refreshHeadings();
     saveState.value = "saved";
   } catch (reason) {
     if (loadSequence !== projectLoadSequence) return;
     if (reason instanceof Error && "status" in reason && reason.status === 404) {
+      manuscriptMissing.value = true;
+      manuscriptLoadFailed.value = false;
+      editor.value?.setEditable(true);
+      apiState.value = "available";
       editor.value?.commands.setContent({ type: "doc", content: [{ type: "paragraph" }] });
+      refreshHeadings();
     } else {
-      saveError.value = reason instanceof Error ? reason.message : "Не удалось загрузить рукопись.";
-      saveState.value = "failed";
+      manuscriptLoadFailed.value = true;
+      editor.value?.setEditable(false);
+      apiState.value = "failed";
     }
   } finally {
     if (loadSequence === projectLoadSequence) editorReady.value = true;
@@ -98,16 +148,19 @@ async function loadProject(projectId: string): Promise<void> {
   saveSequence += 1;
   loading.value = true;
   error.value = "";
+  apiState.value = "loading";
   project.value = null;
   if (saveTimer) clearTimeout(saveTimer);
   try {
     const loadedProject = await getProject(projectId);
     if (loadSequence !== projectLoadSequence) return;
     project.value = loadedProject;
+    apiState.value = "available";
     await loadManuscript(projectId, loadSequence);
   } catch (reason) {
     if (loadSequence !== projectLoadSequence) return;
-    error.value = reason instanceof Error ? reason.message : "Не удалось загрузить проект.";
+    apiState.value = "failed";
+    error.value = errorMessage(reason, "Не удалось загрузить проект. Проверьте доступность API и права доступа.");
   } finally {
     if (loadSequence === projectLoadSequence) loading.value = false;
   }
@@ -126,12 +179,6 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="detail-actions">
-    <RouterLink to="/" custom v-slot="{ navigate }">
-      <Button label="К списку проектов" severity="secondary" text @click="navigate" />
-    </RouterLink>
-  </div>
-
   <Card v-if="loading" class="detail-card" aria-label="Загрузка проекта">
     <template #content>
       <Skeleton width="55%" height="2rem" class="field" />
@@ -149,46 +196,289 @@ onBeforeUnmount(() => {
     </div>
   </Message>
 
-  <Card v-else-if="project" class="detail-card">
-    <template #title>{{ project.name }}</template>
-    <template #subtitle>Исследовательский проект</template>
-    <template #content>
-      <p class="detail-description">
-        {{ project.description || "Описание пока не добавлено." }}
-      </p>
-      <dl class="detail-meta">
-        <dt>Идентификатор</dt>
-        <dd><code>{{ project.id }}</code></dd>
-        <dt>Создан</dt>
-        <dd>{{ formatDate(project.created_at) }}</dd>
-      </dl>
-      <section class="manuscript-section" aria-label="Рукопись проекта">
-        <div class="manuscript-heading">
-          <div>
-            <h2>Рукопись</h2>
-            <p>Черновик статьи, сохранённый в этом проекте.</p>
-          </div>
-          <div class="manuscript-save-state" role="status" aria-live="polite">
-            <span v-if="saveState === 'dirty'">Есть несохранённые изменения</span>
-            <span v-else-if="saveState === 'saving'">Сохраняем…</span>
-            <span v-else-if="saveState === 'saved'">Сохранено<span v-if="manuscript"> · версия {{ manuscript.version }}</span></span>
-            <span v-else-if="saveState === 'failed'">Ошибка сохранения</span>
-          </div>
+  <section v-else-if="project" class="project-workspace" aria-label="Рабочее пространство проекта">
+    <aside class="workspace-rail workspace-rail--navigation" aria-label="Навигация проекта">
+      <RouterLink to="/" class="workspace-back">← Проекты</RouterLink>
+      <p class="eyebrow">Проект</p>
+      <h1 class="workspace-project-title">{{ project.name }}</h1>
+      <p class="workspace-project-description">{{ project.description || "Описание пока не добавлено." }}</p>
+      <div class="workspace-nav-group">
+        <h2>Материалы</h2>
+        <a href="#manuscript" class="workspace-nav-link workspace-nav-link--active">Рукопись</a>
+      </div>
+      <div class="workspace-nav-group">
+        <h2>В этой рукописи</h2>
+        <p v-if="!editorReady" class="workspace-muted">Загружаем структуру…</p>
+        <p v-else-if="headings.length === 0" class="workspace-muted">Добавьте заголовки, чтобы создать навигацию по разделам.</p>
+        <nav v-else class="outline-list" aria-label="Разделы рукописи">
+          <Button v-for="heading in headings" :key="heading.id" :label="heading.text" severity="secondary" text class="outline-link" :class="{ 'outline-link--nested': heading.level > 2, 'outline-link--selected': selectedHeading === heading.id }" @click="goToHeading(heading.id)" />
+        </nav>
+      </div>
+    </aside>
+
+    <section id="manuscript" class="workspace-editor-column" aria-label="Редактор рукописи">
+      <div class="workspace-titlebar">
+        <div>
+          <p class="eyebrow">Рабочее пространство</p>
+          <h2>Рукопись</h2>
         </div>
-        <div class="manuscript-toolbar" aria-label="Форматирование текста">
-          <Button label="Жирный" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleBold().run()" />
-          <Button label="Курсив" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleItalic().run()" />
-          <Button label="Заголовок" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()" />
-          <Button label="Список" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleBulletList().run()" />
-        </div>
-        <EditorContent v-if="editor" :editor="editor" class="manuscript-editor" />
-        <Message v-if="saveState === 'failed'" severity="error" :closable="false" class="manuscript-error">
-          <div class="manuscript-error__content">
-            <span>{{ saveError }}</span>
-            <Button label="Повторить сохранение" severity="danger" text @click="void saveManuscript()" />
-          </div>
-        </Message>
+        <Tag v-if="saveState === 'saved'" severity="success" value="Сохранено" />
+        <Tag v-else-if="saveState === 'saving'" severity="info" value="Сохраняем" />
+        <Tag v-else-if="saveState === 'dirty'" severity="warn" value="Есть изменения" />
+        <Tag v-else-if="saveState === 'failed'" severity="danger" value="Ошибка сохранения" />
+      </div>
+      <Message v-if="manuscriptMissing" severity="info" :closable="false" class="workspace-notice">Рукопись ещё не создана. Начните писать — первый текст сохранится автоматически.</Message>
+      <Message v-if="manuscriptLoadFailed" severity="error" :closable="false" class="workspace-notice">
+        Не удалось загрузить рукопись. Редактирование временно отключено, чтобы не заменить несинхронизированную версию.
+        <Button label="Повторить загрузку" severity="danger" text @click="void loadManuscript(project.id, projectLoadSequence)" />
+      </Message>
+      <div class="manuscript-toolbar" aria-label="Форматирование текста">
+        <Button label="Жирный" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleBold().run()" />
+        <Button label="Курсив" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleItalic().run()" />
+        <Button label="Заголовок" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleHeading({ level: 2 }).run()" />
+        <Button label="Список" severity="secondary" outlined size="small" :disabled="!editor" @click="editor?.chain().focus().toggleBulletList().run()" />
+      </div>
+      <EditorContent v-if="editor" :editor="editor" class="manuscript-editor" />
+      <Message v-if="saveState === 'failed'" severity="error" :closable="false" class="manuscript-error">
+        <div class="manuscript-error__content"><span>{{ saveError }}</span><Button label="Повторить сохранение" severity="danger" text @click="void saveManuscript()" /></div>
+      </Message>
+    </section>
+
+    <aside class="workspace-rail workspace-rail--context" aria-label="Контекст проекта">
+      <p class="eyebrow">Контекст</p>
+      <section class="context-card">
+        <h2>Проект</h2>
+        <p>{{ project.description || "Описание пока не добавлено." }}</p>
+        <dl><dt>Создан</dt><dd>{{ formatDate(project.created_at) }}</dd><dt>ID</dt><dd><code>{{ project.id }}</code></dd></dl>
       </section>
-    </template>
-  </Card>
+      <section class="context-card">
+        <h2>Состояние</h2>
+        <div class="context-status"><span>API</span><Tag :severity="apiState === 'failed' ? 'danger' : apiState === 'loading' ? 'info' : 'success'" :value="apiState === 'failed' ? 'Ошибка' : apiState === 'loading' ? 'Загрузка' : 'Доступно'" /></div>
+        <div class="context-status"><span>Рукопись</span><Tag :severity="manuscriptLoadFailed || saveState === 'failed' ? 'danger' : saveState === 'saving' || saveState === 'dirty' ? 'warn' : 'success'" :value="manuscriptLoadFailed ? 'Ошибка загрузки' : saveState === 'failed' ? 'Ошибка сохранения' : saveState === 'saving' ? 'Сохранение' : saveState === 'dirty' ? 'Не сохранено' : manuscript ? `Версия ${manuscript.version}` : 'Новая'" /></div>
+        <div class="context-status"><span>AI</span><Tag severity="secondary" value="Не подключён" /></div>
+        <p class="context-hint">AI-помощник появится после подключения сервиса. Текст сейчас редактируется вручную.</p>
+      </section>
+    </aside>
+  </section>
 </template>
+
+<style scoped>
+.project-workspace {
+  display: grid;
+  grid-template-columns: minmax(205px, 245px) minmax(360px, 1fr) minmax(220px, 270px);
+  align-items: start;
+  gap: 22px;
+}
+
+.workspace-rail {
+  position: sticky;
+  top: 20px;
+  display: grid;
+  gap: 22px;
+  min-width: 0;
+  padding: 20px 16px;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius);
+  background: var(--p-surface-0);
+}
+
+.workspace-back {
+  color: var(--p-primary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.workspace-project-title {
+  margin: -14px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 1.15rem;
+  line-height: 1.35;
+}
+
+.workspace-project-description,
+.workspace-muted,
+.context-card p,
+.context-hint {
+  margin: -14px 0 0;
+  color: var(--p-text-muted-color);
+  font-size: 0.84rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.workspace-nav-group {
+  display: grid;
+  gap: 9px;
+}
+
+.workspace-nav-group h2,
+.context-card h2 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.workspace-nav-link {
+  padding: 9px 10px;
+  border-radius: var(--p-content-border-radius);
+  color: var(--p-primary-color);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.workspace-nav-link--active {
+  background: var(--p-primary-50);
+}
+
+.outline-list {
+  display: grid;
+  justify-items: stretch;
+  gap: 2px;
+}
+
+.outline-link.p-button {
+  justify-content: flex-start;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 7px 9px;
+  color: var(--p-text-color);
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.outline-link--nested.p-button {
+  padding-left: 20px;
+}
+
+.outline-link--selected.p-button {
+  background: var(--p-highlight-background);
+  color: var(--p-highlight-color);
+}
+
+.workspace-editor-column {
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius);
+  background: var(--p-surface-50);
+}
+
+.workspace-titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.workspace-titlebar .eyebrow,
+.workspace-rail .eyebrow {
+  margin-bottom: 7px;
+}
+
+.workspace-titlebar h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+}
+
+.workspace-notice {
+  margin: 0 0 14px;
+}
+
+.workspace-editor-column .manuscript-editor {
+  min-height: 65vh;
+  margin-top: 12px;
+  padding: clamp(18px, 4vw, 44px);
+  background: var(--p-surface-0);
+}
+
+.workspace-editor-column :deep(.manuscript-editor .tiptap) {
+  min-height: 58vh;
+}
+
+.context-card {
+  display: grid;
+  gap: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--p-content-border-color);
+}
+
+.context-card p {
+  margin: -10px 0 0;
+}
+
+.context-card dl {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+  margin: -8px 0 0;
+  font-size: 0.8rem;
+}
+
+.context-card dt {
+  color: var(--p-text-muted-color);
+}
+
+.context-card dd {
+  margin: 0 0 8px;
+  overflow-wrap: anywhere;
+}
+
+.context-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.context-card .context-hint {
+  margin: -6px 0 0;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 760px) {
+  .project-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace-rail {
+    position: static;
+  }
+
+  .workspace-rail--navigation {
+    order: 0;
+  }
+
+  .workspace-editor-column {
+    order: 1;
+  }
+
+  .workspace-rail--context {
+    order: 2;
+  }
+
+  .workspace-editor-column .manuscript-editor {
+    min-height: 50vh;
+  }
+
+  .workspace-editor-column :deep(.manuscript-editor .tiptap) {
+    min-height: 44vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-editor-column {
+    padding: 15px;
+  }
+
+  .workspace-titlebar {
+    align-items: flex-start;
+  }
+}
+</style>

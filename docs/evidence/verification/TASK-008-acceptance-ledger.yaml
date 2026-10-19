@@ -1,0 +1,41 @@
+schema_version: 1
+task_id: TASK-008
+contract_ref: docs/evidence/verification/TASK-008-contract.yaml
+baseline_ref: main@5b070eeddec05c1e39599898b88bb6c31c93f480
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+    rationale: Project route retains its project context; outline entries derive from Tiptap heading nodes and focus the matching position. Manual browser check confirmed the section click focuses the editor.
+  - id: AC-2
+    status: passed
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+    rationale: The view has separate project/document navigation, editor, and project context/status regions; browser accessibility snapshot exposed each region and their content.
+  - id: AC-3
+    status: passed
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+    rationale: Loading skeleton, no-manuscript message, project/manuscript error handling, narrow-screen single-column media rule, and distinct save/API/AI status labels are implemented. Browser inspection exercised loaded and project-error states; narrow layout is covered by the 760px breakpoint rule.
+  - id: AC-4
+    status: passed
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+    rationale: Typecheck and production build passed. Manual in-app browser check inspected loaded state, section navigation/focus, and project API error with return navigation.
+required_checks:
+  - command: npm run typecheck
+    status: passed
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+  - command: npm run build
+    status: passed; existing runtime-config and large-chunk warnings remain
+    evidence_ref: frontend/package.json
+  - command: Manual in-app browser check with isolated mock API
+    status: passed for loaded workspace, section focus, and project error/return states
+    evidence_ref: frontend/src/views/ProjectDetailView.vue
+  - command: git diff --check
+    status: passed
+    evidence_ref: git diff
+  - command: GitNexus impact and change analysis
+    status: incomplete; detect_changes mapped 14 symbols and 9 flows with high aggregate risk, while exact impacts for loadProject/loadManuscript/saveManuscript were LOW. Index was four commits behind HEAD and worktree index refresh failed. Bounded source/diff/static-check fallback passed; no concrete unresolved data-integrity risk found.
+    evidence_ref: docs/evidence/verification/TASK-008-contract.yaml
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null
