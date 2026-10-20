@@ -4,7 +4,7 @@ id: imp-2026-003-light-design-system-user-settings
 name: "Единый светлый дизайн-код и согласование настроек пользователя"
 type: imp
 version: 1.0.0
-status: blocked
+status: active
 freeze: false
 date: 2026-10-20
 last_reviewed: 2026-10-20
@@ -30,11 +30,11 @@ parent_ref: null
 change_kind: none
 phases: 4
 phase_statuses:
-  P1: blocked
-  P2: pending
+  P1: verified
+  P2: ready
   P3: pending
   P4: pending
-progress: 0/4
+progress: 1/4
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-003-light-design-system-user-settings.md
 architecture_status: complete
@@ -117,7 +117,7 @@ deployment_mode: not_applicable
 | staging | No | Не задан | — | `not_requested` |
 | production | No | Не задан | — | `not_requested` |
 
-**Authorization boundary:** текущий запрос разрешает создание плана и фиксацию решений. Он не является `explicit user authorization` для запуска фаз, миграции реальной пользовательской базы, push, deployment или общих/production изменений.
+**Authorization boundary:** пользователь явно разрешил локальную реализацию IMP. Это разрешение охватывает фазовые локальные изменения и изолированные проверки; оно не разрешает push, deployment, shared/production миграции или изменение внешних окружений.
 
 ## Fixed decisions and invariants
 
@@ -157,7 +157,7 @@ Checkpoint существующих изменений → P1 → P2 → P3 → 
 
 ## Phase 1: Реализовать семантическую палитру светлой темы
 
-Phase ID: `P1`; status: `blocked` до снятия IMP-BL-01.
+Phase ID: `P1`; status: `verified` после checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`, снявшего IMP-BL-01.
 
 ### Goal and input
 
@@ -166,7 +166,7 @@ Phase ID: `P1`; status: `blocked` до снятия IMP-BL-01.
 
 ### Preconditions and scope / non-scope
 
-- Preconditions: IMP-BL-01 снят; текущая реализация сверена с checkpoint.
+- Preconditions: IMP-BL-01 снят; текущая реализация сверена с checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`.
 - Scope: semantic roles для primary, hover/active, link, focus, selected и нейтральных surface/text/border; применение к PrimeVue controls и общим UI.
 - Non-scope: тёмная тема, заливка больших поверхностей цветами палитры, массовый редизайн экранов.
 
@@ -180,7 +180,7 @@ Phase ID: `P1`; status: `blocked` до снятия IMP-BL-01.
 
 ### Tasks and ownership
 
-**Package Task:** [TASK-023 — Реализовать семантическую палитру светлой темы](../../../tasks/TASK-023.md). Задача зарегистрирована и заблокирована до снятия IMP-BL-01.
+**Package Task:** [TASK-023 — Реализовать семантическую палитру светлой темы](../../../tasks/TASK-023.md). Задача `done`; IMP-BL-01 снят указанным checkpoint.
 
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|
