@@ -39,14 +39,13 @@ criteria:
   evidence:
   - frontend/src/router/index.ts login next validation and protected-route redirects;
     frontend/src/views/LoginView.vue retry and post-login next handling
-status: in_progress
-revision: 6
+status: done
+revision: 7
 blockers: []
 created_at: '2026-10-20T08:25:43Z'
-updated_at: '2026-10-20T09:07:56Z'
-next_action: Commit TASK-016 on main and verify parent reachability
-progress_note: Acceptance evidence recorded; scoped diff reviewed and TODO validation
-  passed
+updated_at: '2026-10-20T09:09:05Z'
+progress_note: TASK-016 finalized on main at 7fc8a2b; reachability and post-commit
+  build passed
 ---
 
 ## Outcome
@@ -71,3 +70,11 @@ This follow-up owns frontend session restoration and refresh semantics. Profile 
 - Independent code review confirmed the earlier startup, PATCH-401, logout-failure, and unavailable-retry findings are resolved. Review was source-based; no runtime browser session test was performed.
 - `npm run typecheck` and `npm run build` passed. Build reports existing warnings for `/runtime-config.js` and the >500 kB bundle.
 - GitNexus index refresh completed for this checkout. Graph analysis warns that the execution-flow enumeration is truncated (186 flows reported, 214 candidates), so graph coverage is incomplete. Staged detect-changes classified the shared requestApi change as critical. The bounded fallback source review, `git diff --cached --check`, typecheck, and production build passed; no concrete unresolved safety issue was found.
+
+## TASK-016 finalization (2026-10-20)
+
+- Scoped implementation and task evidence committed on declared local parent `main`: `7fc8a2b9eb688517e00fd1a51af2f8f5deba1718` (`fix(auth): unify frontend session restoration (TASK-016)`).
+- Parent reachability verified: `reachable: true`; parent HEAD equals task commit.
+- Post-commit `npm run typecheck` and `npm run build` passed. Existing warnings remain for `/runtime-config.js` script bundling and the >500 kB JS chunk.
+- GitNexus refreshed after integration and indexes this HEAD. Its index reports 186 flows from 214 candidates with truncation warnings; do not treat graph coverage as complete. The accepted fallback source review, staged diff review, `git diff --cached --check`, typecheck and build found no unresolved safety issue.
+- The working tree still contains the pre-existing unrelated unstaged UI, logging, Compose and documentation changes; they were preserved and excluded from the TASK-016 commit.
