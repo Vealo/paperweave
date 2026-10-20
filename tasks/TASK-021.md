@@ -43,10 +43,11 @@ criteria:
   checked: false
   evidence: []
 status: todo
-revision: 2
+revision: 3
 blockers: []
 created_at: '2026-10-20T08:29:08Z'
-updated_at: '2026-10-20T08:45:34Z'
+updated_at: '2026-10-20T10:35:49Z'
+progress_note: Predecessor TASK-020 completed and integrated on main; task is ready
 ---
 
 ## Outcome

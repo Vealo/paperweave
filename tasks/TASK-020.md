@@ -76,14 +76,12 @@ criteria:
   - UV_CACHE_DIR=/tmp/paperweave-uv-cache DOCKER_CONFIG=/tmp/paperweave-docker-config
     BUILDX_CONFIG=/tmp/paperweave-buildx make test (77 passed); frontend npm test
     (4 passed), typecheck and production build passed
-status: in_progress
-revision: 10
+status: done
+revision: 11
 blockers: []
 created_at: '2026-10-20T08:28:54Z'
-updated_at: '2026-10-20T10:33:08Z'
-next_action: Finalize scoped TASK-020 changes and run post-integration checks
-progress_note: Backend 77 tests, frontend 4 tests, typecheck and build passed; isolated
-  SeaweedFS smoke accepted
+updated_at: '2026-10-20T10:35:23Z'
+progress_note: Committed ba5cbe3 on main; post-commit checks passed; TASK-021 is ready
 ---
 
 ## Outcome
@@ -103,3 +101,5 @@ Review repair: retried DELETE accepts active/pending_delete/deleted catalog reco
 Final acceptance review (2026-10-20): independent ledger accepted AC-1 through AC-7 for the current source tree. AC-1: configurable local/S3 storage adapters and pinned SeaweedFS image are present in config, storage factory, and Compose. AC-2: `file_artifacts` stores lifecycle and object metadata; migration/backfill and source-parent/idempotency regression checks cover durable references. AC-3: avatar/image/PDF APIs enforce typed validation and owner/domain scope; server-only credentials and non-public object keys are documented and exercised by integration tests. AC-4: avatar replacement switches the PostgreSQL pointer after verified upload; old-object deletion is retryable, and uploads/deletes are idempotent; integration tests cover retries, replacement and replay. AC-5: migration test preserves existing PDF IDs, keys, versions/checksums and registers avatar references without moving file bytes. AC-6: isolated Compose smoke started DB, SeaweedFS, API and UI; `/api/v1/health/ready` returned 200 with database and storage available; smoke resources were removed. AC-7: isolated `make test` passed 76 tests, including S3 adapter, migration, ownership and lifecycle coverage. `compileall` and `git diff --check` passed. This is local verification only; no production deployment was performed.
 
 Acceptance follow-up (2026-10-20): independent audit raised a possible idempotency-key overflow. Source review confirmed the public/document service limit is 119 characters and the `document:` namespace is 9 characters, so the stored value is exactly the PostgreSQL `String(128)` boundary. Added `test_pdf_idempotency_key_maximum_length_fits_catalog`, which exercises a real isolated PostgreSQL upload and asserts a 128-character stored key. Re-ran the supported isolated `make test`: 77 passed in 20.81s. The reported overflow was not present in the reviewed source; the boundary is now regression-tested.
+
+Finalization receipt (2026-10-20): TASK-020 accepted and integrated directly on the user's requested `main` branch as commit `ba5cbe38eaed2ae2343a0b563f3e81d97c8bec3d`. Parent verification: `verify_parent_reachability.py --repo /home/denis/Projects/paperweave --parent main --task-commit ba5cbe38eaed2ae2343a0b563f3e81d97c8bec3d` returned `reachable: true`; parent HEAD equals the task commit. Post-commit checks: isolated `make test` 77 passed; frontend `npm test` 4 passed; `npm run typecheck` passed; `npm run build` succeeded (existing Vite warnings about runtime-config script bundling and chunk size). Isolated SeaweedFS Compose smoke passed earlier: all services healthy and API readiness returned 200; its resources were removed. GitNexus was refreshed and `status` reports indexed commit/current commit `ba5cbe3` and all covered file contents match; analyzer warned that flow coverage is incomplete (211 flows reported; 45 entry candidates and 38 deduplicated flows dropped), so no complete-graph claim is made. No push or deployment was performed.
