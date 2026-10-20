@@ -184,9 +184,9 @@ Phase ID: `P1`; status: `verified` после checkpoint `5bed8bfa1966fbf815fbaa
 
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|
-| 1.1 | Сверить PrimeVue/Aura public theme API и сопоставить утверждённую палитру с semantic/component tokens. | `main.ts`, frontend | Button/link/focus/selected matrix | `pending` |
-| 1.2 | Перевести общие стили на semantic roles; убрать несогласованные цветовые литералы из общих правил. | `styles/main.css`, frontend | Поиск literals + компонентная матрица | `pending` |
-| 1.3 | Уточнить дизайн-код так, чтобы документация соответствовала токенам и состояниям. | `docs/design-system.md`, docs owner | Проверка документа и diff | `pending` |
+| 1.1 | Сверить PrimeVue/Aura public theme API и сопоставить утверждённую палитру с semantic/component tokens. | `main.ts`, frontend | Button/link/focus/selected matrix | `verified`, TASK-023 |
+| 1.2 | Перевести общие стили на semantic roles; убрать несогласованные цветовые литералы из общих правил. | `styles/main.css`, frontend | Поиск literals + компонентная матрица | `verified`, TASK-023 |
+| 1.3 | Уточнить дизайн-код так, чтобы документация соответствовала токенам и состояниям. | `docs/design-system.md`, docs owner | Проверка документа и diff | `verified`, TASK-023 |
 
 ### Data and compatibility
 
@@ -195,31 +195,31 @@ Phase ID: `P1`; status: `verified` после checkpoint `5bed8bfa1966fbf815fbaa
 
 ### Acceptance criteria
 
-- [ ] `AC-P1-001`: основные действия используют `#5B7917` с читаемым текстом.
-- [ ] `AC-P1-002`: `#0D3500` ограничен тёмным состоянием акцента; крупные surfaces нейтральны.
-- [ ] `AC-P1-003`: общие компоненты используют централизованные semantic tokens.
+- [x] `AC-P1-001`: основные действия используют `#5B7917` с читаемым текстом.
+- [x] `AC-P1-002`: `#0D3500` ограничен тёмным состоянием акцента; крупные surfaces нейтральны.
+- [x] `AC-P1-003`: общие компоненты используют централизованные semantic tokens.
 
 ### Verification
 
-- [ ] `npm --prefix frontend run typecheck`, `npm --prefix frontend run test` и `npm --prefix frontend run build` проходят.
-- [ ] Проверены button, link, input, message, focus-visible, selected, disabled и hover/active состояния.
-- [ ] Контраст проверяется по выбранным цветовым парам, а не только визуально.
+- [x] TASK-023 зафиксировал успешные `typecheck`, frontend tests (4 passed) и production build.
+- [x] Button, link, focus, selected и hover/active matrix подтверждена; TASK-026 дополнил состояния input, message, disabled и error.
+- [x] Контраст ключевых пар рассчитан: белый на `#5B7917` — 5.01:1, на `#0D3500` — 13.76:1; светлые маркерные цвета не применяются для мелкого текста.
 
 ### Evidence contract
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| `build` | `npm --prefix frontend run build` | `local` | `pass/fail/unavailable` | при исполнении | Task evidence |
-| `manual` | Матрица общих компонентов и скриншоты | `local` | `pass/fail/unavailable` | при исполнении | Task evidence |
+| `frontend` | TASK-023: typecheck, 4 frontend tests, build; визуальная матрица основных semantic roles | `local` | `pass` | 2026-10-20 | [TASK-023](../../../tasks/TASK-023.md) |
+| `manual` | Контрастные пары и browser preview для цветов/фокуса; экранная матрица дополнена в P4 | `local` | `pass` | 2026-10-20 | [TASK-023](../../../tasks/TASK-023.md), [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml) |
 
 ### Exit criteria
 
-- [ ] Все токены и общие состояния сверены с принятой палитрой.
-- [ ] Изменённые файлы происходят из checkpoint; старый и новый diff не смешаны.
+- [x] Все токены и общие состояния сверены с принятой палитрой.
+- [x] Изменённые файлы происходят из checkpoint; старый и новый diff не смешаны.
 
 ## Phase 2: Нормализовать сохранённую настройку темы
 
-Phase ID: `P2`; dependency: P1; status: `verified`, implementation commit `adebfef3e1d4c2db235279e9770361b45344f499`.
+Phase ID: `P2`; dependency: P1; status: `verified`, implementation commit `adebfefb7165e1e69576908453acd9eb6fad770a`.
 
 ### Goal and input
 
@@ -241,44 +241,44 @@ Phase ID: `P2`; dependency: P1; status: `verified`, implementation commit `adebf
 
 ### Tasks and ownership
 
-**Package Task:** [TASK-024 — Нормализовать сохранённую настройку темы](../../../tasks/TASK-024.md); `done`, committed on `main` as `adebfef3e1d4c2db235279e9770361b45344f499`; depends on TASK-023.
+**Package Task:** [TASK-024 — Нормализовать сохранённую настройку темы](../../../tasks/TASK-024.md); `done`, committed on `main` as `adebfefb7165e1e69576908453acd9eb6fad770a`; depends on TASK-023.
 
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|
-| 2.1 | Определить переход API для legacy payload `system`/`dark`, чтобы ответы и DB всегда соответствовали `light`. | schema/API/repository | Legacy и текущий payload/response | `pending` |
-| 2.2 | Добавить миграцию backfill: все текущие значения → `light`; default для новых строк → `light`. | migrations, persistence | Disposable DB с прежними значениями и несколькими users | `pending` |
-| 2.3 | Зафиксировать финальную валидацию API, default и пользовательскую изоляцию. | models/API/tests | GET/PATCH, invalid values, isolation | `pending` |
+| 2.1 | Определить переход API для legacy payload `system`/`dark`, чтобы ответы и DB всегда соответствовали `light`. | schema/API/repository | Legacy и текущий payload/response | `verified`, TASK-024 |
+| 2.2 | Добавить миграцию backfill: все текущие значения → `light`; default для новых строк → `light`. | migrations, persistence | Disposable DB с прежними значениями и несколькими users | `verified`, TASK-024 |
+| 2.3 | Зафиксировать финальную валидацию API, default и пользовательскую изоляцию. | models/API/tests | GET/PATCH, invalid values, isolation | `verified`, TASK-024 |
 
 ### Data and compatibility
 
-- [ ] До миграции локальной пользовательской базы зафиксировать snapshot/restore процедуру.
-- [ ] Upgrade/downgrade и повторный upgrade тестировать на disposable PostgreSQL.
-- [ ] Downgrade приложения допускает `light`; старые preference values восстанавливаются только из snapshot — их нормализация является согласованным результатом.
-- [ ] Проверить, что users, sessions и другие пользовательские данные не меняются.
+- Disposable rehearsal использует отдельный Compose-проект и PostgreSQL в tmpfs; снимок постоянной пользовательской БД не создаётся и не подразумевается этим evidence.
+- [x] Upgrade, downgrade до `20261020_0010` и повторный upgrade проверены на disposable PostgreSQL; downgrade сохраняет нормализованные `light`, а исходные preference values могут быть восстановлены только из заранее созданного snapshot.
+- [x] Проверено, что email, display_name, password_hash, role и is_active существующих пользователей не меняются; миграция обновляет только `user_settings.theme`.
+- Для любой будущей миграции постоянной локальной пользовательской БД перед запуском требуется отдельный snapshot/restore plan; этот IMP не подтверждает такую операцию.
 
 ### Acceptance criteria
 
-- [ ] `AC-P2-001`: все прежние значения `system`, `dark`, `light` приводятся к `light`; новые настройки имеют default `light`.
-- [ ] `AC-P2-002`: API читает/сохраняет `light`, сохраняет user isolation и предсказуемо обрабатывает legacy/invalid payload.
-- [ ] `AC-P2-003`: migration rehearsal подтверждает отсутствие изменений других пользовательских данных.
+- [x] `AC-P2-001`: все прежние значения `system`, `dark`, `light` приводятся к `light`; новые настройки имеют default `light`.
+- [x] `AC-P2-002`: API читает/сохраняет `light`, сохраняет user isolation и предсказуемо обрабатывает legacy/invalid payload.
+- [x] `AC-P2-003`: migration rehearsal подтверждает отсутствие изменений других пользовательских данных.
 
 ### Verification
 
-- [ ] `make test` проходит; integration tests покрывают default, backfill всех вариантов, legacy/invalid payload, авторизацию и изоляцию.
-- [ ] Disposable migration upgrade/downgrade проверяет сохранность контрольной выборки.
-- [ ] OpenAPI и профильный API contract согласованы.
+- [x] Профильные migration и settings API integration tests покрывают default, backfill всех вариантов, legacy/invalid payload, авторизацию и изоляцию; общий suite не является gate этого IMP.
+- [x] Disposable migration upgrade/downgrade/re-upgrade проверяет сохранность контрольной выборки.
+- [x] OpenAPI schema и профильный API contract согласованы.
 
 ### Evidence contract
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| `test` | `make test` (изолированные test DB/SeaweedFS ресурсы) | `test` | `pass/fail/unavailable` | при исполнении | Task evidence |
-| `runtime` | Migration upgrade/downgrade cases in `make test` on disposable PostgreSQL | `test` | `pass/fail/unavailable` | при исполнении | Migration evidence |
+| `test` | `test_user_settings_migration_backfills_existing_accounts`; `test_user_settings_have_defaults_and_are_isolated` | `disposable Compose PostgreSQL (tmpfs)` | `pass`, 2 tests | 2026-10-20 | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml) |
+| `migration` | Alembic upgrade → backfill verification → downgrade `20261020_0010` → re-upgrade; compare user fields | `disposable Compose PostgreSQL (tmpfs)` | `pass` | 2026-10-20 | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml) |
 
 ### Exit criteria
 
-- [ ] Default, migration, API transition и rollback документированы и проверены.
-- [ ] Snapshot создан перед любым обновлением живой локальной пользовательской базы.
+- [x] Default, migration, API transition и rollback limits документированы и проверены на disposable базе.
+- Для постоянной локальной пользовательской базы: snapshot обязателен отдельно до любого будущего migration run; это не подтверждено данным локальным тестом.
 
 ## Phase 3: Устранить конфликт настроек и активной схемы
 
@@ -414,7 +414,7 @@ Phase ID: `P4`; dependencies: P1–P3.
 
 | ID | Phase/task | Severity | Status | Evidence | Impact | Owner | Exit condition | Next action |
 |---|---|---|---|---|---|---|---|---|
-| IMP-BL-01 | P1, затем P2–P4 по зависимостям | `blocking` | `resolved` | Checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5` сохранил ранее накопленные изменения; P1/TASK-023 прошла scoped проверки и интегрирована в `main` коммитом `433c739ec5f38f2484c3871c4fbbdac46805326a`. | Риск смешать или затереть пользовательскую работу снят; зависимые фазы могут продолжаться по своим воротам. | Denis Karmalak / текущий владелец изменений | Выполнено: checkpoint создан, P1 проверена и интегрирована. | Нет; продолжить P3 после её локальной визуальной проверки. |
+| IMP-BL-01 | P1, затем P2–P4 по зависимостям | `blocking` | `resolved` | Checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5` сохранил ранее накопленные изменения; P1/TASK-023 прошла scoped проверки и интегрирована в `main` коммитом `433c739ec5f38f2484c3871c4fbbdac46805326a`. | Риск смешать или затереть пользовательскую работу снят; зависимые фазы могут продолжаться по своим воротам. | Denis Karmalak / текущий владелец изменений | Выполнено: checkpoint создан, P1 проверена и интегрирована. | Блокер снят; P1–P4 подтверждены, финальная сверка ведётся в TASK-027. |
 
 ## Risks & Mitigations
 
@@ -436,12 +436,12 @@ Phase ID: `P4`; dependencies: P1–P3.
 | Durable preference | `user_settings`, Identity API/repository | Existing auth/session boundary | Project ownership or second store |
 | Settings UI | ProfileView + system settings placeholder | Shared components/settings API | Duplicated theme selectors |
 
-### Required test matrix
+### Reconciled verification matrix
 
-- [ ] PostgreSQL: existing `system/dark/light` rows normalize to `light`; new row defaults to `light`; rollback/snapshot behavior is explicit.
-- [ ] API: current-user isolation, transition legacy payload, invalid values, GET after restart.
-- [ ] Frontend: bootstrap, profile read/save, logout/login between users, API failure.
-- [ ] Visual: light/dark OS preference, key routes, modal/header/forms, focus/disabled/error/consent.
+- PostgreSQL: disposable migration rehearsal confirms `system/dark/light` → `light`, new-row default, downgrade/re-upgrade and preservation of other user fields; restoration of prior values requires a snapshot made before any future persistent-database migration.
+- API: GET/PATCH returns `light`, accepts legacy payloads as a transition, rejects invalid values, and preserves per-user isolation.
+- Frontend: bootstrap clears stale `.p-dark`; the shell and profile do not load/apply competing theme settings; profile has no inactive theme editor. System settings stays a separate placeholder.
+- Visual: light appearance held with dark OS preference on listed routes; contrast, status labels, header/forms, dialogs, focus, disabled and error states are recorded by P4 evidence.
 
 ## Finalization audit
 
@@ -474,10 +474,10 @@ IMP may become `complete` only after P1–P4 and its final verification Task hav
 
 ### Verification
 
-- [ ] Every AC-1…AC-5 maps to verified phase evidence.
-- [ ] Migration, compatibility and local restore limits are verified.
+- [ ] Every AC-1…AC-5 maps to verified phase evidence in TASK-023–TASK-026 and the TASK-027 acceptance ledger.
+- [ ] Migration, compatibility and local restore limits are verified; the disposable rehearsal is not a persistent-database migration.
 - [ ] No hosted/production result is implied by local checks.
-- [ ] Register a real final verification Task via task-store before final phase closure.
+- [ ] TASK-027 is registered in task-store as the final verification Task.
 
 ## Definition of Done
 
@@ -496,3 +496,4 @@ IMP may become `complete` only after P1–P4 and its final verification Task hav
 | 2026-10-20 | Expanded into TASK-023–TASK-026 plus final verification TASK-027; P1 remains blocked by IMP-BL-01. |
 | 2026-10-20 | Resolved IMP-BL-01 with checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`; P1–P2 verified; TASK-025 implementation committed. |
 | 2026-10-20 | P3 browser blocker removed by refreshing local Compose and verifying the dark-OS route matrix. P4 audit fixed low-contrast actions/messages and fullscreen dialogs; TASK-026 acceptance evidence records all checks and the stale GitNexus limitation. |
+| 2026-10-20 | TASK-027 independently reconciled P1–P4 evidence, repeated only the two theme-specific migration/API tests on disposable PostgreSQL, corrected stale P1/P2 checklists and finalized local-only limits. |
