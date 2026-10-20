@@ -23,6 +23,7 @@ import ProfileIdentity from "../components/ProfileIdentity.vue";
 
 const router = useRouter();
 const busy = ref(false);
+const avatarUploading = ref(false);
 const error = ref("");
 const notice = ref("");
 const passwordError = ref("");
@@ -89,6 +90,8 @@ async function savePassword(): Promise<void> {
 }
 
 async function uploadAvatar(file: File): Promise<void> {
+  if (avatarUploading.value) return;
+  avatarUploading.value = true;
   error.value = "";
   notice.value = "";
   try {
@@ -96,6 +99,8 @@ async function uploadAvatar(file: File): Promise<void> {
     notice.value = "Аватар обновлён.";
   } catch (cause) {
     error.value = cause instanceof Error ? cause.message : "Не удалось загрузить аватар.";
+  } finally {
+    avatarUploading.value = false;
   }
 }
 
@@ -140,17 +145,17 @@ function applyTheme(theme: UserSettings["theme"]): void {
         <template #content>
           <div class="profile-page__identity">
             <ProfileIdentity :display-name="form.displayName || 'Имя пользователя'" :email="form.email" :avatar-url="currentUser?.avatar_url ?? null" />
-            <ProfileAvatarPicker :disabled="busy" :error="error" :notice="notice" @select="uploadAvatar" @invalid="error = $event" />
+            <ProfileAvatarPicker :disabled="avatarUploading" :uploading="avatarUploading" :error="error" :notice="notice" @select="uploadAvatar" @invalid="error = $event" />
             <Button v-if="currentUser?.avatar_url" label="Удалить аватар" severity="secondary" text @click="removeAvatar" />
           </div>
           <form class="auth-form" @submit.prevent="saveProfile">
             <div class="field">
               <label for="profile-name">Имя</label>
-              <InputText id="profile-name" v-model="form.displayName" required maxlength="120" fluid :disabled="busy" autocomplete="name" />
+            <InputText id="profile-name" v-model="form.displayName" required maxlength="120" fluid :disabled="busy || avatarUploading" autocomplete="name" />
             </div>
             <div class="field">
               <label for="profile-email">Электронная почта</label>
-              <InputText id="profile-email" v-model="form.email" type="email" required maxlength="320" fluid :disabled="busy" autocomplete="email" />
+              <InputText id="profile-email" v-model="form.email" type="email" required maxlength="320" fluid :disabled="busy || avatarUploading" autocomplete="email" />
             </div>
             <div v-if="form.email.trim().toLowerCase() !== currentUser?.email.toLowerCase()" class="field">
               <label for="profile-current-password">Текущий пароль для смены email</label>
@@ -158,7 +163,7 @@ function applyTheme(theme: UserSettings["theme"]): void {
             </div>
             <Message v-if="error" severity="error" :closable="false">{{ error }}</Message>
             <Message v-if="notice" severity="success" :closable="false">{{ notice }}</Message>
-            <Button type="submit" label="Сохранить профиль" :loading="busy" :disabled="busy" />
+            <Button type="submit" label="Сохранить профиль" :loading="busy" :disabled="busy || avatarUploading" />
           </form>
         </template>
       </Card>
