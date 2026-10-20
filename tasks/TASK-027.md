@@ -16,36 +16,40 @@ criteria:
 - id: AC-1
   text: 'AC-1: Все AC-1…AC-5 и критерии фаз P1–P4 подтверждены относимыми локальными
     или disposable-environment evidence; незакрытые критерии точно перечислены.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-027-acceptance-ledger.yaml
 - id: AC-2
   text: 'AC-2: Миграция и rollback/rehearsal проверены на disposable PostgreSQL, сохранение
     иных пользовательских данных подтверждено, shared/production результат не подразумевается.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-027-scoped-checks.yaml
 - id: AC-3
   text: 'AC-3: Архитектурные выводы, non-goals и единственный light-only контракт
     согласованы с кодом, схемой/API/UI и документами.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-027-acceptance-ledger.yaml
 - id: AC-4
   text: 'AC-4: IMP.md, DOCS.md, TODO и ссылки/evidence согласованы с canonical IMP
     и реальными Task ID; проверки плана и ссылок имеют записанные результаты.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-027-acceptance-ledger.yaml
 - id: AC-5
   text: 'AC-5: Task-owned изменения интегрированы в объявленный parent, интеграционные
     ссылки и post-integration checks подтверждены; unrelated dirty baseline не включён.'
-  checked: false
-  evidence: []
-status: in_progress
-revision: 3
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-027-gitflow.yaml
+status: done
+revision: 4
 blockers: []
 created_at: '2026-10-20T11:41:34Z'
-updated_at: '2026-10-20T13:28:03Z'
-next_action: Проверить архитектурные контракты, ссылки и закрыть ветку TASK-027
-progress_note: 2 scoped theme migration/API tests passed in disposable PostgreSQL;
-  P1/P2 plan checklist reconciled
+updated_at: '2026-10-20T13:32:45Z'
+progress_note: 'TASK-027 accepted: phase evidence, disposable migration/API checks,
+  documentation and main integration verified'
 ---
 
 ## Outcome

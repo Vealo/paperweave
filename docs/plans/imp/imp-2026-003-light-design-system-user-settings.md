@@ -4,7 +4,7 @@ id: imp-2026-003-light-design-system-user-settings
 name: "Единый светлый дизайн-код и согласование настроек пользователя"
 type: imp
 version: 1.0.0
-status: active
+status: complete
 freeze: false
 date: 2026-10-20
 last_reviewed: 2026-10-20
@@ -39,8 +39,8 @@ analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-003-light-design-system-user-settings.md
 architecture_status: complete
 architecture_ref: ../../evidence/architecture/imp-2026-003-light-design-system-user-settings.json
-finalization_status: pending
-audit_ref: null
+finalization_status: complete
+audit_ref: ../../evidence/verification/TASK-027-acceptance-ledger.yaml
 deployment_mode: not_applicable
 ---
 
@@ -272,8 +272,8 @@ Phase ID: `P2`; dependency: P1; status: `verified`, implementation commit `adebf
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| `test` | `test_user_settings_migration_backfills_existing_accounts`; `test_user_settings_have_defaults_and_are_isolated` | `disposable Compose PostgreSQL (tmpfs)` | `pass`, 2 tests | 2026-10-20 | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml) |
-| `migration` | Alembic upgrade → backfill verification → downgrade `20261020_0010` → re-upgrade; compare user fields | `disposable Compose PostgreSQL (tmpfs)` | `pass` | 2026-10-20 | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml) |
+| `test` | `test_user_settings_migration_backfills_existing_accounts`; `test_user_settings_have_defaults_and_are_isolated` | `disposable Compose PostgreSQL (tmpfs)` | `pass`, 2 tests | 2026-10-20 | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml); [acceptance](../../evidence/verification/TASK-027-acceptance-ledger.yaml) |
+| `migration` | Alembic upgrade → backfill verification → downgrade `20261020_0010` → re-upgrade; compare user fields | `disposable Compose PostgreSQL (tmpfs)` | `pass` | 2026-10-20 | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml); [acceptance](../../evidence/verification/TASK-027-acceptance-ledger.yaml) |
 
 ### Exit criteria
 
@@ -445,7 +445,7 @@ Phase ID: `P4`; dependencies: P1–P3.
 
 ## Finalization audit
 
-`finalization_status` begins `pending`; this audit is not an implementation phase.
+`finalization_status` began `pending`; the audit is not an implementation phase.
 
 ### Expected result
 
@@ -464,9 +464,15 @@ Independent evidence confirms all phases, migration behavior, architecture findi
 
 | Evidence | Source | Required result | Artifact |
 |---|---|---|---|
-| Phase reconciliation | Canonical IMP and phase evidence | Every mandatory gate supported | Final verification record |
-| Local data/UI | Local app and disposable PostgreSQL | Light-only behavior and migration verified | Final verification record |
-| Documentation | `IMP.md`, `DOCS.md`, design-system/data-model | Links and claims align with implementation | Final verification record |
+| Phase reconciliation | Canonical IMP and phase evidence | Every mandatory gate supported | [TASK-027 acceptance](../../evidence/verification/TASK-027-acceptance-ledger.yaml) |
+| Local data/UI | Local app and disposable PostgreSQL | Light-only behavior and migration verified | [TASK-027 scoped checks](../../evidence/verification/TASK-027-scoped-checks.yaml) |
+| Documentation | `IMP.md`, `DOCS.md`, design-system/data-model | Links and claims align with implementation | [TASK-027 finalization](../../evidence/verification/TASK-027-finalization.yaml) |
+
+### Final result
+
+TASK-027 is accepted and integrated into `main`. P1–P4 evidence, disposable migration rehearsal, architecture boundaries and documentation are reconciled in the [acceptance ledger](../../evidence/verification/TASK-027-acceptance-ledger.yaml). Two scope-specific migration/API tests passed in a disposable PostgreSQL backed by tmpfs; no persistent, shared or production database was migrated. A snapshot remains a prerequisite before any separately authorized migration of a persistent local database when restoration of prior values is needed.
+
+GitNexus index refresh remains incomplete: the graph rebuilt, but the CLI could not update `/home/denis/.gitnexus/registry.json` because the filesystem is read-only (`EROFS`). MCP change analysis reported only document sections and no affected flows against the stale index. Direct source/reference review and exact-diff checks found no code changes or concrete unresolved safety/data-integrity risk; the documented degraded-graph fallback passed. This is not reported as a clean or current graph.
 
 ## Closure
 
@@ -474,19 +480,19 @@ IMP may become `complete` only after P1–P4 and its final verification Task hav
 
 ### Verification
 
-- [ ] Every AC-1…AC-5 maps to verified phase evidence in TASK-023–TASK-026 and the TASK-027 acceptance ledger.
-- [ ] Migration, compatibility and local restore limits are verified; the disposable rehearsal is not a persistent-database migration.
-- [ ] No hosted/production result is implied by local checks.
-- [ ] TASK-027 is registered in task-store as the final verification Task.
+- [x] Every AC-1…AC-5 maps to verified phase evidence in TASK-023–TASK-026 and the TASK-027 acceptance ledger.
+- [x] Migration, compatibility and local restore limits are verified; the disposable rehearsal is not a persistent-database migration.
+- [x] No hosted/production result is implied by local checks.
+- [x] TASK-027 is registered in task-store as the final verification Task.
 
 ## Definition of Done
 
-- [ ] Palette implemented centrally through semantic tokens; neutral surfaces and contrast match the accepted design-code.
-- [ ] PostgreSQL stores `light` for every user; API behavior is consistent.
-- [ ] No application path or OS preference activates `.p-dark`.
-- [ ] Profile and system settings have distinct, understandable roles.
-- [ ] Automated and visual evidence covers acceptance criteria and failure paths.
-- [ ] Docs/indexes reconciled and whole-plan verification accepted.
+- [x] Palette implemented centrally through semantic tokens; neutral surfaces and contrast match the accepted design-code.
+- [x] PostgreSQL stores `light` for every user; API behavior is consistent.
+- [x] No application path or OS preference activates `.p-dark`.
+- [x] Profile and system settings have distinct, understandable roles.
+- [x] Automated and visual evidence covers acceptance criteria and failure paths.
+- [x] Docs/indexes reconciled and whole-plan verification accepted.
 
 ## Change Log
 

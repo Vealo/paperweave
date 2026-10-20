@@ -1,0 +1,113 @@
+schema_version: 1
+task_id: TASK-027
+repositories:
+  - repo_root: /home/denis/Projects/paperweave
+    applicable: true
+    base_ref: main
+    base_sha: c04821966430e6b81ce4bb50009972dff88a262f
+    task_branch: codex/task-027-final-verification
+    task_commits:
+      - 9e21cc3e42a4a09bf354a4f4e5452cd56cde681e
+    integration_ref: main
+    merge_commit: 42d96974dea522dc90c582919b9d3e5ba2cb09ca
+baseline:
+  captured: 2026-10-20; task start on main at c04821966430e6b81ce4bb50009972dff88a262f
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+    - TODO.md.before-reconcile-02f05406fda8
+    - TODO.md.before-reconcile-04539a7878a6
+    - TODO.md.before-reconcile-10e9e0fd1fab
+    - TODO.md.before-reconcile-156a7ca35ad9
+    - TODO.md.before-reconcile-36176b47c622
+    - TODO.md.before-reconcile-36fca55aeb81
+    - TODO.md.before-reconcile-38540a5c92c8
+    - TODO.md.before-reconcile-3c747621f5d1
+    - TODO.md.before-reconcile-3d30bd3a87ee
+    - TODO.md.before-reconcile-44eb5d5549e3
+    - TODO.md.before-reconcile-463f922ce07f
+    - TODO.md.before-reconcile-4bdf6694651a
+    - TODO.md.before-reconcile-4cad7960a13b
+    - TODO.md.before-reconcile-4fd1aab8cbf9
+    - TODO.md.before-reconcile-50ca5156bcda
+    - TODO.md.before-reconcile-55689f5989f9
+    - TODO.md.before-reconcile-5fe5ffe6ced2
+    - TODO.md.before-reconcile-61205549470a
+    - TODO.md.before-reconcile-637b24415083
+    - TODO.md.before-reconcile-68be412edff6
+    - TODO.md.before-reconcile-78f2eb5d89c2
+    - TODO.md.before-reconcile-7dd731303d1f
+    - TODO.md.before-reconcile-7e8d0a9d1ed5
+    - TODO.md.before-reconcile-7ee0e73463b5
+    - TODO.md.before-reconcile-8b240a1795ea
+    - TODO.md.before-reconcile-9679457858e5
+    - TODO.md.before-reconcile-a78c6fb36d8f
+    - TODO.md.before-reconcile-ab99bf525f94
+    - TODO.md.before-reconcile-ac76bb65c382
+    - TODO.md.before-reconcile-af85d3856e41
+    - TODO.md.before-reconcile-b05b9d0b0e8d
+    - TODO.md.before-reconcile-ba518057dfc0
+    - TODO.md.before-reconcile-bf20e98430a1
+    - TODO.md.before-reconcile-bf753b40f345
+    - TODO.md.before-reconcile-c56a9975600e
+    - TODO.md.before-reconcile-c8dab21cb087
+    - TODO.md.before-reconcile-cd5ea2eedb7c
+    - TODO.md.before-reconcile-ce652420f086
+    - TODO.md.before-reconcile-d397530e746c
+    - TODO.md.before-reconcile-d4ad747d11af
+    - TODO.md.before-reconcile-d6826e6a3505
+    - TODO.md.before-reconcile-db48eda2e66a
+    - TODO.md.before-reconcile-ee0d3feb35dd
+    - TODO.md.before-reconcile-f0cbdb2ad73d
+    - TODO.md.before-reconcile-f2ea2c66bfbf
+    - TODO.md.before-reconcile-f73f97a7e282
+    - TODO.md.before-reconcile-fca5287b0791
+    - TODO.md.before-reconcile-fe1f713f5e9f
+    - TODO.md.before-reconcile-fe5fa29a5e24
+    - tasks/.lock
+  ownership_map_ref: docs/evidence/verification/TASK-027-scoped-checks.yaml
+  preservation_action: >-
+    All baseline TODO backups and tasks/.lock were left untracked and unstaged. The
+    task generated TODO.md.before-reconcile-c187056ca31e,
+    TODO.md.before-reconcile-70356995004c and
+    TODO.md.before-reconcile-a7c597e3b660; these snapshots are also preserved and
+    excluded from commits. Only reviewed task-owned paths were committed.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-027-acceptance-ledger.yaml
+  checks:
+    - command: theme migration and API integration tests on disposable Compose PostgreSQL
+      status: passed
+      evidence_ref: docs/evidence/verification/TASK-027-scoped-checks.yaml
+    - command: task-store validate
+      status: passed
+      evidence_ref: "valid: 27 task(s)"
+    - command: validate-todo.py TODO.md --store tasks
+      status: passed
+      evidence_ref: "STRUCTURE AND TASK-STORE PROJECTION OK"
+    - command: local Markdown reference validation
+      status: passed
+      evidence_ref: "66 local links resolved, 0 missing; percent-encoded paths decoded"
+    - command: git diff --check
+      status: passed
+      evidence_ref: post-integration and final-record validation
+    - command: GitNexus detect_changes and analyze --index-only
+      status: incomplete_fallback
+      evidence_ref: docs/evidence/verification/TASK-027-acceptance-ledger.yaml
+      rationale: >-
+        Index remains stale/incomplete. CLI graph rebuild reached the external registry
+        write then failed with EROFS. MCP saw documentation sections only; direct source,
+        reference and exact-diff review passed with no concrete unresolved risk. No clean
+        or current graph result is claimed.
+integration:
+  status: merged
+  post_merge_checks:
+    - task-store validation passed
+    - TODO projection validation passed
+    - local Markdown links passed
+    - git diff --check passed
+    - task commit reachable from main
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: project owner
+  next_action: none; TASK-027 accepted and IMP-2026-003 finalized locally

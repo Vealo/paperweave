@@ -1,0 +1,41 @@
+schema_version: 1
+task_id: TASK-027
+acceptance_ref: docs/evidence/verification/TASK-027-acceptance-ledger.yaml
+commit:
+  required: true
+  created: true
+  id: 9e21cc3e42a4a09bf354a4f4e5452cd56cde681e
+  reason: Task-owned IMP evidence reconciliation committed and integrated locally.
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-027-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: 42d96974dea522dc90c582919b9d3e5ba2cb09ca
+  parent_head: 42d96974dea522dc90c582919b9d3e5ba2cb09ca
+  task_commit_reachable: true
+  reason: >-
+    verify_parent_reachability.py returned reachable: true for task commit
+    9e21cc3e42a4a09bf354a4f4e5452cd56cde681e on main.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-027.md
+documentation_graph:
+  required_updates:
+    - IMP.md
+    - DOCS.md
+    - docs/plans/imp/imp-2026-003-light-design-system-user-settings.md
+    - docs/evidence/verification/TASK-027-acceptance-ledger.yaml
+    - docs/evidence/verification/TASK-027-scoped-checks.yaml
+    - docs/evidence/verification/TASK-027-gitflow.yaml
+    - docs/evidence/verification/TASK-027-finalization.yaml
+    - TODO.md
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md; task-store snapshot validated
+linked_open_outcomes: []
+result: finalized
+next_action: null

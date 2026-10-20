@@ -1,0 +1,88 @@
+schema_version: 1
+task_id: TASK-027
+contract_ref: tasks/TASK-027.md
+baseline_ref: main
+baseline_sha: c04821966430e6b81ce4bb50009972dff88a262f
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: >-
+      tasks/TASK-023.md; tasks/TASK-024.md;
+      docs/evidence/verification/TASK-025-acceptance-ledger.yaml;
+      docs/evidence/verification/TASK-026-acceptance-ledger.yaml;
+      docs/plans/imp/imp-2026-003-light-design-system-user-settings.md
+    rationale: >-
+      P1-P4 task criteria are supported by their task records and scoped acceptance
+      evidence. The IMP plan's stale P1/P2 pending rows and checklists have been
+      reconciled to the accepted task evidence; P3/P4 records were independently checked.
+  - id: AC-2
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-027-scoped-checks.yaml; tests/integration/test_projects_api.py::test_user_settings_migration_backfills_existing_accounts
+    rationale: >-
+      Two theme-specific integration tests passed in dedicated disposable Compose
+      PostgreSQL databases backed by tmpfs. The rehearsal covered legacy-value backfill,
+      default, downgrade/re-upgrade and preservation of user fields. No shared,
+      production or persistent PaperWeave database was migrated by these checks.
+  - id: AC-3
+    status: passed
+    evidence_ref: >-
+      src/paperweave/infrastructure/db/models.py;
+      src/paperweave/infrastructure/db/identity_repository.py;
+      src/paperweave/api/schemas/identity.py;
+      migrations/versions/20261020_0011_light_user_theme.py;
+      frontend/src/main.ts; frontend/src/theme/paperweavePreset.ts;
+      docs/design-system.md; docs/data-model.md; ADR-0007
+    rationale: >-
+      Code, schema, API, UI, ADR and documents agree that light is the only persisted
+      and active theme; legacy payloads normalize to light. Dark mode and OS preference
+      activation remain out of scope, and profile theme selection is absent.
+  - id: AC-4
+    status: passed
+    evidence_ref: >-
+      IMP.md; DOCS.md; TODO.md; docs/plans/imp/imp-2026-003-light-design-system-user-settings.md;
+      python3 /home/denis/.agents/skills/task-store/scripts/tasks.py --store tasks validate;
+      python3 /home/denis/.agents/skills/todo/scripts/validate-todo.py TODO.md --store tasks;
+      local Markdown link validation (66 local links resolved, 0 missing; percent-encoded paths decoded);
+      git diff --check
+    rationale: >-
+      IMP, document register, TODO projection, task records and evidence references were
+      reconciled. The plan and local-reference checks were run; final post-record results
+      are included in required_checks and the finalization receipt.
+  - id: AC-5
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-027-gitflow.yaml; docs/evidence/verification/TASK-027-finalization.yaml
+    rationale: >-
+      Task-owned commit 9e21cc3e42a4a09bf354a4f4e5452cd56cde681e is reachable from
+      main at merge 42d96974dea522dc90c582919b9d3e5ba2cb09ca. Post-integration
+      task-store, TODO and whitespace/reference checks passed. Unrelated untracked
+      TODO backup files and tasks/.lock were not staged or committed.
+required_checks:
+  - command: Two scoped theme migration/API integration tests in disposable Compose PostgreSQL
+    status: passed
+    evidence_ref: docs/evidence/verification/TASK-027-scoped-checks.yaml
+  - command: task-store validate
+    status: passed
+    evidence_ref: "valid: 27 task(s), post-integration"
+  - command: validate-todo.py TODO.md --store tasks
+    status: passed
+    evidence_ref: "STRUCTURE AND TASK-STORE PROJECTION OK, post-integration"
+  - command: local Markdown link validation for IMP.md, DOCS.md, TODO.md, TASK-027 and canonical IMP
+    status: passed
+    evidence_ref: "66 local links resolved, 0 missing; percent-encoded paths decoded"
+  - command: git diff --check
+    status: passed
+    evidence_ref: Post-integration and final-record diff checks
+  - command: GitNexus analyze --index-only
+    status: incomplete
+    evidence_ref: EROFS writing /home/denis/.gitnexus/registry.json after graph rebuild
+    rationale: >-
+      MCP detect_changes saw only expected documentation sections (20 changed symbols,
+      5 files, 0 affected processes, low reported risk). The separate index rebuild
+      remains incomplete because the external registry is not writable. The result
+      is not a complete/current graph. Direct review of the exact diff, repository theme
+      references and contracts found no source-code changes or concrete unresolved
+      safety/data-integrity risk; bounded fallback passed.
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null
