@@ -13,23 +13,36 @@ criteria:
 - id: AC-1
   text: 'AC-P2-001: все прежние значения system, dark, light приводятся к light; новые
     настройки имеют default light.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - 'Disposable PostgreSQL migration rehearsal: system/dark/light all normalized to
+    light; new DB default and CHECK constraint enforce light.'
+  - Disposable PostgreSQL rehearsal also downgraded to 0010 and re-upgraded; existing
+    values remained light after downgrade, then the light-only constraint/default
+    returned.
 - id: AC-2
   text: 'AC-P2-002: API читает/сохраняет light, сохраняет user isolation и предсказуемо
     обрабатывает legacy/invalid payload.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - 'API integration coverage: GET returns light, legacy system/dark/light PATCH returns
+    light, sepia is 422, and member updates do not affect owner settings.'
 - id: AC-3
   text: 'AC-P2-003: migration rehearsal подтверждает отсутствие изменений других пользовательских
     данных.'
-  checked: false
-  evidence: []
-status: todo
-revision: 1
+  checked: true
+  evidence:
+  - 'Isolated Compose test run: 87 passed; migration rehearsal preserved email, display_name,
+    password_hash, role, and is_active.'
+status: in_progress
+revision: 4
 blockers: []
 created_at: '2026-10-20T11:41:18Z'
-updated_at: '2026-10-20T11:41:18Z'
+updated_at: '2026-10-20T12:17:48Z'
+next_action: Review scoped diff, run GitNexus pre-commit analysis, and commit TASK-024
+  on main
+progress_note: 'P2 migration/API verified: 87 tests pass, including isolated upgrade/downgrade
+  and isolation coverage.'
 ---
 
 ## Outcome

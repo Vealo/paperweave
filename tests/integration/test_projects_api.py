@@ -1,6 +1,6 @@
 from datetime import UTC, datetime
 from pathlib import Path
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from alembic import command
 from alembic.config import Config
@@ -244,7 +244,15 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
         assert {"run_id", "file_id", "page_number", "text"} <= passage_columns
         with engine.connect() as connection:
             revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-        assert revision == "20261020_0010"
+        assert revision == "20261020_0011"
+        user_settings_columns = {
+            column["name"]: column for column in inspector.get_columns("user_settings")
+        }
+        assert user_settings_columns["theme"]["default"].startswith("'light'")
+        assert any(
+            constraint["name"] == "ck_user_settings_theme_light"
+            for constraint in inspector.get_check_constraints("user_settings")
+        )
         assert {"manuscript_id", "block_position", "text", "version", "manuscript_version"} <= {column["name"] for column in inspector.get_columns("claims")}
         assert {"claim_id", "claim_version", "passage_id", "passage_file_id", "relation", "review_state", "manuscript_version", "version"} <= {column["name"] for column in inspector.get_columns("evidence_links")}
         assert {"reviewer_id", "link_version", "decision", "note", "decided_at"} <= {column["name"] for column in inspector.get_columns("review_decisions")}
@@ -269,28 +277,98 @@ def test_user_settings_migration_backfills_existing_accounts(
         alembic_config = Config(str(PROJECT_ROOT / "alembic.ini"))
         command.upgrade(alembic_config, "20261020_0008")
 
-        existing_user_id = "00000000-0000-0000-0000-000000000987"
+        existing_user_ids = [
+            "00000000-0000-0000-0000-000000000987",
+            "00000000-0000-0000-0000-000000000988",
+            "00000000-0000-0000-0000-000000000989",
+        ]
+        with create_engine(schema_url).begin() as connection:
+            for index, user_id in enumerate(existing_user_ids):
+                connection.execute(
+                    text(
+                        "INSERT INTO users (id, email, display_name, password_hash, role) "
+                        "VALUES (:id, :email, :name, :password_hash, 'member')"
+                    ),
+                    {
+                        "id": user_id,
+                        "email": f"existing-{index}@example.test",
+                        "name": f"Existing User {index}",
+                        "password_hash": f"hash-{index}",
+                    },
+                )
+
+        command.upgrade(alembic_config, "20261020_0010")
         with create_engine(schema_url).begin() as connection:
             connection.execute(
-                text(
-                    "INSERT INTO users (id, email, display_name, role) "
-                    "VALUES (:id, 'existing@example.test', 'Existing User', 'member')"
-                ),
-                {"id": existing_user_id},
+                text("UPDATE user_settings SET theme=:theme WHERE user_id=:user_id"),
+                [
+                    {"user_id": existing_user_ids[0], "theme": "system"},
+                    {"user_id": existing_user_ids[1], "theme": "dark"},
+                    {"user_id": existing_user_ids[2], "theme": "light"},
+                ],
             )
 
         command.upgrade(alembic_config, "head")
         with create_engine(schema_url).connect() as connection:
             settings = connection.execute(
-                text("SELECT theme FROM user_settings WHERE user_id=:user_id"),
-                {"user_id": existing_user_id},
+                text(
+                    "SELECT user_id, theme FROM user_settings "
+                    "WHERE user_id IN (:owner, :user_1, :user_2, :user_3) ORDER BY user_id"
+                ),
+                {
+                    "owner": "00000000-0000-0000-0000-000000000001",
+                    "user_1": existing_user_ids[0],
+                    "user_2": existing_user_ids[1],
+                    "user_3": existing_user_ids[2],
+                },
+            ).all()
+            users = connection.execute(
+                text(
+                    "SELECT email, display_name, password_hash, role, is_active FROM users "
+                    "WHERE email LIKE 'existing-%' ORDER BY email"
+                )
+            ).all()
+            revision = connection.execute(
+                text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-            is_active = connection.execute(
-                text("SELECT is_active FROM users WHERE id=:user_id"),
-                {"user_id": existing_user_id},
+        assert revision == "20261020_0011"
+        assert [(row.user_id, row.theme) for row in settings] == sorted(
+            [(UUID("00000000-0000-0000-0000-000000000001"), "light")]
+            + [(UUID(user_id), "light") for user_id in existing_user_ids]
+        )
+        assert [(row.email, row.display_name, row.password_hash, row.role, row.is_active) for row in users] == [
+            (f"existing-{index}@example.test", f"Existing User {index}", f"hash-{index}", "member", True)
+            for index in range(3)
+        ]
+
+        command.downgrade(alembic_config, "20261020_0010")
+        with create_engine(schema_url).connect() as connection:
+            downgraded_revision = connection.execute(
+                text("SELECT version_num FROM alembic_version")
             ).scalar_one()
-        assert settings == "system"
-        assert is_active is True
+            downgraded_themes = connection.execute(
+                text("SELECT user_id, theme FROM user_settings ORDER BY user_id")
+            ).all()
+        assert downgraded_revision == "20261020_0010"
+        assert all(row.theme == "light" for row in downgraded_themes)
+
+        command.upgrade(alembic_config, "head")
+
+        with create_engine(schema_url).begin() as connection:
+            new_user_id = "00000000-0000-0000-0000-000000000990"
+            connection.execute(
+                text("INSERT INTO users (id, email, display_name, role) VALUES (:id, 'new@example.test', 'New User', 'member')"),
+                {"id": new_user_id},
+            )
+            connection.execute(
+                text("INSERT INTO user_settings (user_id) VALUES (:id)"),
+                {"id": new_user_id},
+            )
+            default_theme = connection.execute(
+                text("SELECT theme FROM user_settings WHERE user_id=:id"),
+                {"id": new_user_id},
+            ).scalar_one()
+        assert default_theme == "light"
     finally:
         with admin_engine.begin() as connection:
             connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))

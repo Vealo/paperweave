@@ -275,7 +275,7 @@ def test_owner_manages_member_profiles_and_deactivation_preserves_data(
             assert connection.execute(
                 text("SELECT theme FROM user_settings WHERE user_id=:user_id"),
                 {"user_id": UUID(member["id"])},
-            ).scalar_one() == "system"
+            ).scalar_one() == "light"
 
         reactivated = client.patch(user_url, json={"is_active": True})
         assert reactivated.status_code == 200, reactivated.text
@@ -318,17 +318,22 @@ def test_user_settings_have_defaults_and_are_isolated(
         _login(member_client, member["email"], MEMBER_PASSWORD)
         member_settings = member_client.get("/api/v1/auth/me/settings")
         assert member_settings.status_code == 200, member_settings.text
-        assert member_settings.json() == {"user_id": member["id"], "theme": "system"}
+        assert member_settings.json() == {"user_id": member["id"], "theme": "light"}
 
         owner_settings_before = client.get("/api/v1/auth/me/settings")
         assert owner_settings_before.status_code == 200, owner_settings_before.text
         owner_theme_before = owner_settings_before.json()["theme"]
 
-        updated = member_client.patch(
-            "/api/v1/auth/me/settings", json={"theme": "dark"}
+        for legacy_theme in ("system", "dark", "light"):
+            updated = member_client.patch(
+                "/api/v1/auth/me/settings", json={"theme": legacy_theme}
+            )
+            assert updated.status_code == 200, updated.text
+            assert updated.json()["theme"] == "light"
+        invalid = member_client.patch(
+            "/api/v1/auth/me/settings", json={"theme": "sepia"}
         )
-        assert updated.status_code == 200, updated.text
-        assert updated.json()["theme"] == "dark"
+        assert invalid.status_code == 422
         assert client.get("/api/v1/auth/me/settings").json()["theme"] == owner_theme_before
 
         with create_engine(database_url).connect() as connection:
@@ -339,4 +344,4 @@ def test_user_settings_have_defaults_and_are_isolated(
                     "member": UUID(member["id"]),
                 },
             ).all()
-        assert {row.user_id: row.theme for row in rows}[UUID(member["id"])] == "dark"
+        assert {row.user_id: row.theme for row in rows}[UUID(member["id"])] == "light"

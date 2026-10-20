@@ -31,7 +31,7 @@ change_kind: none
 phases: 4
 phase_statuses:
   P1: verified
-  P2: ready
+  P2: active
   P3: pending
   P4: pending
 progress: 1/4

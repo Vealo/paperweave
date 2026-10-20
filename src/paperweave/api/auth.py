@@ -136,7 +136,7 @@ def update_my_settings(
     repository: IdentityRepositoryDep,
     user=Depends(get_current_user),
 ) -> UserSettingsResponse:
-    return _settings_response(repository.update_settings(user.id, theme=payload.theme))
+    return _settings_response(repository.update_settings(user.id))
 
 
 @router.post("/me/avatar", response_model=UserResponse)

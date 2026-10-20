@@ -29,11 +29,14 @@ class UserRecord(Base):
 
 class UserSettingsRecord(Base):
     __tablename__ = "user_settings"
+    __table_args__ = (
+        CheckConstraint("theme = 'light'", name="ck_user_settings_theme_light"),
+    )
 
     user_id: Mapped[UUID] = mapped_column(
         Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
     )
-    theme: Mapped[str] = mapped_column(String(10), nullable=False, default="system", server_default="system")
+    theme: Mapped[str] = mapped_column(String(10), nullable=False, default="light", server_default="light")
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )

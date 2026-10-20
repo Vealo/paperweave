@@ -107,11 +107,12 @@ class IdentityRepository:
             self._session.commit()
         return settings
 
-    def update_settings(
-        self, user_id: UUID, *, theme: str
-    ) -> UserSettingsRecord:
+    def update_settings(self, user_id: UUID) -> UserSettingsRecord:
         settings = self.get_settings(user_id)
-        settings.theme = theme
+        # `system` and `dark` remain accepted at the API boundary for older
+        # clients, but `light` is the only persisted theme until dark mode is
+        # implemented as a separate product capability.
+        settings.theme = "light"
         self._session.commit()
         return settings
 

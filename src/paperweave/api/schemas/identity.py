@@ -125,7 +125,7 @@ class UserSettingsUpdateRequest(BaseModel):
 
 class UserSettingsResponse(BaseModel):
     user_id: str
-    theme: str
+    theme: Literal["light"]
 
 
 class UserResponse(BaseModel):
