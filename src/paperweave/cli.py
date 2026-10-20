@@ -111,6 +111,27 @@ class ComposeRunner:
             capture_output=capture_output,
         )
 
+    def service_status(self) -> tuple[dict[str, dict[str, str]], str | None]:
+        result = self.run("ps", "--all", "--format", "json", check=False, capture_output=True)
+        if result.returncode:
+            return {}, f"docker compose ps завершился с кодом {result.returncode}"
+
+        statuses: dict[str, dict[str, str]] = {}
+        try:
+            for line in result.stdout.splitlines():
+                if not line.strip():
+                    continue
+                container = json.loads(line)
+                service = container.get("Service")
+                if service in {"db", "api", "ui"}:
+                    statuses[service] = {
+                        "state": str(container.get("State") or "unknown"),
+                        "health": str(container.get("Health") or ""),
+                    }
+        except (json.JSONDecodeError, AttributeError):
+            return {}, "не удалось разобрать ответ docker compose ps"
+        return statuses, None
+
     def start(self, force_recreate: bool = False) -> None:
         self.run("build", "api", "migrate", "ui")
         self.run("stop", "api", "ui", check=False)
@@ -199,11 +220,42 @@ def _seaweedfs_state(runner: ComposeRunner) -> str:
 
 
 def _storage_summary(config: AppConfig, seaweedfs_state: str, s3_status: str) -> None:
-    print(f"Storage backend: {config.storage.backend}")
-    print(f"SeaweedFS: {seaweedfs_state}")
-    print(f"S3 readiness: {s3_status}")
-    print(f"S3 endpoint: {_safe_endpoint(config.storage.s3_endpoint_url)}")
-    print(f"S3 bucket: {config.storage.s3_bucket}")
+    print("  Хранилище:")
+    print(f"    Backend:      {config.storage.backend}")
+    print(f"    SeaweedFS:    {seaweedfs_state}")
+    print(f"    S3 readiness: {s3_status}")
+    print(f"    S3 endpoint:  {_safe_endpoint(config.storage.s3_endpoint_url)}")
+    print(f"    S3 bucket:    {config.storage.s3_bucket}")
+
+
+def _print_startup_summary(runner: ComposeRunner, config: AppConfig) -> None:
+    statuses, status_error = runner.service_status()
+    bind_host = config.deployment.bind_host
+    url_host = f"[{bind_host}]" if ":" in bind_host else bind_host
+
+    def status_for(service: str) -> str:
+        if status_error:
+            return "состояние недоступно"
+        status = statuses.get(service)
+        if status is None:
+            return "контейнер не найден"
+        health = status["health"]
+        if health:
+            return f"{health} ({status['state']})"
+        return status["state"]
+
+    print("\nPaperWeave — состояние после запуска:")
+    print(f"  UI:        http://{url_host}:{config.ui.port} — {status_for('ui')}")
+    print(f"  API:       {config.ui.api_base_url}/api/v1 — {status_for('api')}")
+    print(f"  API ready: {config.ui.api_base_url}/api/v1/health/ready")
+    print(
+        f"  PostgreSQL: {status_for('db')} "
+        f"({config.database.host}:{config.database.port}, только внутри Compose)"
+    )
+    print("  Миграции:  применены")
+    print(f"  Compose:   {runner.project_name}")
+    if status_error:
+        print(f"  Примечание: {status_error}")
 
 
 def _run_s3_probe(runner: ComposeRunner, *, mode: str, profile: str) -> int:
@@ -261,21 +313,29 @@ def main(argv: list[str] | None = None) -> int:
             state = _seaweedfs_state(runner)
             if config.storage.backend == "s3" and urlsplit(config.storage.s3_endpoint_url).hostname == "seaweedfs":
                 probe_status = _run_s3_probe(runner, mode="readiness", profile="storage-check")
+                _print_startup_summary(runner, config)
                 _storage_summary(config, state, "available" if probe_status == 0 else "unavailable")
                 return probe_status
             if config.storage.backend == "local":
                 s3_status = "not checked (local backend selected)"
             else:
                 s3_status = "not checked (configured endpoint is outside local SeaweedFS)"
+            _print_startup_summary(runner, config)
             _storage_summary(config, state, s3_status)
         elif args.command == "restart":
             runner.start(force_recreate=True)
             state = _seaweedfs_state(runner)
             if config.storage.backend == "s3" and urlsplit(config.storage.s3_endpoint_url).hostname == "seaweedfs":
                 probe_status = _run_s3_probe(runner, mode="readiness", profile="storage-check")
+                _print_startup_summary(runner, config)
                 _storage_summary(config, state, "available" if probe_status == 0 else "unavailable")
                 return probe_status
-            _storage_summary(config, state, "not checked")
+            if config.storage.backend == "local":
+                s3_status = "not checked (local backend selected)"
+            else:
+                s3_status = "not checked (configured endpoint is outside local SeaweedFS)"
+            _print_startup_summary(runner, config)
+            _storage_summary(config, state, s3_status)
         elif args.command == "down":
             runner.run("down", "--remove-orphans")
         elif args.command == "migrate":
