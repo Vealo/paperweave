@@ -4,7 +4,9 @@ import { getAuthStatus, getCurrentUser, isSessionError } from "../api/auth";
 import AccessDeniedView from "../views/AccessDeniedView.vue";
 import LoginView from "../views/LoginView.vue";
 import ProjectDetailView from "../views/ProjectDetailView.vue";
+import ProfileView from "../views/ProfileView.vue";
 import ProjectsView from "../views/ProjectsView.vue";
+import UserManagementView from "../views/UserManagementView.vue";
 import UsersView from "../views/UsersView.vue";
 
 export const router = createRouter({
@@ -19,6 +21,18 @@ export const router = createRouter({
       component: ProjectDetailView,
       props: true,
       meta: { requiresAuth: true },
+    },
+    {
+      path: "/profile",
+      name: "profile",
+      component: ProfileView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/users",
+      name: "users",
+      component: UserManagementView,
+      meta: { requiresAuth: true, ownerOnly: true },
     },
     {
       path: "/users/new",
