@@ -49,13 +49,13 @@ criteria:
   checked: true
   evidence:
   - docs/runbook-local.md S3 and SeaweedFS operations
-status: in_progress
-revision: 8
+status: done
+revision: 9
 blockers: []
 created_at: '2026-10-20T08:29:08Z'
-updated_at: '2026-10-20T10:55:51Z'
-progress_note: S3 round-trip passed; isolated make test passed 84 tests
-next_action: Commit scoped TASK-021 changes on main
+updated_at: '2026-10-20T10:56:46Z'
+progress_note: Implemented and integrated on main; isolated S3 check and 84 tests
+  passed
 ---
 
 ## Outcome
@@ -71,3 +71,5 @@ Makefile, CLI-команды, Compose service health/readiness и runbook для
 The Makefile interface should expose local SeaweedFS startup and a bounded S3 put/get/delete check, then summarize service status without printing secrets.
 
 Finalization evidence: isolated `make storage-check` completed S3 readiness plus put/get/delete verification; `make test` passed 84 tests and cleaned its test-owned Compose resources. `make up` was not run against the shared/default Compose project; its summary and probe failure behavior are supported by focused CLI unit tests and source review. Reviewer acceptance ledger: /root/audit_task021, accepted AC-1 through AC-6.
+
+Finalization: source commit 59b2aabc23463c677932158124add412da54612b is HEAD on parent main; verify_parent_reachability.py returned reachable=true with parent_head 59b2aabc23463c677932158124add412da54612b. Post-integration GitNexus analyze completed and status reports indexed commit 59b2aab; the analyzer still warns that process-flow coverage is incomplete (214/252 candidates, dropped/truncated entries), so graph is updated but incomplete. Post-integration local checks: make test, 84 passed; make storage-check isolated S3 readiness and round-trip passed. No shared/default `make up` smoke and no push/deploy.
