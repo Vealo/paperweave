@@ -26,8 +26,12 @@ criteria:
   checked: false
   evidence: []
 - id: AC-4
-  text: Ошибка декодирования, лимита или записи не повреждает прежний аватар и не
-    оставляет несвязанных файлов.
+  text: 'Ошибки проверки/лимита и атомарной записи файла не меняют прежний аватар
+    и не оставляют частичного объекта. При ошибке COMMIT сервис сверяет активный ключ
+    с PostgreSQL: при подтверждённой новой ссылке сохраняет новый файл и удаляет прежний;
+    при подтверждённой старой ссылке удаляет кандидата. Если БД недоступна для сверки,
+    сохраняет потенциально используемый файл и пишет структурированное событие; повторяемая
+    очистка такого неопределённого объекта выполняется в TASK-020.'
   checked: false
   evidence: []
 - id: AC-5
@@ -35,11 +39,14 @@ criteria:
     к пользовательской БД или внешнему хранилищу.
   checked: false
   evidence: []
-status: todo
-revision: 2
+status: in_progress
+revision: 6
 blockers: []
 created_at: '2026-10-20T08:26:00Z'
-updated_at: '2026-10-20T08:45:33Z'
+updated_at: '2026-10-20T09:34:08Z'
+next_action: Run final focused checks, then commit scoped implementation
+progress_note: Commit outcome is reconciled with PostgreSQL; ambiguous references
+  are preserved and logged
 ---
 
 ## Outcome

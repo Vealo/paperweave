@@ -128,6 +128,14 @@ class IdentityRepository:
         self._session.commit()
         return user, previous_key
 
+    def resolve_avatar_after_write_error(
+        self, user_id: UUID
+    ) -> tuple[UserRecord | None, str | None]:
+        """Re-read the committed avatar pointer after an ambiguous commit error."""
+        self._session.rollback()
+        user = self._session.get(UserRecord, user_id, populate_existing=True)
+        return user, user.avatar_key if user is not None else None
+
     def clear_avatar(self, user_id: UUID) -> tuple[UserRecord, str | None]:
         user = self._session.get(UserRecord, user_id)
         if user is None:
