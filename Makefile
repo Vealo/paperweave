@@ -2,8 +2,9 @@ PYTHON ?= uv run --frozen python
 PAPERWEAVE_CONFIG ?= config.toml
 COMPOSE_PROJECT_NAME ?= paperweave
 export PYTHONPATH := src
+.DEFAULT_GOAL := help
 
-.PHONY: init config-check up down restart logs ps migrate test help
+.PHONY: init config-check up down restart logs ps migrate test storage-check help
 
 init:
 	$(PYTHON) -m paperweave.cli --config "$(PAPERWEAVE_CONFIG)" init
@@ -31,6 +32,9 @@ migrate:
 
 test:
 	$(PYTHON) -m paperweave.cli --config "$(PAPERWEAVE_CONFIG)" --project-name "$(COMPOSE_PROJECT_NAME)" test
+
+storage-check:
+	$(PYTHON) -m paperweave.cli --config "$(PAPERWEAVE_CONFIG)" --project-name "$(COMPOSE_PROJECT_NAME)" storage-check
 
 help:
 	$(PYTHON) -m paperweave.cli help

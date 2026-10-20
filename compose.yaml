@@ -6,6 +6,15 @@ services:
       - seaweedfs_data:/data
       - ${PW_SEAWEED_S3_CONFIG:?run through the PaperWeave CLI}:/etc/seaweedfs/s3.json:ro
 
+  storage-check-seaweedfs:
+    image: chrislusf/seaweedfs:4.48
+    profiles: [storage-check, test]
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json", "-ip.bind=0.0.0.0"]
+    tmpfs:
+      - /data
+    volumes:
+      - ${PW_SEAWEED_S3_CONFIG:?run through the PaperWeave CLI}:/etc/seaweedfs/s3.json:ro
+
   db:
     image: postgres:16-alpine
     environment:
@@ -117,6 +126,25 @@ services:
     depends_on:
       test-db:
         condition: service_healthy
+
+  storage-probe:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: backend
+    profiles: [storage-check, test]
+    command: ["uv", "run", "--frozen", "python", "-m", "paperweave.infrastructure.storage.s3_check"]
+    environment:
+      PW_S3_CHECK_MODE: ${PW_S3_CHECK_MODE:-round-trip}
+      PW_S3_CHECK_TIMEOUT: ${PW_S3_CHECK_TIMEOUT:-30}
+      PW_S3_ENDPOINT_URL: ${PW_S3_ENDPOINT_URL:?run through the PaperWeave CLI}
+      PW_S3_REGION: ${PW_S3_REGION:?run through the PaperWeave CLI}
+      PW_S3_BUCKET: ${PW_S3_BUCKET:?run through the PaperWeave CLI}
+      PW_S3_ACCESS_KEY: ${PW_S3_ACCESS_KEY:?run through the PaperWeave CLI}
+      PW_S3_SECRET_KEY: ${PW_S3_SECRET_KEY:?run through the PaperWeave CLI}
+    depends_on:
+      storage-check-seaweedfs:
+        condition: service_started
 
 volumes:
   postgres_data:

@@ -13,41 +13,49 @@ criteria:
 - id: AC-1
   text: Вызов make без аргументов по-прежнему показывает help; help документирует
     S3-команды и их назначение.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - make help; Makefile default goal
 - id: AC-2
   text: make up в итоговой сводке показывает включённый backend, состояние SeaweedFS,
     S3 endpoint/порт и bucket без вывода credentials; ошибка проверки сообщает причину
     и не заявляет healthy.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - tests/unit/test_cli.py; make test (84 passed)
+  - src/paperweave/cli.py _storage_summary/_run_s3_probe/main; tests/unit/test_cli.py
 - id: AC-3
   text: make ps и make logs показывают SeaweedFS; make down останавливает его, сохраняя
     persistent volume.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - Makefile and compose.yaml service/ps/logs/down configuration
 - id: AC-4
   text: Добавлена отдельная команда проверки S3 health, аутентификации и put/get/delete
     на уникальном тестовом ключе с очисткой; она не читает и не меняет пользовательские
     файлы.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - make storage-check isolated S3 put/get/delete round-trip
 - id: AC-5
   text: make test или выделенная storage-check проверка использует отдельные test-owned
     ресурсы и проверяет запуск, ожидание готовности и отказ S3.
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - make test isolated SeaweedFS readiness and 84 passed
 - id: AC-6
   text: Runbook описывает порты, конфигурацию и credentials, health checks, команды
     запуска/остановки/логов и безопасную диагностику.
-  checked: false
-  evidence: []
-status: todo
-revision: 3
+  checked: true
+  evidence:
+  - docs/runbook-local.md S3 and SeaweedFS operations
+status: in_progress
+revision: 8
 blockers: []
 created_at: '2026-10-20T08:29:08Z'
-updated_at: '2026-10-20T10:35:49Z'
-progress_note: Predecessor TASK-020 completed and integrated on main; task is ready
+updated_at: '2026-10-20T10:55:51Z'
+progress_note: S3 round-trip passed; isolated make test passed 84 tests
+next_action: Commit scoped TASK-021 changes on main
 ---
 
 ## Outcome
@@ -61,3 +69,5 @@ Makefile, CLI-команды, Compose service health/readiness и runbook для
 ## Notes
 
 The Makefile interface should expose local SeaweedFS startup and a bounded S3 put/get/delete check, then summarize service status without printing secrets.
+
+Finalization evidence: isolated `make storage-check` completed S3 readiness plus put/get/delete verification; `make test` passed 84 tests and cleaned its test-owned Compose resources. `make up` was not run against the shared/default Compose project; its summary and probe failure behavior are supported by focused CLI unit tests and source review. Reviewer acceptance ledger: /root/audit_task021, accepted AC-1 through AC-6.
