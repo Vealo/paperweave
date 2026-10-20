@@ -5,6 +5,10 @@
   --pw-color-link: #305700;
   --pw-color-marker: #899D31;
   --pw-color-subtle: #B9C24B;
+  --pw-color-info: #1d4ed8;
+  --pw-color-success: #166534;
+  --pw-color-warning: #854d0e;
+  --pw-color-danger: #b91c1c;
   --pw-color-focus: var(--pw-color-marker);
   --pw-surface-selected: #f4f7ed;
   --pw-surface-selected-hover: #e8eed8;
@@ -269,12 +273,6 @@ a:hover {
 }
 
 /* Shared viewport-sized modal surface for all blocking dialogs. */
-.p-dialog-mask:has(> .pw-modal-fullscreen) {
-  align-items: stretch;
-  justify-content: stretch;
-  padding: 0;
-}
-
 .pw-modal-fullscreen.p-dialog {
   display: flex;
   width: 100vw;
@@ -622,7 +620,7 @@ a:hover {
 }
 
 .account-menu__logout .p-menu-item-content {
-  color: var(--p-red-500);
+  color: var(--p-red-700);
 }
 
 .account-settings {

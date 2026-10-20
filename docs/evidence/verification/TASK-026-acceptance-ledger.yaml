@@ -1,0 +1,68 @@
+schema_version: 1
+task_id: TASK-026
+contract_ref: tasks/TASK-026.md
+baseline_ref: e9ae4292ad9505f7762cdfced94491be3f16cf83
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: browser matrix, local PaperWeave UI at 2026-10-20
+    rationale: >-
+      On /, /projects/a180eb97-9dad-45a1-af32-6c387cb06625, /profile, /users and
+      /users/new, the visible-text contrast scan reported no failures. The active
+      p-dark class stayed absent while prefers-color-scheme: dark was true. The
+      owner account menu logout action used #b91c1c. Login session-expired warning
+      used #854d0e on a pale surface; a read-only unknown-project request rendered
+      the error message in #b91c1c at 5.94:1. The AI warning was #854d0e at 6.63:1.
+      All four workspace dialogs ended at exactly the viewport bounds after their
+      transition. The owner-setup form was source-reviewed because bootstrap is
+      already completed in the local database and no database reset was allowed.
+  - id: AC-2
+    status: passed
+    evidence_ref: browser matrix and docs/design-system.md
+    rationale: >-
+      Visible status controls carry readable labels such as Сохранено, Доступно,
+      Только mock and Версия 11; messages retain explanatory text, so meaning is
+      not conveyed by color alone. Disabled editor control remains visibly named
+      Вставить цитату. Keyboard focus on the login password field showed a 2px
+      #899d31 outline.
+  - id: AC-3
+    status: passed
+    evidence_ref: docs/design-system.md; docs/data-model.md; frontend/src/theme/paperweavePreset.ts
+    rationale: >-
+      The design-system documents the light-only UI and semantic message roles.
+      The data model documents user_settings, GET/PATCH /api/v1/auth/me/settings,
+      legacy payload normalization to light, and the distinction between API
+      compatibility and the absent profile theme selector. This matches the
+      database constraint, backend schema/repository, bootstrap behavior and UI.
+required_checks:
+  - command: npm --prefix frontend run typecheck
+    status: passed
+    evidence_ref: command output 2026-10-20
+  - command: npm --prefix frontend run test
+    status: passed
+    evidence_ref: 10 frontend tests passed, including design-system policy tests
+  - command: npm --prefix frontend run build
+    status: passed
+    evidence_ref: 325 modules transformed; build completed (existing chunk-size warning)
+  - command: make test
+    status: passed
+    evidence_ref: 87 backend tests passed; disposable test Compose and database removed
+  - command: git diff --check
+    status: passed
+    evidence_ref: no whitespace errors
+  - command: GitNexus impact and detect_changes
+    status: incomplete
+    evidence_ref: GitNexus index is stale; refresh failed with EROFS writing registry outside workspace
+    rationale: >-
+      Source references, call sites, focused task diff and required checks were
+      reviewed as fallback. No clean or complete GitNexus result is claimed.
+runtime:
+  environment: local Compose
+  observed_at: 2026-10-20T13:01:17Z
+  result: healthy
+  services: [ui, api, postgres, seaweedfs]
+  note: S3 readiness was not checked because the local storage backend is selected.
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null
