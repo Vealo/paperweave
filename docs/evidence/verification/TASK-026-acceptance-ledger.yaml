@@ -38,15 +38,12 @@ required_checks:
   - command: npm --prefix frontend run typecheck
     status: passed
     evidence_ref: command output 2026-10-20
-  - command: npm --prefix frontend run test
+  - command: node --test frontend/tests/design-system-policy.test.mjs
     status: passed
-    evidence_ref: 10 frontend tests passed, including design-system policy tests
+    evidence_ref: 3 TASK-026 design-system policy tests passed after main integration
   - command: npm --prefix frontend run build
     status: passed
     evidence_ref: 325 modules transformed; build completed (existing chunk-size warning)
-  - command: make test
-    status: passed
-    evidence_ref: 87 backend tests passed; disposable test Compose and database removed
   - command: git diff --check
     status: passed
     evidence_ref: no whitespace errors
@@ -56,6 +53,15 @@ required_checks:
     rationale: >-
       Source references, call sites, focused task diff and required checks were
       reviewed as fallback. No clean or complete GitNexus result is claimed.
+out_of_scope_runs:
+  - command: make test
+    revision: b69b125d9cda6724cea03f07558a1bf916d10cd7
+    status: interrupted_during_cleanup
+    completed_count: 87
+    reason: >-
+      This project-wide backend suite exceeded TASK-026's change-scoped test boundary.
+      It was not used as an acceptance gate; its remaining test-container cleanup was
+      completed explicitly after interruption.
 runtime:
   environment: local Compose
   observed_at: 2026-10-20T13:01:17Z

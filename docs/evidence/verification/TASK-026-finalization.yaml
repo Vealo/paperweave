@@ -1,0 +1,38 @@
+schema_version: 1
+task_id: TASK-026
+acceptance_ref: docs/evidence/verification/TASK-026-acceptance-ledger.yaml
+commit:
+  required: true
+  created: true
+  id: c3287fb22c2479b61fb379bf0f9c4a529a3189b2
+  reason: null
+gitflow:
+  applicable: true
+  receipt_ref: docs/evidence/verification/TASK-026-gitflow.yaml
+  integrated: true
+  integration_ref: main
+  merge_commit: b69b125d9cda6724cea03f07558a1bf916d10cd7
+  parent_head: b69b125d9cda6724cea03f07558a1bf916d10cd7
+  task_commit_reachable: true
+  reason: null
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-026.md
+documentation_graph:
+  required_updates:
+  - docs/design-system.md
+  - docs/data-model.md
+  - docs/plans/imp/imp-2026-003-light-design-system-user-settings.md
+  - DOCS.md
+  - IMP.md
+  - TODO.md
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: TODO.md; task-store snapshot validated
+linked_open_outcomes:
+- TASK-027 is ready as a separate next task; it was not started.
+result: finalized
+next_action: Execute TASK-027 as a separate scoped task.

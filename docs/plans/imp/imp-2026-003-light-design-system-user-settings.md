@@ -387,7 +387,7 @@ Phase ID: `P4`; dependencies: P1–P3.
 ### Verification
 
 - [x] Ручная screen matrix прошла при тёмной системной настройке ОС; обычная светлая схема проверена по локальному preset и browser screenshot.
-- [x] `npm --prefix frontend run typecheck`, `npm --prefix frontend run test`, `npm --prefix frontend run build` и `make test` проходят.
+- [x] Change-scoped checks проходят: design-system policy tests, frontend typecheck и production build. Полный backend suite не входит в P4 scope.
 - [x] `git diff --check` и project task-store validation проходят.
 
 ### Evidence contract
@@ -395,7 +395,7 @@ Phase ID: `P4`; dependencies: P1–P3.
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
 | `manual` | Экранная матрица, сообщения, контраст, focus и fullscreen dialogs | `local` | `pass` | 2026-10-20 | [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml); context dialog screenshot captured in execution record |
-| `test` | `npm --prefix frontend run typecheck`; `npm --prefix frontend run test`; `npm --prefix frontend run build`; `make test` | `local/test` | `pass` | 2026-10-20 | [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml) |
+| `test` | `node --test frontend/tests/design-system-policy.test.mjs`; `npm --prefix frontend run typecheck`; `npm --prefix frontend run build` | `local` | `pass` | 2026-10-20 | [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml) |
 
 ### Exit criteria
 

@@ -28,13 +28,13 @@ criteria:
   checked: true
   evidence:
   - docs/evidence/verification/TASK-026-acceptance-ledger.yaml#AC-3
-status: in_progress
-revision: 3
+status: done
+revision: 4
 blockers: []
 created_at: '2026-10-20T11:41:26Z'
-updated_at: '2026-10-20T13:04:45Z'
-next_action: Проверить diff и интегрировать TASK-026 в main.
-progress_note: Светлая матрица прошла; устранены ошибки контраста и fullscreen dialogs.
+updated_at: '2026-10-20T13:14:14Z'
+progress_note: Изменения интегрированы в main; scoped проверки прошли, TODO пересобирается
+  к следующему TASK-027.
 ---
 
 ## Outcome

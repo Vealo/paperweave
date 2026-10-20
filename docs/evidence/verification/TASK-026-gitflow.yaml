@@ -1,0 +1,103 @@
+schema_version: 1
+task_id: TASK-026
+repositories:
+- repo_root: /home/denis/Projects/paperweave
+  applicable: true
+  base_ref: main
+  base_sha: e9ae4292ad9505f7762cdfced94491be3f16cf83
+  task_branch: codex/task-026-contrast-audit
+  task_commits:
+  - c3287fb22c2479b61fb379bf0f9c4a529a3189b2
+  integration_ref: main
+  merge_commit: b69b125d9cda6724cea03f07558a1bf916d10cd7
+baseline:
+  captured: 2026-10-20; task branch began at recorded main baseline; closeout inventory
+    after merge
+  staged_paths: []
+  unstaged_paths: []
+  untracked_paths:
+  - TODO.md.before-reconcile-02f05406fda8
+  - TODO.md.before-reconcile-04539a7878a6
+  - TODO.md.before-reconcile-10e9e0fd1fab
+  - TODO.md.before-reconcile-156a7ca35ad9
+  - TODO.md.before-reconcile-36176b47c622
+  - TODO.md.before-reconcile-36fca55aeb81
+  - TODO.md.before-reconcile-38540a5c92c8
+  - TODO.md.before-reconcile-3c747621f5d1
+  - TODO.md.before-reconcile-3d30bd3a87ee
+  - TODO.md.before-reconcile-44eb5d5549e3
+  - TODO.md.before-reconcile-463f922ce07f
+  - TODO.md.before-reconcile-4bdf6694651a
+  - TODO.md.before-reconcile-4cad7960a13b
+  - TODO.md.before-reconcile-4fd1aab8cbf9
+  - TODO.md.before-reconcile-50ca5156bcda
+  - TODO.md.before-reconcile-55689f5989f9
+  - TODO.md.before-reconcile-5fe5ffe6ced2
+  - TODO.md.before-reconcile-61205549470a
+  - TODO.md.before-reconcile-637b24415083
+  - TODO.md.before-reconcile-68be412edff6
+  - TODO.md.before-reconcile-78f2eb5d89c2
+  - TODO.md.before-reconcile-7dd731303d1f
+  - TODO.md.before-reconcile-7e8d0a9d1ed5
+  - TODO.md.before-reconcile-7ee0e73463b5
+  - TODO.md.before-reconcile-8b240a1795ea
+  - TODO.md.before-reconcile-9679457858e5
+  - TODO.md.before-reconcile-a78c6fb36d8f
+  - TODO.md.before-reconcile-ab99bf525f94
+  - TODO.md.before-reconcile-ac76bb65c382
+  - TODO.md.before-reconcile-af85d3856e41
+  - TODO.md.before-reconcile-b05b9d0b0e8d
+  - TODO.md.before-reconcile-ba518057dfc0
+  - TODO.md.before-reconcile-bf20e98430a1
+  - TODO.md.before-reconcile-bf753b40f345
+  - TODO.md.before-reconcile-c56a9975600e
+  - TODO.md.before-reconcile-c8dab21cb087
+  - TODO.md.before-reconcile-cd5ea2eedb7c
+  - TODO.md.before-reconcile-ce652420f086
+  - TODO.md.before-reconcile-d397530e746c
+  - TODO.md.before-reconcile-d4ad747d11af
+  - TODO.md.before-reconcile-d6826e6a3505
+  - TODO.md.before-reconcile-db48eda2e66a
+  - TODO.md.before-reconcile-ee0d3feb35dd
+  - TODO.md.before-reconcile-f0cbdb2ad73d
+  - TODO.md.before-reconcile-f2ea2c66bfbf
+  - TODO.md.before-reconcile-f73f97a7e282
+  - TODO.md.before-reconcile-fca5287b0791
+  - TODO.md.before-reconcile-fe1f713f5e9f
+  - TODO.md.before-reconcile-fe5fa29a5e24
+  - tasks/.lock
+  ownership_map_ref: docs/evidence/verification/TASK-026-acceptance-ledger.yaml
+  preservation_action: Preserved all TODO.md.before-reconcile-* backups and tasks/.lock;
+    none staged.
+verification:
+  accepted_ledger_ref: docs/evidence/verification/TASK-026-acceptance-ledger.yaml
+  checks:
+  - command: node --test frontend/tests/design-system-policy.test.mjs
+    status: passed
+    evidence_ref: 3 focused tests passed after integration
+  - command: npm --prefix frontend run typecheck
+    status: passed
+    evidence_ref: post-integration output
+  - command: npm --prefix frontend run build
+    status: passed
+    evidence_ref: post-integration output; known chunk-size warning
+  - command: make test
+    status: interrupted_during_cleanup
+    evidence_ref: ledger out_of_scope_runs; 87 tests completed, not used as TASK-026
+      gate
+  - command: GitNexus detect_changes --scope all
+    status: incomplete_fallback
+    evidence_ref: stale index maps docs headings only; see ledger
+integration:
+  status: merged
+  post_merge_checks:
+  - focused design-system tests passed
+  - frontend typecheck passed
+  - frontend build passed
+  - task-store and TODO validation passed
+  - task commit reachable from main
+  conflict_or_blocker: null
+remote_actions: not_authorized
+handoff:
+  next_owner: project owner
+  next_action: Start ready task TASK-027 separately.

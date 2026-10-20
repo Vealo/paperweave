@@ -6,11 +6,11 @@ IMP.md — индекс фазовых планов. Статусы и гейт�
 
 | Порядок | IMP | Contract source | Цель | Статус | Активная фаза | Зависит от | Блокер | Task package |
 |---:|---|---|---|---|---|---|---|---|
-| 1 | [IMP-2026-003](docs/plans/imp/imp-2026-003-light-design-system-user-settings.md) | Standalone contract | Единый светлый дизайн-код, устранение конфликта темы и нормализация пользовательских настроек | active | P4 accepted; scoped finalization | TASK-026 finalization | — | TASK-023–TASK-027 |
+| 1 | [IMP-2026-003](docs/plans/imp/imp-2026-003-light-design-system-user-settings.md) | Standalone contract | Единый светлый дизайн-код, устранение конфликта темы и нормализация пользовательских настроек | active | Final verification / TASK-027 | TASK-026 done | — | TASK-023–TASK-027 |
 
 ## Зарегистрированные пакеты; ожидают зависимостей
 
-IMP-2026-003 развёрнут в TASK-023–TASK-026 и финальную проверку TASK-027. IMP-BL-01 снят: checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5` сохранён, P1 / TASK-023 verified, P2 / TASK-024 verified (`adebfef3e1d4c2db235279e9770361b45344f499`). TASK-025 реализована и интегрирована (`3884a7a30dafdb6c293efe1e4a04be7e6b147103`). P3 browser gate закрыт при системной тёмной настройке ОС; P4 аудит и локальные исправления подтверждены в [TASK-026 acceptance ledger](docs/evidence/verification/TASK-026-acceptance-ledger.yaml). TASK-026 ожидает только scoped finalization; затем TASK-027 — следующий готовый шаг. GitNexus индекс устарел и обновить его не удалось из-за прав на внешнюю registry; проверка источников и task-owned diff выполнена как явно отмеченный fallback, чистый результат графа не заявляется. Все non-terminal Tasks отображаются в [TODO](TODO.md).
+IMP-2026-003 развёрнут в TASK-023–TASK-026 и финальную проверку TASK-027. IMP-BL-01 снят: checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5` сохранён, P1 / TASK-023 verified, P2 / TASK-024 verified (`adebfef3e1d4c2db235279e9770361b45344f499`). TASK-025 реализована и интегрирована (`3884a7a30dafdb6c293efe1e4a04be7e6b147103`). P3 browser gate закрыт при системной тёмной настройке ОС; P4 аудит и локальные исправления подтверждены [ledger TASK-026](docs/evidence/verification/TASK-026-acceptance-ledger.yaml), финализированы в [TASK-026](docs/evidence/verification/TASK-026-finalization.yaml) и интегрированы в `main`. Полный backend suite не является gate P4; случайный широкий запуск был прерван на cleanup и отражён в ledger как out-of-scope. TASK-027 — следующий готовый шаг. GitNexus индекс остаётся устаревшим; source/diff fallback выполнен, чистый или обновлённый граф не заявляется. Все non-terminal Tasks отображаются в [TODO](TODO.md).
 
 ## Готовые к разворачиванию
 
