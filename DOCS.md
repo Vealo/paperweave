@@ -43,7 +43,7 @@
 | [SPEC-2026-004](docs/specs/spec-2026-004-citations-export.md) | Inline-ссылки на источники проекта и локальный DOCX-экспорт с явными пропусками метаданных | Approved | TASK-013; ADR-0008; IMP-2026-002/P8 |
 | [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Complete; P1–P4 verified, TASK-005 done | TASK-001…TASK-005 |
 | [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | Доменное наращивание локального исследовательского workspace: доступ, рукопись, источники/evidence, mock AI и DOCX | Complete; P1–P8 verified; TASK-014 done | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001; [TASK-014 audit](docs/evidence/verification/TASK-014-audit.md); [finalization](docs/evidence/verification/TASK-014-finalization.yaml) |
-| [IMP-2026-003](docs/plans/imp/imp-2026-003-light-design-system-user-settings.md) | Единый светлый дизайн-код, устранение конфликта темы и нормализация пользовательских настроек | Active; P1 / TASK-023 verified; P2 / TASK-024 in progress | Запрос пользователя 2026-10-20; решения о палитре и переводе значений темы; ADR-0007 |
+| [IMP-2026-003](docs/plans/imp/imp-2026-003-light-design-system-user-settings.md) | Единый светлый дизайн-код, устранение конфликта темы и нормализация пользовательских настроек | Active; P1 / TASK-023 and P2 / TASK-024 verified; P3 / TASK-025 ready | Запрос пользователя 2026-10-20; решения о палитре и переводе значений темы; ADR-0007 |
 
 Полные очереди: [TODO.md](TODO.md) и [IMP.md](IMP.md). Черновой Spec не представлен как утверждённый контракт; scope MVP утверждён ADR-0006.
 

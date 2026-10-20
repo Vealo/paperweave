@@ -31,10 +31,10 @@ change_kind: none
 phases: 4
 phase_statuses:
   P1: verified
-  P2: active
-  P3: pending
+  P2: verified
+  P3: ready
   P4: pending
-progress: 1/4
+progress: 2/4
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-003-light-design-system-user-settings.md
 architecture_status: complete
@@ -219,7 +219,7 @@ Phase ID: `P1`; status: `verified` после checkpoint `5bed8bfa1966fbf815fbaa
 
 ## Phase 2: Нормализовать сохранённую настройку темы
 
-Phase ID: `P2`; dependency: P1.
+Phase ID: `P2`; dependency: P1; status: `verified`, implementation commit `adebfef3e1d4c2db235279e9770361b45344f499`.
 
 ### Goal and input
 
@@ -241,7 +241,7 @@ Phase ID: `P2`; dependency: P1.
 
 ### Tasks and ownership
 
-**Package Task:** [TASK-024 — Нормализовать сохранённую настройку темы](../../../tasks/TASK-024.md); depends on TASK-023.
+**Package Task:** [TASK-024 — Нормализовать сохранённую настройку темы](../../../tasks/TASK-024.md); `done`, committed on `main` as `adebfef3e1d4c2db235279e9770361b45344f499`; depends on TASK-023.
 
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|

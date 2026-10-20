@@ -20,6 +20,7 @@ criteria:
   - Disposable PostgreSQL rehearsal also downgraded to 0010 and re-upgraded; existing
     values remained light after downgrade, then the light-only constraint/default
     returned.
+  - Task implementation commit adebfef3e1d4c2db235279e9770361b45344f499 on main.
 - id: AC-2
   text: 'AC-P2-002: API читает/сохраняет light, сохраняет user isolation и предсказуемо
     обрабатывает legacy/invalid payload.'
@@ -27,6 +28,7 @@ criteria:
   evidence:
   - 'API integration coverage: GET returns light, legacy system/dark/light PATCH returns
     light, sepia is 422, and member updates do not affect owner settings.'
+  - Task implementation commit adebfef3e1d4c2db235279e9770361b45344f499 on main.
 - id: AC-3
   text: 'AC-P2-003: migration rehearsal подтверждает отсутствие изменений других пользовательских
     данных.'
@@ -34,15 +36,15 @@ criteria:
   evidence:
   - 'Isolated Compose test run: 87 passed; migration rehearsal preserved email, display_name,
     password_hash, role, and is_active.'
-status: in_progress
-revision: 4
+  - Task implementation commit adebfef3e1d4c2db235279e9770361b45344f499 on main; local
+    Compose test database was disposable.
+status: done
+revision: 5
 blockers: []
 created_at: '2026-10-20T11:41:18Z'
-updated_at: '2026-10-20T12:17:48Z'
-next_action: Review scoped diff, run GitNexus pre-commit analysis, and commit TASK-024
-  on main
-progress_note: 'P2 migration/API verified: 87 tests pass, including isolated upgrade/downgrade
-  and isolation coverage.'
+updated_at: '2026-10-20T12:19:34Z'
+progress_note: TASK-024 verified and committed on main as adebfef; 87 isolated tests
+  passed.
 ---
 
 ## Outcome
