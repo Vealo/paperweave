@@ -1,22 +1,18 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
 import Message from "primevue/message";
 import Password from "primevue/password";
-import Select from "primevue/select";
 
 import {
   changePassword,
   currentUser,
-  getUserSettings,
   removeProfileAvatar,
   updateProfile,
-  updateUserSettings,
   uploadProfileAvatar,
-  type UserSettings,
 } from "../api/auth";
 import ProfileAvatarPicker from "../components/ProfileAvatarPicker.vue";
 import ProfileIdentity from "../components/ProfileIdentity.vue";
@@ -28,33 +24,12 @@ const error = ref("");
 const notice = ref("");
 const passwordError = ref("");
 const passwordNotice = ref("");
-const settingsError = ref("");
-const settingsNotice = ref("");
 const form = reactive({
   displayName: currentUser.value?.display_name ?? "",
   email: currentUser.value?.email ?? "",
   currentPassword: "",
   newPassword: "",
 });
-const settings = reactive<UserSettings>({
-  user_id: currentUser.value?.id ?? "",
-  theme: "system",
-});
-const themeOptions = [
-  { label: "Системная", value: "system" },
-  { label: "Светлая", value: "light" },
-  { label: "Тёмная", value: "dark" },
-];
-
-onMounted(async () => {
-  try {
-    Object.assign(settings, await getUserSettings());
-    applyTheme(settings.theme);
-  } catch (cause) {
-    settingsError.value = cause instanceof Error ? cause.message : "Не удалось загрузить настройки.";
-  }
-});
-
 async function saveProfile(): Promise<void> {
   busy.value = true;
   error.value = "";
@@ -113,22 +88,6 @@ async function removeAvatar(): Promise<void> {
   }
 }
 
-async function saveSettings(): Promise<void> {
-  settingsError.value = "";
-  settingsNotice.value = "";
-  try {
-    Object.assign(settings, await updateUserSettings({ theme: settings.theme }));
-    applyTheme(settings.theme);
-    settingsNotice.value = "Настройки сохранены.";
-  } catch (cause) {
-    settingsError.value = cause instanceof Error ? cause.message : "Не удалось сохранить настройки.";
-  }
-}
-
-function applyTheme(theme: UserSettings["theme"]): void {
-  const dark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("p-dark", dark);
-}
 </script>
 
 <template>
@@ -136,7 +95,7 @@ function applyTheme(theme: UserSettings["theme"]): void {
     <header class="page-heading">
       <p class="eyebrow">УЧЁТНАЯ ЗАПИСЬ</p>
       <h1>Мой профиль</h1>
-      <p>Управление личными данными, фотографией и настройками интерфейса.</p>
+      <p>Управление личными данными, фотографией профиля и безопасностью учётной записи.</p>
     </header>
 
     <div class="profile-page__grid">
@@ -184,21 +143,6 @@ function applyTheme(theme: UserSettings["theme"]): void {
             <Message v-if="passwordError" severity="error" :closable="false">{{ passwordError }}</Message>
             <Message v-if="passwordNotice" severity="success" :closable="false">{{ passwordNotice }}</Message>
             <Button type="submit" label="Изменить пароль" />
-          </form>
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>Настройки</template>
-        <template #content>
-          <form class="auth-form" @submit.prevent="saveSettings">
-            <div class="field">
-              <label for="profile-theme">Тема</label>
-              <Select id="profile-theme" v-model="settings.theme" :options="themeOptions" option-label="label" option-value="value" fluid />
-            </div>
-            <Message v-if="settingsError" severity="error" :closable="false">{{ settingsError }}</Message>
-            <Message v-if="settingsNotice" severity="success" :closable="false">{{ settingsNotice }}</Message>
-            <Button type="submit" label="Сохранить настройки" />
           </form>
         </template>
       </Card>

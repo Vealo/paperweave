@@ -13,22 +13,27 @@ criteria:
 - id: AC-1
   text: 'AC-P3-001: настройки не загружаются/применяются параллельно разными владельцами
     темы.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-025-acceptance-ledger.yaml
 - id: AC-2
   text: 'AC-P3-002: ни route transition, ни настройка пользователя/ОС не устанавливают
     .p-dark.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-025-acceptance-ledger.yaml
 - id: AC-3
   text: 'AC-P3-003: персональная тема не дублируется в системном placeholder menu.'
-  checked: false
-  evidence: []
-status: todo
-revision: 1
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-025-acceptance-ledger.yaml
+status: in_progress
+revision: 3
 blockers: []
 created_at: '2026-10-20T11:41:26Z'
-updated_at: '2026-10-20T11:41:26Z'
+updated_at: '2026-10-20T12:24:18Z'
+next_action: Зафиксировать проверенную реализацию и acceptance ledger.
+progress_note: Убрал двойное управление темой; typecheck, 7 тестов и build прошли.
 ---
 
 ## Outcome

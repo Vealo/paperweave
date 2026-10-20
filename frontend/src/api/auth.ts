@@ -17,7 +17,7 @@ export interface AuthStatus {
 
 export interface UserSettings {
   user_id: string;
-  theme: "system" | "light" | "dark";
+  theme: "light";
 }
 
 export const currentUser = ref<User | null>(null);

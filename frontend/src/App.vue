@@ -5,7 +5,7 @@ import Button from "primevue/button";
 import Dialog from "primevue/dialog";
 import Menu from "primevue/menu";
 
-import { currentUser, getUserSettings, logout, uploadProfileAvatar } from "./api/auth";
+import { currentUser, logout, uploadProfileAvatar } from "./api/auth";
 import AppHeaderActions, { type AppHeaderAction } from "./components/AppHeaderActions.vue";
 import ProfileAvatarPicker from "./components/ProfileAvatarPicker.vue";
 import ProfileIdentity from "./components/ProfileIdentity.vue";
@@ -54,11 +54,6 @@ function toggleAccountMenu(event: Event): void {
   accountMenu.value?.toggle(event);
 }
 
-function applyTheme(theme: "system" | "light" | "dark"): void {
-  const dark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("p-dark", dark);
-}
-
 async function uploadAvatar(file: File): Promise<void> {
   avatarUploading.value = true;
   avatarError.value = "";
@@ -75,7 +70,6 @@ async function uploadAvatar(file: File): Promise<void> {
 
 onMounted(() => {
   window.addEventListener("paperweave:session-expired", onSessionExpired);
-  void getUserSettings().then((settings) => applyTheme(settings.theme)).catch(() => undefined);
 });
 onUnmounted(() => window.removeEventListener("paperweave:session-expired", onSessionExpired));
 </script>

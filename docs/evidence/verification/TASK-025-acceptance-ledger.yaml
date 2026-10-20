@@ -1,0 +1,38 @@
+schema_version: 1
+task_id: TASK-025
+contract_ref: tasks/TASK-025.md
+baseline_ref: adebfef3e1d4c2db235279e9770361b45344f499
+criteria:
+  - id: AC-1
+    status: passed
+    evidence_ref: frontend/tests/light-theme-policy.test.mjs
+    rationale: App shell and profile no longer load or apply settings independently; repository search finds no active frontend theme loader.
+  - id: AC-2
+    status: passed
+    evidence_ref: frontend/src/main.ts
+    rationale: Bootstrap removes any stale p-dark class before mount; no route, user setting, or OS media query sets it.
+  - id: AC-3
+    status: passed
+    evidence_ref: frontend/src/views/ProfileView.vue
+    rationale: The profile theme selector and persistence UI are removed; the header Settings dialog remains a system placeholder.
+required_checks:
+  - command: npm --prefix frontend run typecheck
+    status: passed
+    evidence_ref: command output 2026-10-20
+  - command: npm --prefix frontend run test
+    status: passed
+    evidence_ref: 7 tests passed, including 3 light-theme-policy tests
+  - command: npm --prefix frontend run build
+    status: passed
+    evidence_ref: 325 modules transformed; build completed
+  - command: git diff --check and frontend source reference search
+    status: passed
+    evidence_ref: no whitespace errors; no active matchMedia/theme apply path
+  - command: GitNexus impact and detect_changes
+    status: incomplete
+    evidence_ref: index is 4 commits behind; source/diff fallback passed per global Git policy
+    rationale: Aggregate high risk was traced to unchanged avatar upload symbols whose line positions shifted; no concrete task-owned risk remains.
+result: accepted
+next_route: task-finalize
+unmet_condition: null
+resume_event: null
