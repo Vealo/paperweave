@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 
-import { getAuthStatus, getCurrentUser, isSessionError } from "../api/auth";
+import { restoreSession } from "../api/auth";
 import AccessDeniedView from "../views/AccessDeniedView.vue";
 import LoginView from "../views/LoginView.vue";
 import ProjectDetailView from "../views/ProjectDetailView.vue";
@@ -45,15 +45,32 @@ export const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
-  if (to.name === "login" || to.name === "access-denied") return true;
-  try {
-    const status = await getAuthStatus();
-    if (!status.owner_exists) return { name: "login", query: { setup: "1" } };
-    const user = await getCurrentUser();
-    if (to.meta.ownerOnly && user.role !== "owner") return { name: "access-denied" };
+  const session = await restoreSession();
+
+  if (to.name === "login") {
+    if (session.status === "authenticated") {
+      const requestedNext = typeof to.query.next === "string" ? to.query.next : "/";
+      const isLocalPath = requestedNext.startsWith("/") && !requestedNext.startsWith("//");
+      const destination = isLocalPath ? router.resolve(requestedNext) : null;
+      const next = destination?.name !== "login" && destination?.name !== "access-denied" ? requestedNext : "/";
+      return next;
+    }
+    if (session.status === "setup" && to.query.setup !== "1") {
+      return { name: "login", query: { setup: "1", ...(to.query.next ? { next: to.query.next } : {}) } };
+    }
+    if (session.status === "unavailable" && to.query.unavailable !== "1") {
+      return { name: "login", query: { unavailable: "1", ...(to.query.next ? { next: to.query.next } : {}) } };
+    }
     return true;
-  } catch (error) {
-    if (isSessionError(error)) return { name: "login", query: { expired: "1" } };
-    return { name: "login", query: { unavailable: "1" } };
   }
+
+  const next = to.fullPath;
+  if (session.status === "setup") return { name: "login", query: { setup: "1", next } };
+  if (session.status === "anonymous") return { name: "login", query: { expired: "1", next } };
+  if (session.status === "unavailable") return { name: "login", query: { unavailable: "1", next } };
+  if (to.name === "access-denied") {
+    return session.user.role === "owner" ? { name: "projects" } : true;
+  }
+  if (to.meta.ownerOnly && session.user.role !== "owner") return { name: "access-denied" };
+  return true;
 });

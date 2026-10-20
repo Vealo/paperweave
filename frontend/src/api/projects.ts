@@ -45,7 +45,9 @@ export async function requestApi<T>(path: string, init?: RequestInit): Promise<T
   }
 
   if (!response.ok) {
-    if (response.status === 401 && !["/auth/login", "/auth/bootstrap", "/auth/status", "/auth/me"].includes(path)) {
+    const method = (init?.method ?? "GET").toUpperCase();
+    const isSessionRestore = path === "/auth/me" && method === "GET";
+    if (response.status === 401 && !["/auth/login", "/auth/bootstrap", "/auth/status"].includes(path) && !isSessionRestore) {
       window.dispatchEvent(new Event("paperweave:session-expired"));
     }
     let message = "Не удалось выполнить запрос.";

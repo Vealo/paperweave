@@ -20,13 +20,16 @@ const error = ref("");
 const busy = ref(false);
 const unavailable = ref(route.query.unavailable === "1");
 
-onMounted(async () => {
+async function checkAuthAvailability(): Promise<void> {
   try {
     setupMode.value = !(await getAuthStatus()).owner_exists;
+    unavailable.value = false;
   } catch {
     unavailable.value = true;
   }
-});
+}
+
+onMounted(checkAuthAvailability);
 
 async function submit(): Promise<void> {
   if (busy.value) return;
@@ -72,6 +75,7 @@ const expired = route.query.expired === "1";
         </Message>
         <Message v-if="unavailable" severity="error" :closable="false">
           Не удалось проверить состояние авторизации. Проверьте доступность API.
+          <Button type="button" label="Повторить проверку" severity="secondary" text @click="checkAuthAvailability" />
         </Message>
         <form class="auth-form" @submit.prevent="submit">
           <div v-if="setupMode" class="field">

@@ -22,14 +22,93 @@ export interface UserSettings {
 
 export const currentUser = ref<User | null>(null);
 
+export type SessionResolution =
+  | { status: "authenticated"; user: User }
+  | { status: "setup" }
+  | { status: "anonymous" }
+  | { status: "unavailable" };
+
+let sessionResolution: SessionResolution | null = null;
+let sessionRestore: Promise<SessionResolution> | null = null;
+let sessionEpoch = 0;
+let authStatusCache: AuthStatus | null = null;
+let authStatusRestore: Promise<AuthStatus> | null = null;
+
+function rememberUser(user: User): User {
+  currentUser.value = user;
+  sessionResolution = { status: "authenticated", user };
+  sessionRestore = null;
+  sessionEpoch += 1;
+  return user;
+}
+
+function clearSession(): void {
+  currentUser.value = null;
+  sessionResolution = { status: "anonymous" };
+  sessionRestore = null;
+  sessionEpoch += 1;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("paperweave:session-expired", clearSession);
+}
+
 export function getAuthStatus(): Promise<AuthStatus> {
-  return requestApi<AuthStatus>("/auth/status");
+  if (authStatusCache) return Promise.resolve(authStatusCache);
+  if (authStatusRestore) return authStatusRestore;
+  authStatusRestore = requestApi<AuthStatus>("/auth/status").then((status) => {
+    authStatusCache = status;
+    return status;
+  }).finally(() => {
+    authStatusRestore = null;
+  });
+  return authStatusRestore;
 }
 
 export async function getCurrentUser(): Promise<User> {
-  const user = await requestApi<User>("/auth/me");
-  currentUser.value = user;
-  return user;
+  const session = await restoreSession();
+  if (session.status === "authenticated") return session.user;
+  if (session.status === "anonymous") throw new ApiError("Authentication required", 401);
+  if (session.status === "setup") throw new Error("Owner setup is required.");
+  throw new Error("Could not restore the current session.");
+}
+
+export async function restoreSession(): Promise<SessionResolution> {
+  if (currentUser.value) return { status: "authenticated", user: currentUser.value };
+  if (sessionResolution) return sessionResolution;
+  if (sessionRestore) return sessionRestore;
+
+  const restoreEpoch = sessionEpoch;
+  sessionRestore = (async () => {
+    try {
+      const authStatus = await getAuthStatus();
+      if (sessionEpoch !== restoreEpoch) return sessionResolution ?? { status: "anonymous" };
+      if (!authStatus.owner_exists) {
+        sessionResolution = { status: "setup" };
+        return sessionResolution;
+      }
+      try {
+        const user = await requestApi<User>("/auth/me");
+        if (sessionEpoch !== restoreEpoch) return sessionResolution ?? { status: "anonymous" };
+        return { status: "authenticated", user: rememberUser(user) };
+      } catch (error) {
+        if (sessionEpoch !== restoreEpoch) return sessionResolution ?? { status: "anonymous" };
+        if (isSessionError(error)) {
+          sessionResolution = { status: "anonymous" };
+          return sessionResolution;
+        }
+        throw error;
+      }
+    } catch {
+      if (sessionEpoch !== restoreEpoch) return sessionResolution ?? { status: "anonymous" };
+      // Do not cache an outage as a session state: later navigation or the
+      // login screen must be able to retry once the API becomes available.
+      return { status: "unavailable" };
+    } finally {
+      sessionRestore = null;
+    }
+  })();
+  return sessionRestore;
 }
 
 export async function setupOwner(input: {
@@ -41,8 +120,8 @@ export async function setupOwner(input: {
     method: "POST",
     body: JSON.stringify(input),
   });
-  currentUser.value = user;
-  return user;
+  authStatusCache = { owner_exists: true };
+  return rememberUser(user);
 }
 
 export async function login(input: { email: string; password: string }): Promise<User> {
@@ -50,15 +129,15 @@ export async function login(input: { email: string; password: string }): Promise
     method: "POST",
     body: JSON.stringify(input),
   });
-  currentUser.value = user;
-  return user;
+  authStatusCache = { owner_exists: true };
+  return rememberUser(user);
 }
 
 export async function logout(): Promise<void> {
   try {
     await requestApi<void>("/auth/logout", { method: "POST" });
   } finally {
-    currentUser.value = null;
+    clearSession();
   }
 }
 
@@ -66,14 +145,12 @@ export async function uploadProfileAvatar(file: File): Promise<User> {
   const formData = new FormData();
   formData.append("file", file);
   const user = await requestApiFormData<User>("/auth/me/avatar", formData);
-  currentUser.value = user;
-  return user;
+  return rememberUser(user);
 }
 
 export async function removeProfileAvatar(): Promise<User> {
   const user = await requestApi<User>("/auth/me/avatar", { method: "DELETE" });
-  currentUser.value = user;
-  return user;
+  return rememberUser(user);
 }
 
 export async function updateProfile(input: {
@@ -85,8 +162,7 @@ export async function updateProfile(input: {
     method: "PATCH",
     body: JSON.stringify(input),
   });
-  currentUser.value = user;
-  return user;
+  return rememberUser(user);
 }
 
 export async function changePassword(input: {
@@ -97,7 +173,7 @@ export async function changePassword(input: {
     method: "POST",
     body: JSON.stringify(input),
   });
-  currentUser.value = null;
+  clearSession();
 }
 
 export function getUserSettings(): Promise<UserSettings> {

@@ -10,12 +10,18 @@ const sessionNotice = ref("");
 
 function onSessionExpired(): void {
   sessionNotice.value = "Сессия завершилась. Войдите снова.";
-  void router.push({ name: "login", query: { expired: "1" } });
+  const next = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  void router.replace({ name: "login", query: { expired: "1", next } });
 }
 
 async function signOut(): Promise<void> {
-  await logout();
-  await router.push({ name: "login" });
+  try {
+    await logout();
+  } catch {
+    sessionNotice.value = "Не удалось подтвердить выход на сервере. Локальное состояние очищено.";
+  } finally {
+    await router.replace({ name: "login" });
+  }
 }
 
 onMounted(() => window.addEventListener("paperweave:session-expired", onSessionExpired));
