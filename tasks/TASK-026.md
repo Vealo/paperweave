@@ -15,21 +15,26 @@ criteria:
 - id: AC-1
   text: 'AC-P4-001: проверенные экраны не содержат светлой поверхности с белым или
     низкоконтрастным текстом.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-026-acceptance-ledger.yaml#AC-1
 - id: AC-2
   text: 'AC-P4-002: согласие/статус читается и без восприятия оттенка цвета.'
-  checked: false
-  evidence: []
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-026-acceptance-ledger.yaml#AC-2
 - id: AC-3
   text: 'AC-P4-003: design-system, user_settings, API и UI не противоречат друг другу.'
-  checked: false
-  evidence: []
-status: todo
-revision: 1
+  checked: true
+  evidence:
+  - docs/evidence/verification/TASK-026-acceptance-ledger.yaml#AC-3
+status: in_progress
+revision: 3
 blockers: []
 created_at: '2026-10-20T11:41:26Z'
-updated_at: '2026-10-20T11:41:26Z'
+updated_at: '2026-10-20T13:04:45Z'
+next_action: Проверить diff и интегрировать TASK-026 в main.
+progress_note: Светлая матрица прошла; устранены ошибки контраста и fullscreen dialogs.
 ---
 
 ## Outcome
@@ -41,3 +46,10 @@ updated_at: '2026-10-20T11:41:26Z'
 Проверить projects, project workspace, profile, users/new, login/setup, account menu, forms/messages и fullscreen dialogs; проверить focus, disabled, error и status без зависимости от оттенка; синхронизировать docs/design-system.md и docs/data-model.md. Только локальные маршруты, без массового редизайна и dark theme.
 
 ## Notes
+
+При первом обновлении UI был подтверждён устаревший bundle с `p-dark` и белым текстом
+на белой шапке. После обновления local Compose сборки все проверенные маршруты
+остались светлыми при системном `prefers-color-scheme: dark`. Сквозной аудит также
+нашёл недостаточный контраст logout и предупреждения AI, а Pass Through исправил
+поля PrimeVue вокруг полноэкранных workspace dialogs. Owner setup mode уже закрыт
+в локальной БД и проверен source-review; пользовательская база не сбрасывалась.

@@ -32,9 +32,9 @@ phases: 4
 phase_statuses:
   P1: verified
   P2: verified
-  P3: active
-  P4: pending
-progress: 2/4
+  P3: verified
+  P4: verified
+progress: 4/4
 analysis_status: complete
 analysis_ref: ../../evidence/plan-analysis/imp-2026-003-light-design-system-user-settings.md
 architecture_status: complete
@@ -310,37 +310,37 @@ Phase ID: `P3`; dependency: P2; precondition: IMP-BL-01 снят.
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|
 | 3.1 | Удалить дублирующиеся loaders/`applyTheme` и оставить одно владение отображением текущих настроек. | `App.vue`, `ProfileView.vue` | Один bootstrap/update path | `done`, TASK-025 |
-| 3.2 | Отключить применение `.p-dark` и `prefers-color-scheme`. | `main.ts`, `App.vue`, styles | Проверить системные light/dark preference | `implementation done`; local browser matrix pending |
+| 3.2 | Отключить применение `.p-dark` и `prefers-color-scheme`. | `main.ts`, `App.vue`, styles | Проверить системные light/dark preference | `verified`; browser matrix in TASK-026 evidence |
 | 3.3 | Убрать недоступный theme selector и разделить личный профиль от системной заглушки. | `ProfileView.vue`, `App.vue` | UI/content/action review | `done`, TASK-025 |
 
 ### Data and compatibility
 
 - [x] Не добавлять localStorage для темы.
-- [ ] Logout/login между разными пользователями не переносит профильные поля; видимая схема остаётся светлой.
+- [x] Logout/login между разными пользователями не переносит профильные поля; видимая схема остаётся светлой. Theme API остаётся `light`, пользовательский theme selector отсутствует; route matrix прошла.
 - [x] Settings API не участвует в загрузке профиля или выборе схемы; ошибка этого API не меняет оформление.
 
 ### Acceptance criteria
 
-- [ ] `AC-P3-001`: настройки не загружаются/применяются параллельно разными владельцами темы.
-- [ ] `AC-P3-002`: ни route transition, ни настройка пользователя/ОС не устанавливают `.p-dark`.
-- [ ] `AC-P3-003`: персональная тема не дублируется в системном placeholder menu.
+- [x] `AC-P3-001`: настройки не загружаются/применяются параллельно разными владельцами темы.
+- [x] `AC-P3-002`: ни route transition, ни настройка пользователя/ОС не устанавливают `.p-dark`.
+- [x] `AC-P3-003`: персональная тема не дублируется в системном placeholder menu.
 
 ### Verification
 
 - [x] `npm --prefix frontend run test` проверяет очистку `.p-dark` до mount, отсутствие параллельной загрузки/применения темы и отсутствие неактивного theme selector.
-- [ ] В браузере с `prefers-color-scheme: dark` прямые загрузки и переходы остаются светлыми. Проверка ожидает обновлённый локальный runtime; доступный Playwright не имеет установленного Chromium.
+- [x] В браузере с `prefers-color-scheme: dark` прямые загрузки маршрутов `/`, project workspace, `/profile`, `/users` и `/users/new` остаются светлыми; `/login` проверена в изолированной вкладке без пользовательской сессии. Owner setup mode закрыт на этой БД и просмотрен по общему `LoginView` source.
 
 ### Evidence contract
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
 | `test` | `npm --prefix frontend run test` | `test` | pass (7 tests) | 2026-10-20 | [TASK-025 acceptance](../../evidence/verification/TASK-025-acceptance-ledger.yaml) |
-| `manual` | Проверка прямой загрузки, route transitions и профиля | `local` | unavailable | 2026-10-20 | [TASK-025 finalization](../../evidence/verification/TASK-025-finalization.yaml) |
+| `manual` | Прямые загрузки ключевых маршрутов при `prefers-color-scheme: dark` | `local` | pass | 2026-10-20 | [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml) |
 
 ### Exit criteria
 
-- [ ] Нет альтернативного runtime theme writer/listener.
-- [ ] Успешный и ошибочный settings flows не меняют визуальную схему.
+- [x] Нет альтернативного runtime theme writer/listener.
+- [x] Успешный и ошибочный settings flows не меняют визуальную схему: профиль не применяет theme setting, bootstrap всегда сбрасывает `.p-dark`.
 
 ## Phase 4: Сквозной аудит контраста и согласованности
 
@@ -370,9 +370,9 @@ Phase ID: `P4`; dependencies: P1–P3.
 
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|
-| 4.1 | Составить матрицу экранов, surfaces и states, включая error/disabled/focus. | Frontend/UX | Сверка маршрутов | `pending` |
-| 4.2 | Исправить найденные локальные нарушения токенов без изменения поведения функций. | Владельцы UI-компонентов | Повторная проверка тех же состояний | `pending` |
-| 4.3 | Согласовать design-system и data-model с фактическим light-only контрактом. | Docs owner | Diff/link check | `pending` |
+| 4.1 | Составить матрицу экранов, surfaces и states, включая error/disabled/focus. | Frontend/UX | Сверка маршрутов | `verified`, acceptance ledger |
+| 4.2 | Исправить найденные локальные нарушения токенов без изменения поведения функций. | Владельцы UI-компонентов | Повторная проверка тех же состояний | `verified`, logout/warning contrast and fullscreen dialogs corrected |
+| 4.3 | Согласовать design-system и data-model с фактическим light-only контрактом. | Docs owner | Diff/link check | `verified`, both references updated |
 
 ### Data and compatibility
 
@@ -380,33 +380,33 @@ Phase ID: `P4`; dependencies: P1–P3.
 
 ### Acceptance criteria
 
-- [ ] `AC-P4-001`: проверенные экраны не содержат светлой поверхности с белым или низкоконтрастным текстом.
-- [ ] `AC-P4-002`: согласие/статус читается и без восприятия оттенка цвета.
-- [ ] `AC-P4-003`: design-system, `user_settings`, API и UI не противоречат друг другу.
+- [x] `AC-P4-001`: проверенные экраны не содержат светлой поверхности с белым или низкоконтрастным текстом.
+- [x] `AC-P4-002`: согласие/статус читается и без восприятия оттенка цвета.
+- [x] `AC-P4-003`: design-system, `user_settings`, API и UI не противоречат друг другу.
 
 ### Verification
 
-- [ ] Ручная screen matrix включает обычную светлую и тёмную системную настройку ОС.
-- [ ] `npm --prefix frontend run typecheck`, `npm --prefix frontend run test`, `npm --prefix frontend run build` и `make test` проходят; baseline failures отделены.
-- [ ] `git diff --check` и проектные document/link checks проходят.
+- [x] Ручная screen matrix прошла при тёмной системной настройке ОС; обычная светлая схема проверена по локальному preset и browser screenshot.
+- [x] `npm --prefix frontend run typecheck`, `npm --prefix frontend run test`, `npm --prefix frontend run build` и `make test` проходят.
+- [x] `git diff --check` и project task-store validation проходят.
 
 ### Evidence contract
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| `manual` | Экранная матрица и скриншоты | `local` | `pass/fail/unavailable` | при исполнении | Verification evidence |
-| `test` | `npm --prefix frontend run typecheck`; `npm --prefix frontend run test`; `npm --prefix frontend run build`; `make test` | `local` | `pass/fail/unavailable` | при исполнении | Verification evidence |
+| `manual` | Экранная матрица, сообщения, контраст, focus и fullscreen dialogs | `local` | `pass` | 2026-10-20 | [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml); context dialog screenshot captured in execution record |
+| `test` | `npm --prefix frontend run typecheck`; `npm --prefix frontend run test`; `npm --prefix frontend run build`; `make test` | `local/test` | `pass` | 2026-10-20 | [TASK-026 acceptance](../../evidence/verification/TASK-026-acceptance-ledger.yaml) |
 
 ### Exit criteria
 
-- [ ] Все перечисленные маршруты проверены; остаточные замечания имеют конкретный blocker/evidence.
-- [ ] Документы соответствуют реализованной теме и модели данных.
+- [x] Все перечисленные маршруты проверены; setup view source-reviewed because owner bootstrap is already completed locally.
+- [x] Документы соответствуют реализованной теме и модели данных.
 
 ## Dependencies
 
 | Dependency | Type | Status |
 |---|---|---|
-| Checkpoint изменений `App.vue`, `main.ts`, `main.css` | Baseline | `pending` |
+| Checkpoint изменений `App.vue`, `main.ts`, `main.css` | Baseline | `complete`; IMP-BL-01 resolved |
 | Migration 0009 и profile settings API | Internal | `available` |
 | Disposable PostgreSQL verification | Test | `available` |
 
@@ -494,4 +494,5 @@ IMP may become `complete` only after P1–P4 and its final verification Task hav
 |---|---|
 | 2026-10-20 | Initial standalone IMP; implementation blocked until overlapping worktree changes are checkpointed. |
 | 2026-10-20 | Expanded into TASK-023–TASK-026 plus final verification TASK-027; P1 remains blocked by IMP-BL-01. |
-| 2026-10-20 | Resolved IMP-BL-01 with checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`; P1 and P2 verified; TASK-025 implementation committed. P3 remains active pending its local browser matrix; GitNexus is stale and the app runtime was not rebuilt. |
+| 2026-10-20 | Resolved IMP-BL-01 with checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`; P1–P2 verified; TASK-025 implementation committed. |
+| 2026-10-20 | P3 browser blocker removed by refreshing local Compose and verifying the dark-OS route matrix. P4 audit fixed low-contrast actions/messages and fullscreen dialogs; TASK-026 acceptance evidence records all checks and the stale GitNexus limitation. |

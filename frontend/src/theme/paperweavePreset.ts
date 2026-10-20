@@ -40,6 +40,34 @@ const PaperWeavePreset = definePreset(Aura, {
       focusColor: "var(--pw-color-primary-strong)",
     },
   },
+  components: {
+    message: {
+      colorScheme: {
+        light: {
+          info: {
+            color: "var(--pw-color-info)",
+            outlined: { color: "var(--pw-color-info)" },
+            simple: { color: "var(--pw-color-info)" },
+          },
+          success: {
+            color: "var(--pw-color-success)",
+            outlined: { color: "var(--pw-color-success)" },
+            simple: { color: "var(--pw-color-success)" },
+          },
+          warn: {
+            color: "var(--pw-color-warning)",
+            outlined: { color: "var(--pw-color-warning)" },
+            simple: { color: "var(--pw-color-warning)" },
+          },
+          error: {
+            color: "var(--pw-color-danger)",
+            outlined: { color: "var(--pw-color-danger)" },
+            simple: { color: "var(--pw-color-danger)" },
+          },
+        },
+      },
+    },
+  },
 });
 
 export default PaperWeavePreset;

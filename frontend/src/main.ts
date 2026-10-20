@@ -18,6 +18,17 @@ app.use(PrimeVue, {
       darkModeSelector: ".p-dark",
     },
   },
+  pt: {
+    dialog: {
+      mask: {
+        style: {
+          alignItems: "stretch",
+          justifyContent: "stretch",
+          padding: 0,
+        },
+      },
+    },
+  },
 });
 app.use(router);
 app.mount("#app");
