@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from paperweave.cli import ComposeRunner, _run_s3_probe, _safe_endpoint, _seaweedfs_state, _storage_summary
+from paperweave.cli import ComposeRunner, _run_s3_probe, _safe_endpoint, _seaweedfs_state, _storage_summary, main
 from paperweave.config import load_config
 
 
@@ -49,8 +49,79 @@ def test_storage_summary_omits_endpoint_credentials(tmp_path: Path, capsys) -> N
     output = capsys.readouterr().out
     assert "change_me_storage_secret" not in output
     assert "S3 endpoint:" in output
-    assert "S3 bucket: paperweave-artifacts" in output
+    assert "S3 bucket:" in output
+    assert "paperweave-artifacts" in output
     assert "S3 readiness: unavailable" in output
+
+
+@pytest.mark.parametrize("command", ["up", "restart"])
+def test_startup_summary_keeps_service_status_and_appends_storage(
+    command: str,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys,
+) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        (Path(__file__).parents[2] / "config.example.toml").read_text(),
+        encoding="utf-8",
+    )
+    statuses = {
+        "ui": {"state": "running", "health": "healthy"},
+        "api": {"state": "running", "health": "healthy"},
+        "db": {"state": "running", "health": "healthy"},
+    }
+    monkeypatch.setattr(ComposeRunner, "start", lambda self, force_recreate=False: None)
+    monkeypatch.setattr(ComposeRunner, "service_status", lambda self: (statuses, None))
+    monkeypatch.setattr("paperweave.cli._seaweedfs_state", lambda runner: "running")
+
+    result = main(["--config", str(config_path), "--project-name", "paperweave-test", command])
+
+    assert result == 0
+    output = capsys.readouterr().out
+    assert "PaperWeave — состояние после запуска:" in output
+    assert "  UI:        " in output and "healthy (running)" in output
+    assert "  API:       " in output and "healthy (running)" in output
+    assert "  API ready: " in output
+    assert "  PostgreSQL: healthy (running)" in output
+    assert "  Миграции:  применены" in output
+    assert "  Compose:   paperweave-test" in output
+    assert "  Хранилище:\n    Backend:      local" in output
+    assert "    SeaweedFS:    running" in output
+    assert "    S3 readiness: not checked (local backend selected)" in output
+    assert "    S3 endpoint:  http://seaweedfs:8333" in output
+    assert "    S3 bucket:    paperweave-artifacts" in output
+    assert output.index("  Compose:   ") < output.index("  Хранилище:")
+
+
+def test_service_status_parses_compose_json(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    config_path = tmp_path / "config.toml"
+    config_path.write_text(
+        (Path(__file__).parents[2] / "config.example.toml").read_text(),
+        encoding="utf-8",
+    )
+    runner = ComposeRunner(config_path, "paperweave-test", load_config(config_path))
+
+    def fake_run(*arguments: str, check: bool = True, capture_output: bool = False) -> subprocess.CompletedProcess[str]:
+        assert arguments == ("ps", "--all", "--format", "json")
+        assert not check
+        assert capture_output
+        output = (
+            '{"Service":"ui","State":"running","Health":"healthy"}\n'
+            '{"Service":"api","State":"running","Health":"healthy"}\n'
+            '{"Service":"db","State":"running","Health":"healthy"}\n'
+        )
+        return subprocess.CompletedProcess(arguments, 0, stdout=output)
+
+    monkeypatch.setattr(runner, "run", fake_run)
+    statuses, error = runner.service_status()
+
+    assert error is None
+    assert statuses == {
+        "ui": {"state": "running", "health": "healthy"},
+        "api": {"state": "running", "health": "healthy"},
+        "db": {"state": "running", "health": "healthy"},
+    }
 
 
 def test_seaweedfs_state_reports_compose_health(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
