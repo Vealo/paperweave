@@ -45,14 +45,13 @@ criteria:
   evidence:
   - frontend/src/components/ProfileAvatarPicker.vue keyboard arrow pan and accessible
     controls; PrimeVue modal focus handling; responsive crop sizing
-status: in_progress
-revision: 5
+status: done
+revision: 6
 blockers: []
 created_at: '2026-10-20T08:25:54Z'
-updated_at: '2026-10-20T09:17:17Z'
-next_action: Finalize TASK-017 after independent re-review and scoped diff check
-progress_note: Crop flow and profile upload state pass typecheck/build; review fixes
-  applied
+updated_at: '2026-10-20T09:20:24Z'
+progress_note: Committed b8086da on main; reachability and post-commit typecheck/build
+  passed
 ---
 
 ## Outcome
