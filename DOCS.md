@@ -43,6 +43,7 @@
 | [SPEC-2026-004](docs/specs/spec-2026-004-citations-export.md) | Inline-ссылки на источники проекта и локальный DOCX-экспорт с явными пропусками метаданных | Approved | TASK-013; ADR-0008; IMP-2026-002/P8 |
 | [IMP-2026-001](docs/plans/imp/imp-2026-001-mvp-foundation.md) | Фазовая реализация первого MVP; standalone на основе принятого ADR и запроса | Complete; P1–P4 verified, TASK-005 done | TASK-001…TASK-005 |
 | [IMP-2026-002](docs/plans/imp/imp-2026-002-domain-workspace.md) | Доменное наращивание локального исследовательского workspace: доступ, рукопись, источники/evidence, mock AI и DOCX | Complete; P1–P8 verified; TASK-014 done | ROADMAP-PAPERWEAVE; пользовательская концепция; IMP-2026-001; [TASK-014 audit](docs/evidence/verification/TASK-014-audit.md); [finalization](docs/evidence/verification/TASK-014-finalization.yaml) |
+| [IMP-2026-003](docs/plans/imp/imp-2026-003-light-design-system-user-settings.md) | Единый светлый дизайн-код, устранение конфликта темы и нормализация пользовательских настроек | Blocked before implementation; analysis `ready_with_blockers` | Запрос пользователя 2026-10-20; решения о палитре и переводе значений темы; ADR-0007 |
 
 Полные очереди: [TODO.md](TODO.md) и [IMP.md](IMP.md). Черновой Spec не представлен как утверждённый контракт; scope MVP утверждён ADR-0006.
 
@@ -50,11 +51,16 @@
 
 В архитектуре и модели данных отделены целевые предложения от проверенной локальной MVP-основы; обзор аналогов остаётся непроверенным предложением.
 
+| Документ | Каноническая область | Статус | Когда читать |
+|---|---|---|---|
+| [Хранение пользовательских файлов](docs/storage-artifacts.md) | Реализованный каталог артефактов, типы файлов, storage backends и lifecycle | Локальный контракт; production backup/restore и перенос backend остаются открытыми | При изменении загрузки, замены, удаления или хранения файлов |
+| [Логирование PaperWeave](docs/observability/logging.md) | Локальный формат, privacy-ограничения и каталог событий | Применяемый проектный канон | При добавлении логов и диагностике локальных сервисов |
+
 ## Runbooks
 
 | Документ | Операция / scope | Когда читать |
 |---|---|---|
-| [Локальная разработка](docs/runbook-local.md) | Подготовка TOML, команды Makefile, локальная Compose-система и изолированный test DB | При запуске и обслуживании локального MVP |
+| [Локальная разработка](docs/runbook-local.md) | Подготовка TOML, команды Makefile, Compose-сервисы, локальный SeaweedFS/S3, изолированные проверки хранилища и просмотр логов | При запуске и обслуживании локального MVP |
 
 ## Устаревшие и архивные документы
 

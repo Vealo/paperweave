@@ -21,7 +21,7 @@
 | `make up` | Собрать API/UI, запустить PostgreSQL, дождаться readiness БД, выполнить Alembic и только затем запустить API/UI. |
 | `make down` | Остановить и удалить контейнеры текущего Compose-проекта; именованный PostgreSQL volume сохраняется. Не добавляйте `-v`. |
 | `make restart` | Повторить build/config/migration и пересоздать сервисы с текущими настройками. |
-| `make logs` | Следить за последними 100 строками логов Compose-сервисов. |
+| `make logs` | Следить за последними 100 строками логов Compose-сервисов. Схема, уровни, каталог событий и правила приватности описаны в [документе логирования](observability/logging.md). |
 | `make ps` | Показать состояние сервисов. |
 | `make migrate` | Убедиться, что PostgreSQL готов, затем выполнить `alembic upgrade head`. |
 | `make test` | Запустить pytest в отдельном Compose-проекте с PostgreSQL и SeaweedFS в `tmpfs`; перед pytest проверяется S3 readiness. После завершения тестовые ресурсы удаляются. Рабочая БД и S3 bucket не подключаются. |
@@ -35,6 +35,8 @@ Frontend раздаётся через локальный UI-сервис на `
 make config-check PAPERWEAVE_CONFIG=/tmp/paperweave-local.toml
 make up COMPOSE_PROJECT_NAME=paperweave-dev
 ```
+
+`make logs` показывает структурированные JSON Lines backend-события и access-события UI. Проверки здоровья исключены из access-потока. Нажатие Ctrl-C останавливает только просмотр логов; оно не останавливает Compose-сервисы и завершается без traceback.
 
 Порты по умолчанию: API `127.0.0.1:18741`, UI `127.0.0.1:18742`; PostgreSQL host-порт не публикуется. `deployment.bind_host` принимает только loopback IP. Внутри контейнеров API и UI слушают доступный Compose-интерфейс.
 
@@ -60,6 +62,9 @@ make up COMPOSE_PROJECT_NAME=paperweave-dev
 | `POST /auth/bootstrap` | Однократно создаёт owner account и начинает сессию (`201`) |
 | `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` | Вход, выход и сведения о текущем пользователе |
 | `POST /auth/users` | Создаёт member account; доступно только owner (`201`) |
+| `POST /auth/me/avatar`, `GET /auth/me/avatar` | Загружает (PNG/JPEG/WebP до 5 MiB) и возвращает аватар текущего пользователя; доступны только в его сессии |
+| `POST /auth/users/{uuid}/avatar` | Загружает аватар созданного пользователя; доступно только owner. Владелец загружает его при создании аккаунта, а пользователь позднее может заменить его через настройки своего профиля. |
+| `GET /auth/users/{uuid}/avatar` | Возвращает аватар текущего пользователя или пользователя, которого просматривает owner; остальные аккаунты недоступны участникам. |
 | `POST /projects` | Создаёт проект текущего пользователя (`201`); `name` после trim — 1–200 символов, `description` — до 5000 |
 | `GET /projects` | Возвращает только проекты текущего пользователя от новых к старым |
 | `GET /projects/{uuid}` | Возвращает только принадлежащий пользователю проект; иначе `404` |

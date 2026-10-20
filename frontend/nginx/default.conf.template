@@ -1,8 +1,26 @@
+map $request_uri $paperweave_loggable {
+    default 1;
+    /_health 0;
+}
+
+map $status $paperweave_log_level {
+    ~^5 ERROR;
+    default INFO;
+}
+
+log_format paperweave_json escape=json '{"timestamp":"$time_iso8601","level":"$paperweave_log_level","service":"ui","event":"http.request.completed","message":"HTTP-запрос завершён","method":"$request_method","route":"$uri","status_code":$status,"duration_seconds":$request_time}';
+
 server {
     listen 80;
     server_name _;
     root /usr/share/nginx/html;
     index index.html;
+    access_log /var/log/nginx/access.log paperweave_json if=$paperweave_loggable;
+
+    location = /_health {
+        access_log off;
+        return 204;
+    }
 
     location /api/ {
         proxy_pass http://api:${PW_API_PORT};

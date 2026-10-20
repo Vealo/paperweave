@@ -24,7 +24,7 @@ relations:
 
 ## Реализованная модель MVP
 
-В текущем срезе реализованы проект и локальные пользователи/сессии, одна версионируемая рукопись на проект, ручные Source metadata/PDF files, ExtractionRun/SourcePassage, Claim/EvidenceLink/ReviewDecision, AIProposal и Citation marker для DOCX. Реализованные сущности ограничены условиями отдельных Tasks: нет ResearchQuestion, StudyExtraction, нескольких рукописей на проект или Job queue.
+В текущем срезе реализованы проект, локальные пользователи/настройки/сессии, типизированный каталог пользовательских файлов, одна версионируемая рукопись на проект, ручные Source metadata/PDF files, ExtractionRun/SourcePassage, Claim/EvidenceLink/ReviewDecision, AIProposal и Citation marker для DOCX. Реализованные сущности ограничены условиями отдельных Tasks: нет ResearchQuestion, StudyExtraction, нескольких рукописей на проект или Job queue.
 
 | Таблица | Поле | Тип / ограничение |
 |---|---|---|
@@ -33,8 +33,10 @@ relations:
 | `projects` | `description` | nullable `TEXT`, максимум 5000 символов на API boundary |
 | `projects` | `created_at` | `TIMESTAMPTZ`, обязательное, задаётся PostgreSQL |
 | `projects` | `owner_id` | UUID, обязательный FK на `users.id`; каждый запрос проекта ограничен текущим владельцем |
-| `users` | `id`, `email`, `display_name`, `password_hash`, `role`, `created_at` | Локальная учётная запись; пароль — salted PBKDF2-HMAC-SHA256 hash; role — `owner` или `member` |
+| `users` | `id`, `email`, `display_name`, `avatar_artifact_id`, `avatar_key`, `avatar_media_type`, `password_hash`, `role`, `is_active`, `created_at` | Локальная учётная запись; активный аватар связан с `file_artifacts` через `avatar_artifact_id`; backend, bucket, object key и lifecycle принадлежат каталогу артефактов. Пароль — salted PBKDF2-HMAC-SHA256 hash; role — `owner` или `member`; деактивация отзывает сессии и сохраняет пользовательские данные |
+| `user_settings` | `user_id`, `theme`, `updated_at` | Настройка темы текущего пользователя (`system`, `light`, `dark`); `user_id` — PK/FK с cascade; default-row создаётся миграцией для существующих аккаунтов и при создании новых |
 | `sessions` | `id`, `user_id`, `token_hash`, `created_at`, `last_activity_at`, `expires_at` | Серверная сессия в PostgreSQL; база хранит SHA-256 hash случайного cookie token |
+| `file_artifacts` | `id`, `owner_user_id`, `kind`, `domain_type`, `domain_id`, `backend`, `bucket`, `object_key`, `media_type`, `size_bytes`, `checksum_sha256`, `version`, `lifecycle`, `idempotency_key`, cleanup metadata | PostgreSQL — каталог и источник истины для владельца и lifecycle; байты лежат в backend по непрозрачному ключу. Типы: `avatar`, `image`, `document`; подробности и переходы состояний — в [контракте хранения файлов](storage-artifacts.md) |
 | `manuscripts` | `id` | UUID, primary key |
 | `manuscripts` | `project_id` | Обязательный уникальный FK на `projects.id` с cascade при удалении проекта; MVP допускает одну рукопись на проект |
 | `manuscripts` | `content` | Обязательный PostgreSQL JSONB с корнем Tiptap `doc`; порядок элементов хранится в массиве `content` |

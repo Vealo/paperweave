@@ -3,6 +3,8 @@ import { onBeforeUnmount, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import Button from "primevue/button";
 import Card from "primevue/card";
+import Dialog from "primevue/dialog";
+import Menu from "primevue/menu";
 import Message from "primevue/message";
 import Tag from "primevue/tag";
 import Skeleton from "primevue/skeleton";
@@ -41,6 +43,58 @@ const exporting = ref(false);
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 let saveSequence = 0;
 let projectLoadSequence = 0;
+const workspaceActionsMenu = ref();
+const navigationDialogVisible = ref(false);
+const contextDialogVisible = ref(false);
+const libraryDialogVisible = ref(false);
+const evidenceDialogVisible = ref(false);
+const libraryDialogMounted = ref(false);
+const evidenceDialogMounted = ref(false);
+const pendingHeadingPosition = ref<number | null>(null);
+const pendingClaimPosition = ref<number | null>(null);
+
+function openLibraryDialog(): void {
+  libraryDialogMounted.value = true;
+  libraryDialogVisible.value = true;
+}
+
+function openEvidenceDialog(): void {
+  evidenceDialogMounted.value = true;
+  evidenceDialogVisible.value = true;
+}
+
+const workspaceActions = [
+  { label: "Навигация проекта", command: () => { navigationDialogVisible.value = true; } },
+  { label: "Контекст проекта", command: () => { contextDialogVisible.value = true; } },
+  { label: "Библиотека источников", command: openLibraryDialog },
+  { label: "Утверждения и основания", command: openEvidenceDialog },
+];
+
+function toggleWorkspaceActions(event: Event): void {
+  workspaceActionsMenu.value?.toggle(event);
+}
+
+function selectHeading(position: number): void {
+  pendingHeadingPosition.value = position;
+  navigationDialogVisible.value = false;
+}
+
+function finishHeadingNavigation(): void {
+  const position = pendingHeadingPosition.value;
+  pendingHeadingPosition.value = null;
+  if (position !== null) goToHeading(position);
+}
+
+function finishClaimNavigation(): void {
+  const position = pendingClaimPosition.value;
+  pendingClaimPosition.value = null;
+  if (position !== null) goToClaim(position);
+}
+
+function handleClaimNavigation(position: number): void {
+  pendingClaimPosition.value = position;
+  evidenceDialogVisible.value = false;
+}
 
 const editor = useEditor({
   extensions: [StarterKit, Citation],
@@ -247,35 +301,20 @@ onBeforeUnmount(() => {
   </Message>
 
   <section v-else-if="project" class="project-workspace" aria-label="Рабочее пространство проекта">
-    <aside class="workspace-rail workspace-rail--navigation" aria-label="Навигация проекта">
-      <RouterLink to="/" class="workspace-back">← Проекты</RouterLink>
-      <p class="eyebrow">Проект</p>
-      <h1 class="workspace-project-title">{{ project.name }}</h1>
-      <p class="workspace-project-description">{{ project.description || "Описание пока не добавлено." }}</p>
-      <div class="workspace-nav-group">
-        <h2>Материалы</h2>
-        <a href="#manuscript" class="workspace-nav-link workspace-nav-link--active">Рукопись</a>
-      </div>
-      <div class="workspace-nav-group">
-        <h2>В этой рукописи</h2>
-        <p v-if="!editorReady" class="workspace-muted">Загружаем структуру…</p>
-        <p v-else-if="headings.length === 0" class="workspace-muted">Добавьте заголовки, чтобы создать навигацию по разделам.</p>
-        <nav v-else class="outline-list" aria-label="Разделы рукописи">
-          <Button v-for="heading in headings" :key="heading.id" :label="heading.text" severity="secondary" text class="outline-link" :class="{ 'outline-link--nested': heading.level > 2, 'outline-link--selected': selectedHeading === heading.id }" @click="goToHeading(heading.id)" />
-        </nav>
-      </div>
-    </aside>
-
     <section id="manuscript" class="workspace-editor-column" aria-label="Редактор рукописи">
       <div class="workspace-titlebar">
         <div>
           <p class="eyebrow">Рабочее пространство</p>
           <h2>Рукопись</h2>
         </div>
-        <Tag v-if="saveState === 'saved'" severity="success" value="Сохранено" />
-        <Tag v-else-if="saveState === 'saving'" severity="info" value="Сохраняем" />
-        <Tag v-else-if="saveState === 'dirty'" severity="warn" value="Есть изменения" />
-        <Tag v-else-if="saveState === 'failed'" severity="danger" value="Ошибка сохранения" />
+        <div class="workspace-titlebar__actions">
+          <Tag v-if="saveState === 'saved'" severity="success" value="Сохранено" />
+          <Tag v-else-if="saveState === 'saving'" severity="info" value="Сохраняем" />
+          <Tag v-else-if="saveState === 'dirty'" severity="warn" value="Есть изменения" />
+          <Tag v-else-if="saveState === 'failed'" severity="danger" value="Ошибка сохранения" />
+          <Button label="Инструменты ▾" severity="secondary" outlined aria-haspopup="true" aria-controls="workspace-actions-menu" @click="toggleWorkspaceActions" />
+          <Menu id="workspace-actions-menu" ref="workspaceActionsMenu" :model="workspaceActions" popup />
+        </div>
       </div>
       <Message v-if="manuscriptMissing" severity="info" :closable="false" class="workspace-notice">Рукопись ещё не создана. Начните писать — первый текст сохранится автоматически.</Message>
       <Message v-if="manuscriptLoadFailed" severity="error" :closable="false" class="workspace-notice">
@@ -294,75 +333,56 @@ onBeforeUnmount(() => {
       <Message v-if="sourcesLoadError" severity="warn" :closable="false" class="workspace-notice">{{ sourcesLoadError }}</Message>
       <Message v-if="exportError" severity="error" :closable="false" class="workspace-notice">{{ exportError }}</Message>
       <EditorContent v-if="editor" :editor="editor" class="manuscript-editor" />
-      <ClaimEvidencePanel v-if="project" :project-id="project.id" :selected-text="claimSelection.text" :block-position="claimSelection.position" :disabled="saveState !== 'saved'" @navigate="goToClaim" />
       <Message v-if="saveState === 'failed'" severity="error" :closable="false" class="manuscript-error">
         <div class="manuscript-error__content"><span>{{ saveError }}</span><Button label="Повторить сохранение" severity="danger" text @click="void saveManuscript()" /></div>
       </Message>
     </section>
 
-    <aside class="workspace-rail workspace-rail--context" aria-label="Контекст проекта">
-      <p class="eyebrow">Контекст</p>
-      <section class="context-card">
-        <h2>Проект</h2>
-        <p>{{ project.description || "Описание пока не добавлено." }}</p>
-        <dl><dt>Создан</dt><dd>{{ formatDate(project.created_at) }}</dd><dt>ID</dt><dd><code>{{ project.id }}</code></dd></dl>
-      </section>
-      <section class="context-card">
-        <h2>Состояние</h2>
+  </section>
+
+  <Dialog v-if="project" v-model:visible="navigationDialogVisible" modal header="Навигация проекта" class="pw-modal-fullscreen workspace-dialog workspace-dialog--navigation" @after-hide="finishHeadingNavigation">
+    <div class="workspace-dialog__body">
+      <section class="workspace-dialog__project-summary"><p class="eyebrow">Проект</p><h2>{{ project.name }}</h2><p>{{ project.description || "Описание пока не добавлено." }}</p></section>
+      <div class="workspace-nav-group"><h3>Материалы</h3><Button label="Рукопись" severity="primary" text class="workspace-nav-link workspace-nav-link--active" @click="navigationDialogVisible = false" /></div>
+      <div class="workspace-nav-group"><h3>В этой рукописи</h3>
+        <p v-if="!editorReady" class="workspace-muted">Загружаем структуру…</p>
+        <p v-else-if="headings.length === 0" class="workspace-muted">Добавьте заголовки, чтобы создать навигацию по разделам.</p>
+        <nav v-else class="outline-list" aria-label="Разделы рукописи"><Button v-for="heading in headings" :key="heading.id" :label="heading.text" severity="secondary" text class="outline-link" :class="{ 'outline-link--nested': heading.level > 2, 'outline-link--selected': selectedHeading === heading.id }" @click="selectHeading(heading.id)" /></nav>
+      </div>
+    </div>
+  </Dialog>
+
+  <Dialog v-if="project" v-model:visible="contextDialogVisible" modal header="Контекст проекта" class="pw-modal-fullscreen workspace-dialog workspace-dialog--context">
+    <div class="workspace-dialog__body">
+      <section class="context-card"><h2>Проект</h2><p>{{ project.description || "Описание пока не добавлено." }}</p><dl><dt>Создан</dt><dd>{{ formatDate(project.created_at) }}</dd><dt>ID</dt><dd><code>{{ project.id }}</code></dd></dl></section>
+      <section class="context-card"><h2>Состояние</h2>
         <div class="context-status"><span>API</span><Tag :severity="apiState === 'failed' ? 'danger' : apiState === 'loading' ? 'info' : 'success'" :value="apiState === 'failed' ? 'Ошибка' : apiState === 'loading' ? 'Загрузка' : 'Доступно'" /></div>
         <div class="context-status"><span>Рукопись</span><Tag :severity="manuscriptLoadFailed || saveState === 'failed' ? 'danger' : saveState === 'saving' || saveState === 'dirty' ? 'warn' : 'success'" :value="manuscriptLoadFailed ? 'Ошибка загрузки' : saveState === 'failed' ? 'Ошибка сохранения' : saveState === 'saving' ? 'Сохранение' : saveState === 'dirty' ? 'Не сохранено' : manuscript ? `Версия ${manuscript.version}` : 'Новая'" /></div>
         <div class="context-status"><span>AI</span><Tag severity="warn" value="Только mock" /></div>
         <p class="context-hint">Mock-предложение доступно для выделенного текста сохранённой рукописи; внешней передачи нет.</p>
       </section>
-      <AIProposalPanel v-if="project" :project-id="project.id" :selected-text="claimSelection.text" :target-position="claimSelection.position" :manuscript-version="manuscript?.version ?? null" :disabled="saveState !== 'saved' || !manuscript" @applied="applyAIManuscript" />
-    </aside>
-    <ProjectLibrary :project-id="project.id" />
-  </section>
+      <AIProposalPanel :project-id="project.id" :selected-text="claimSelection.text" :target-position="claimSelection.position" :manuscript-version="manuscript?.version ?? null" :disabled="saveState !== 'saved' || !manuscript" @applied="applyAIManuscript" />
+    </div>
+  </Dialog>
+
+  <Dialog v-if="project" v-model:visible="libraryDialogVisible" modal header="Библиотека источников" class="pw-modal-fullscreen workspace-dialog workspace-dialog--library">
+    <ProjectLibrary v-if="libraryDialogMounted" :project-id="project.id" />
+  </Dialog>
+
+  <Dialog v-if="project" v-model:visible="evidenceDialogVisible" modal header="Утверждения и основания" class="pw-modal-fullscreen workspace-dialog workspace-dialog--evidence" @after-hide="finishClaimNavigation">
+    <ClaimEvidencePanel v-if="evidenceDialogMounted" :project-id="project.id" :selected-text="claimSelection.text" :block-position="claimSelection.position" :disabled="saveState !== 'saved'" @navigate="handleClaimNavigation" />
+  </Dialog>
 </template>
 
 <style scoped>
 .project-workspace {
-  display: grid;
-  grid-template-columns: minmax(205px, 245px) minmax(360px, 1fr) minmax(220px, 270px);
-  align-items: start;
-  gap: 22px;
+  display: block;
 }
 
-.project-workspace :deep(.library-panel) {
-  grid-column: 1 / -1;
-}
-
-.workspace-rail {
-  position: sticky;
-  top: 20px;
-  display: grid;
-  gap: 22px;
-  min-width: 0;
-  padding: 20px 16px;
-  border: 1px solid var(--p-content-border-color);
-  border-radius: var(--p-content-border-radius);
-  background: var(--p-surface-0);
-}
-
-.workspace-back {
-  color: var(--p-primary-color);
-  font-size: 0.875rem;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.workspace-project-title {
-  margin: -14px 0 0;
-  overflow-wrap: anywhere;
-  font-size: 1.15rem;
-  line-height: 1.35;
-}
-
-.workspace-project-description,
 .workspace-muted,
 .context-card p,
 .context-hint {
-  margin: -14px 0 0;
+  margin: 0;
   color: var(--p-text-muted-color);
   font-size: 0.84rem;
   line-height: 1.55;
@@ -374,19 +394,14 @@ onBeforeUnmount(() => {
   gap: 9px;
 }
 
-.workspace-nav-group h2,
+.workspace-nav-group h3,
 .context-card h2 {
   margin: 0;
   font-size: 0.9rem;
 }
 
-.workspace-nav-link {
-  padding: 9px 10px;
-  border-radius: var(--p-content-border-radius);
-  color: var(--p-primary-color);
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-decoration: none;
+.workspace-nav-link.p-button {
+  justify-content: flex-start;
 }
 
 .workspace-nav-link--active {
@@ -436,8 +451,14 @@ onBeforeUnmount(() => {
   margin-bottom: 18px;
 }
 
-.workspace-titlebar .eyebrow,
-.workspace-rail .eyebrow {
+.workspace-titlebar__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.workspace-titlebar .eyebrow {
   margin-bottom: 7px;
 }
 
@@ -470,15 +491,46 @@ onBeforeUnmount(() => {
   border-top: 1px solid var(--p-content-border-color);
 }
 
+.workspace-dialog__body {
+  display: grid;
+  gap: 20px;
+  align-content: start;
+  min-height: 100%;
+  padding: 2px;
+}
+
+.workspace-dialog__project-summary {
+  display: grid;
+  gap: 10px;
+}
+
+.workspace-dialog__project-summary h2,
+.workspace-dialog__project-summary p {
+  margin: 0;
+}
+
+.workspace-dialog__project-summary p:last-child {
+  color: var(--p-text-muted-color);
+  line-height: 1.55;
+}
+
+.workspace-dialog :deep(.library-panel),
+.workspace-dialog :deep(.evidence-panel) {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .context-card p {
-  margin: -10px 0 0;
+  margin: 0;
 }
 
 .context-card dl {
   display: grid;
   grid-template-columns: 1fr;
   gap: 5px;
-  margin: -8px 0 0;
+  margin: 0;
   font-size: 0.8rem;
 }
 
@@ -500,31 +552,11 @@ onBeforeUnmount(() => {
 }
 
 .context-card .context-hint {
-  margin: -6px 0 0;
+  margin: 0;
   font-size: 0.78rem;
 }
 
 @media (max-width: 760px) {
-  .project-workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .workspace-rail {
-    position: static;
-  }
-
-  .workspace-rail--navigation {
-    order: 0;
-  }
-
-  .workspace-editor-column {
-    order: 1;
-  }
-
-  .workspace-rail--context {
-    order: 2;
-  }
-
   .workspace-editor-column .manuscript-editor {
     min-height: 50vh;
   }
@@ -541,6 +573,11 @@ onBeforeUnmount(() => {
 
   .workspace-titlebar {
     align-items: flex-start;
+  }
+
+  .workspace-titlebar__actions {
+    align-items: flex-end;
+    flex-direction: column-reverse;
   }
 }
 </style>

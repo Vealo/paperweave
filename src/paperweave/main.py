@@ -3,9 +3,12 @@
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
+import logging
 import os
 from pathlib import Path
+from time import perf_counter
 from typing import AsyncIterator
+from uuid import uuid4
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +21,11 @@ from paperweave.infrastructure.db.connection import build_database_url
 from paperweave.infrastructure.db.session import create_session_factory
 from paperweave.infrastructure.db.artifact_lifecycle import reconcile_pending_deletes
 from paperweave.infrastructure.storage.factory import create_storage
+from paperweave.infrastructure.logging import configure_logging, log_context, log_event
+
+
+configure_logging(service="api")
+logger = logging.getLogger(__name__)
 
 
 def create_app(
@@ -41,10 +49,14 @@ def create_app(
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
         with app.state.session_factory() as session:
-            reconcile_pending_deletes(session, storage)
+            cleaned, cleanup_failed = reconcile_pending_deletes(session, storage)
+        if cleaned or cleanup_failed:
+            log_event(logger, logging.INFO, "storage.cleanup.reconciled", "Очередь удаления объектов обработана", completed=cleaned, failed=cleanup_failed)
+        log_event(logger, logging.INFO, "app.started", "API запущен")
         try:
             yield
         finally:
+            log_event(logger, logging.INFO, "app.stopping", "API останавливается")
             engine.dispose()
 
     app = FastAPI(title="PaperWeave", lifespan=lifespan)
@@ -63,14 +75,38 @@ def create_app(
 
     @app.middleware("http")
     async def enforce_local_browser_origin(request, call_next):
-        if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
-            origin = request.headers.get("origin")
-            if origin not in trusted_origins:
-                return JSONResponse(
-                    status_code=403,
-                    content={"detail": "Request origin is not allowed for this local workspace"},
+        request_id = uuid4().hex
+        started_at = perf_counter()
+        with log_context(request_id=request_id):
+            if request.method in {"POST", "PUT", "PATCH", "DELETE"}:
+                origin = request.headers.get("origin")
+                if origin not in trusted_origins:
+                    response = JSONResponse(
+                        status_code=403,
+                        content={"detail": "Request origin is not allowed for this local workspace"},
+                    )
+                else:
+                    response = await call_next(request)
+            else:
+                response = await call_next(request)
+
+            response.headers["X-Request-ID"] = request_id
+            route = request.scope.get("route")
+            route_path = getattr(route, "path", "<unmatched>")
+            if not route_path.startswith("/api/v1/health/"):
+                elapsed_ms = round((perf_counter() - started_at) * 1000, 2)
+                event_level = logging.ERROR if response.status_code >= 500 else logging.INFO
+                log_event(
+                    logger,
+                    event_level,
+                    "http.request.completed",
+                    "HTTP-запрос завершён",
+                    method=request.method,
+                    route=route_path,
+                    status_code=response.status_code,
+                    duration_ms=elapsed_ms,
                 )
-        return await call_next(request)
+        return response
     app.include_router(api_router, prefix="/api/v1")
     return app
 

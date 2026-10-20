@@ -349,6 +349,10 @@ def main(argv: list[str] | None = None) -> int:
             return _test(runner)
         elif args.command == "storage-check":
             return _storage_check(runner, config)
+    except KeyboardInterrupt:
+        if args.command != "logs":
+            raise
+        return 0
     except FileNotFoundError:
         print("Docker Compose is required but was not found.", file=sys.stderr)
         return 127

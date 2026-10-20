@@ -1,0 +1,41 @@
+{
+  "review_id": "imp-2026-003-light-design-system-user-settings",
+  "baseline_commit": "74901be",
+  "scope": "Implement the accepted light design system and palette, resolve dark/light token conflict, and normalize persisted per-user theme settings to light.",
+  "verdict": "pass_with_conditions",
+  "findings": [
+    {
+      "id": "AC-01",
+      "severity": "degraded",
+      "scope": "phases",
+      "phase_ids": ["P1", "P3", "P4"],
+      "evidence": "frontend/src/App.vue and frontend/src/views/ProfileView.vue each load settings and define applyTheme; both can toggle p-dark. frontend/src/main.ts enables darkModeSelector .p-dark. frontend/src/styles/main.css uses semantic surface/text tokens, including distinct page and header surfaces. User screenshots show a dark body with a light header and low-contrast account text.",
+      "impact": "Theme selection has two frontend owners and allows a partial dark appearance. Shared semantic tokens and one light-mode policy are required to prevent incompatible surface and text colors.",
+      "owner": "Frontend",
+      "exit_condition": "A single light appearance policy is used at bootstrap/profile; no runtime path enables p-dark or follows OS dark preference; reviewed screens use compatible foreground and surface tokens.",
+      "next_action": "Implement the approved palette through shared tokens, remove duplicate theme application, and audit shared surfaces/components."
+    },
+    {
+      "id": "AC-02",
+      "severity": "degraded",
+      "scope": "phase",
+      "phase_ids": ["P2"],
+      "evidence": "user_settings.theme is stored in PostgreSQL, defaults to system in the model and migration 20261020_0009_user_profiles.py, and the PATCH schema accepts system/light/dark. The user explicitly chose to migrate all saved values to light.",
+      "impact": "Changing persisted preferences and the API/model default affects durable state and may affect a frontend version that still submits system or dark.",
+      "owner": "Identity/persistence and API",
+      "exit_condition": "A migration converts all existing settings to light, new rows default to light, transition API behavior is compatible, and migration/restore semantics are tested on disposable databases.",
+      "next_action": "Implement conversion and API transition with an explicit local snapshot/restore procedure; do not mutate shared or production databases."
+    },
+    {
+      "id": "AC-03",
+      "severity": "blocking",
+      "scope": "phases",
+      "phase_ids": ["P1", "P3", "P4"],
+      "evidence": "The current worktree is on main at 74901be and has uncommitted changes in frontend/src/App.vue, frontend/src/main.ts, frontend/src/styles/main.css, docs/design-system.md, docs/data-model.md, and DOCS.md; these overlap planned implementation/documentation changes.",
+      "impact": "Editing these files before the existing changes are checkpointed or isolated could overwrite or mix prior user work with this implementation.",
+      "owner": "Denis Karmalak / current change owner",
+      "exit_condition": "The existing changes affecting planned files are checkpointed/integrated or the implementation starts in a task-owned worktree from that checkpoint.",
+      "next_action": "Preserve current changes and resolve their checkpoint before starting affected implementation phases."
+    }
+  ]
+}
