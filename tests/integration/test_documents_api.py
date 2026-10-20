@@ -1,6 +1,7 @@
 """Local PDF extraction provenance and retry behavior."""
 from io import BytesIO
 from pathlib import Path
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 from pypdf import PdfWriter
@@ -12,7 +13,8 @@ def _project_source_file(client: TestClient, tmp_path: Path, monkeypatch, pdf: b
     root = f"/api/v1/projects/{project['id']}/sources"
     source = client.post(root, json={"title": "A paper"}).json()
     uploaded = client.post(f"{root}/{source['id']}/files",
-                           files={"file": ("paper.pdf", pdf, "application/pdf")})
+                           files={"file": ("paper.pdf", pdf, "application/pdf")},
+                           headers={"Idempotency-Key": f"documents-original-{uuid4()}"})
     assert uploaded.status_code == 201
     base = f"{root}/{source['id']}/files/{uploaded.json()['id']}"
     return project, source, uploaded.json(), base
@@ -104,7 +106,7 @@ def test_new_file_version_marks_prior_passage_for_review(client: TestClient, tmp
     project, source, file, endpoint = _project_source_file(client, tmp_path, monkeypatch, original_pdf)
     assert client.post(f"{endpoint}/extractions").json()["status"] == "complete"
     base = f"/api/v1/projects/{project['id']}/sources/{source['id']}/files"
-    newer = client.post(base, files={"file": ("paper-v2.pdf", _pdf_with_text("New version text"), "application/pdf")})
+    newer = client.post(base, files={"file": ("paper-v2.pdf", _pdf_with_text("New version text"), "application/pdf")}, headers={"Idempotency-Key": "documents-version-two"})
     assert newer.status_code == 201
     passages = client.get(f"{endpoint}/passages").json()
     assert passages and all(passage["review_state"] == "needs_review" for passage in passages)

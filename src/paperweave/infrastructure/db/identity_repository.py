@@ -5,9 +5,10 @@ from datetime import datetime, timedelta, timezone
 from uuid import UUID, uuid4
 
 from sqlalchemy import delete, select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from paperweave.infrastructure.db.models import SessionRecord, UserRecord, UserSettingsRecord
+from paperweave.infrastructure.db.models import FileArtifactRecord, SessionRecord, UserRecord, UserSettingsRecord
 from paperweave.modules.identity.security import hash_password
 
 BOOTSTRAP_OWNER_ID = UUID("00000000-0000-0000-0000-000000000001")
@@ -128,6 +129,129 @@ class IdentityRepository:
         self._session.commit()
         return user, previous_key
 
+    def find_idempotent_artifact(self, user_id: UUID, idempotency_key: str, kind: str) -> FileArtifactRecord | None:
+        return self._session.scalar(select(FileArtifactRecord).where(
+            FileArtifactRecord.owner_user_id == user_id,
+            FileArtifactRecord.idempotency_key == idempotency_key,
+            FileArtifactRecord.kind == kind,
+        ))
+
+    def reserve_avatar_artifact(self, user_id: UUID, artifact_id: UUID, backend: str, bucket: str, key: str,
+                                size_bytes: int, checksum: str, media_type: str,
+                                idempotency_key: str) -> FileArtifactRecord:
+        existing = self.find_idempotent_artifact(user_id, idempotency_key, "avatar")
+        if existing is not None:
+            return existing
+        artifact = FileArtifactRecord(
+            id=artifact_id, owner_user_id=user_id, kind="avatar", domain_type="user", domain_id=user_id,
+            backend=backend, bucket=bucket, object_key=key, original_name="avatar.png", media_type=media_type,
+            size_bytes=size_bytes, checksum_sha256=checksum, version=1, lifecycle="pending_upload",
+            idempotency_key=idempotency_key,
+        )
+        self._session.add(artifact)
+        try:
+            self._session.commit()
+        except IntegrityError:
+            self._session.rollback()
+            existing = self.find_idempotent_artifact(user_id, idempotency_key, "avatar")
+            if existing is None:
+                raise
+            return existing
+        return artifact
+
+    def activate_avatar_artifact(self, user_id: UUID, artifact_id: UUID) -> tuple[UserRecord, FileArtifactRecord | None]:
+        user = self._session.scalar(select(UserRecord).where(UserRecord.id == user_id).with_for_update())
+        candidate = self._session.get(FileArtifactRecord, artifact_id)
+        if user is None or candidate is None or candidate.owner_user_id != user_id:
+            raise LookupError("Avatar artifact not found")
+        previous = self._session.get(FileArtifactRecord, user.avatar_artifact_id) if user.avatar_artifact_id else None
+        user.avatar_artifact_id = artifact_id
+        user.avatar_key = candidate.object_key
+        user.avatar_media_type = candidate.media_type
+        candidate.lifecycle = "active"
+        if previous is not None:
+            previous.lifecycle = "pending_delete"
+        self._session.commit()
+        return user, previous
+
+    def mark_artifact_deleted(self, artifact_id: UUID) -> None:
+        artifact = self._session.get(FileArtifactRecord, artifact_id)
+        if artifact is not None:
+            artifact.lifecycle = "deleted"
+            artifact.deleted_at = datetime.now(timezone.utc)
+            artifact.last_cleanup_error = None
+            self._session.commit()
+
+    def mark_artifact_cleanup_failed(self, artifact_id: UUID, error_type: str) -> None:
+        artifact = self._session.get(FileArtifactRecord, artifact_id)
+        if artifact is not None:
+            artifact.lifecycle = "pending_delete"
+            artifact.cleanup_attempts += 1
+            artifact.last_cleanup_error = error_type[:500]
+            self._session.commit()
+
+    def get_artifact(self, artifact_id: UUID) -> FileArtifactRecord | None:
+        return self._session.get(FileArtifactRecord, artifact_id)
+
+    def reserve_user_image(self, user_id: UUID, artifact_id: UUID, backend: str, bucket: str, key: str,
+                           original_name: str, size_bytes: int, checksum: str, media_type: str,
+                           idempotency_key: str) -> FileArtifactRecord:
+        existing = self.find_idempotent_artifact(user_id, idempotency_key, "image")
+        if existing is not None:
+            return existing
+        artifact = FileArtifactRecord(
+            id=artifact_id, owner_user_id=user_id, kind="image", domain_type="user", domain_id=user_id,
+            backend=backend, bucket=bucket, object_key=key, original_name=original_name,
+            media_type=media_type, size_bytes=size_bytes, checksum_sha256=checksum, version=1,
+            lifecycle="pending_upload", idempotency_key=idempotency_key,
+        )
+        self._session.add(artifact)
+        try:
+            self._session.commit()
+        except IntegrityError:
+            self._session.rollback()
+            existing = self.find_idempotent_artifact(user_id, idempotency_key, "image")
+            if existing is None:
+                raise
+            return existing
+        return artifact
+
+    def activate_user_image(self, artifact_id: UUID, user_id: UUID) -> FileArtifactRecord:
+        artifact = self._session.get(FileArtifactRecord, artifact_id)
+        if artifact is None or artifact.owner_user_id != user_id or artifact.kind != "image":
+            raise LookupError("Image artifact not found")
+        artifact.lifecycle = "active"
+        self._session.commit()
+        return artifact
+
+    def resolve_user_image_after_write_error(self, artifact_id: UUID, user_id: UUID) -> FileArtifactRecord | None:
+        self._session.rollback()
+        artifact = self._session.get(FileArtifactRecord, artifact_id, populate_existing=True)
+        if artifact and artifact.owner_user_id == user_id and artifact.kind == "image" and artifact.lifecycle == "active":
+            return artifact
+        return None
+
+    def get_owned_artifact(self, artifact_id: UUID, user_id: UUID, kind: str) -> FileArtifactRecord | None:
+        return self._session.scalar(select(FileArtifactRecord).where(
+            FileArtifactRecord.id == artifact_id,
+            FileArtifactRecord.owner_user_id == user_id,
+            FileArtifactRecord.kind == kind,
+            FileArtifactRecord.lifecycle == "active",
+        ))
+
+    def mark_user_artifact_pending_delete(self, artifact_id: UUID, user_id: UUID, kind: str) -> FileArtifactRecord | None:
+        artifact = self._session.scalar(select(FileArtifactRecord).where(
+            FileArtifactRecord.id == artifact_id,
+            FileArtifactRecord.owner_user_id == user_id,
+            FileArtifactRecord.kind == kind,
+            FileArtifactRecord.lifecycle.in_(("active", "pending_delete", "deleted")),
+        ))
+        if artifact is None:
+            return None
+        artifact.lifecycle = "pending_delete"
+        self._session.commit()
+        return artifact
+
     def resolve_avatar_after_write_error(
         self, user_id: UUID
     ) -> tuple[UserRecord | None, str | None]:
@@ -145,6 +269,19 @@ class IdentityRepository:
         user.avatar_media_type = None
         self._session.commit()
         return user, previous_key
+
+    def clear_avatar_artifact(self, user_id: UUID) -> tuple[UserRecord, FileArtifactRecord | None]:
+        user = self._session.get(UserRecord, user_id)
+        if user is None:
+            raise LookupError("User not found")
+        previous = self._session.get(FileArtifactRecord, user.avatar_artifact_id) if user.avatar_artifact_id else None
+        user.avatar_artifact_id = None
+        user.avatar_key = None
+        user.avatar_media_type = None
+        if previous is not None:
+            previous.lifecycle = "pending_delete"
+        self._session.commit()
+        return user, previous
 
     def create_session(self, user_id: UUID, token_hash: str) -> None:
         now = datetime.now(timezone.utc)

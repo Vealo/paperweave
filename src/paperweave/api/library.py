@@ -2,7 +2,7 @@
 from typing import Annotated
 from uuid import UUID
 from urllib.parse import quote
-from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Response, UploadFile, status
 from paperweave.api.dependencies import get_current_user, get_library_service
 from paperweave.api.schemas.library import SourceCreateRequest, SourceResponse, SourceFileResponse
 from paperweave.modules.library.errors import DuplicateFileError, DuplicateSourceError, FileTooLargeError, InvalidPdfError, ReferencedFileError, SourceNotFoundError
@@ -27,9 +27,12 @@ def create_source(project_id: UUID, payload: SourceCreateRequest, service: Servi
     except SourceNotFoundError as exc: raise HTTPException(404, "Project not found") from exc
 
 @router.post("/{source_id}/files", response_model=SourceFileResponse, status_code=201)
-async def upload_source_file(project_id: UUID, source_id: UUID, service: Service, file: UploadFile = File(...), user=Depends(get_current_user)):
+async def upload_source_file(project_id: UUID, source_id: UUID, service: Service,
+                             idempotency_key: Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=119)],
+                             file: UploadFile = File(...),
+                             user=Depends(get_current_user)):
     content = await file.read(MAX_PDF_BYTES + 1)
-    try: record = service.upload_pdf(user.id, project_id, source_id, file.filename or "document.pdf", file.content_type or "", content)
+    try: record = service.upload_pdf(user.id, project_id, source_id, file.filename or "document.pdf", file.content_type or "", content, idempotency_key)
     except SourceNotFoundError as exc: raise HTTPException(404, "Source not found") from exc
     except FileTooLargeError as exc: raise HTTPException(413, "PDF exceeds 25 MiB") from exc
     except InvalidPdfError as exc: raise HTTPException(415, "Only valid PDF files are supported") from exc

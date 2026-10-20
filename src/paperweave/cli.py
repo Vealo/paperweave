@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
 import subprocess
@@ -45,6 +46,7 @@ def _compose_environment(config: AppConfig) -> dict[str, str]:
         "PW_DB_USER": config.database.user,
         "PW_DB_PASSWORD": config.database.password,
         "PW_BIND_HOST": config.deployment.bind_host,
+        "PW_SEAWEED_VOLUME_NAME": "paperweave_seaweedfs_data",
     }
 
 
@@ -56,6 +58,25 @@ class ComposeRunner:
         self.environment.update(_compose_environment(config))
         self.environment["PW_CONFIG_PATH"] = str(self.config_path)
         self.environment["PW_VOLUME_NAME"] = f"{project_name}-postgres-data"
+        self.environment["PW_SEAWEED_VOLUME_NAME"] = f"{project_name}-seaweedfs-data"
+        s3_config_path = self.config_path.parent / ".paperweave-secrets" / f"{project_name}-seaweedfs-s3.json"
+        s3_config_path.parent.mkdir(parents=True, exist_ok=True)
+        s3_config_path.parent.chmod(0o700)
+        s3_document = {
+            "identities": [{
+                "name": "paperweave-api",
+                "credentials": [{
+                    "accessKey": config.storage.s3_access_key,
+                    "secretKey": config.storage.s3_secret_key,
+                }],
+                "actions": ["Admin", "Read", "List", "Tagging", "Write"],
+            }]
+        }
+        s3_fd = os.open(s3_config_path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
+        os.chmod(s3_config_path, 0o600)
+        with os.fdopen(s3_fd, "w", encoding="utf-8") as s3_file:
+            json.dump(s3_document, s3_file)
+        self.environment["PW_SEAWEED_S3_CONFIG"] = str(s3_config_path.resolve())
         self.environment["PAPERWEAVE_CONFIG_FILE"] = CONTAINER_CONFIG
 
     def run(self, *arguments: str, check: bool = True) -> subprocess.CompletedProcess[str]:

@@ -1,4 +1,11 @@
 services:
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json", "-ip.bind=0.0.0.0"]
+    volumes:
+      - seaweedfs_data:/data
+      - ${PW_SEAWEED_S3_CONFIG:?run through the PaperWeave CLI}:/etc/seaweedfs/s3.json:ro
+
   db:
     image: postgres:16-alpine
     environment:
@@ -47,6 +54,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      seaweedfs:
+        condition: service_started
     healthcheck:
       test:
         ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:${PW_API_PORT:?}/api/v1/health/live', timeout=2)"]
@@ -114,3 +123,5 @@ volumes:
     name: ${PW_VOLUME_NAME:?run through the PaperWeave CLI}
   paperweave_files:
     name: ${PW_FILE_VOLUME_NAME:-paperweave_files}
+  seaweedfs_data:
+    name: ${PW_SEAWEED_VOLUME_NAME:-paperweave_seaweedfs_data}

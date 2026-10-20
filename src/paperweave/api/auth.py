@@ -4,7 +4,7 @@ from typing import Annotated
 from urllib.parse import quote
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, HTTPException, Request, Response, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Request, Response, UploadFile, status
 from sqlalchemy.exc import IntegrityError
 
 from paperweave.api.dependencies import (
@@ -14,10 +14,10 @@ from paperweave.api.profile_dependencies import get_profile_service
 from paperweave.api.schemas.identity import (
     AuthStatusResponse, CredentialsRequest, OwnerSetupRequest, PasswordChangeRequest,
     UserAdminUpdateRequest, UserCreateRequest, UserProfileUpdateRequest, UserResponse, UserSettingsResponse,
-    UserSettingsUpdateRequest,
+    UserSettingsUpdateRequest, UserArtifactResponse,
 )
 from paperweave.infrastructure.db.identity_repository import ABSOLUTE_TIMEOUT, IdentityRepository
-from paperweave.modules.identity.profile import AvatarTooLargeError, InvalidAvatarError, MAX_AVATAR_BYTES, ProfileService
+from paperweave.modules.identity.profile import AvatarTooLargeError, IdempotencyConflictError, InvalidAvatarError, MAX_AVATAR_BYTES, ProfileService
 from paperweave.modules.identity.security import hash_session_token, new_session_token, verify_password
 
 router = APIRouter(prefix="/auth", tags=["identity"])
@@ -143,16 +143,19 @@ def update_my_settings(
 async def upload_my_avatar(
     request: Request,
     profile: ProfileServiceDep,
+    idempotency_key: Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=119)],
     file: UploadFile = File(...),
     user=Depends(get_current_user),
 ) -> UserResponse:
     content = await file.read(MAX_AVATAR_BYTES + 1)
     try:
-        updated = profile.update_avatar(user.id, file.content_type or "", content)
+        updated = profile.update_avatar(user.id, file.content_type or "", content, idempotency_key)
     except AvatarTooLargeError as exc:
         raise HTTPException(status_code=413, detail="Avatar exceeds 5 MiB") from exc
     except InvalidAvatarError as exc:
         raise HTTPException(status_code=415, detail="Use a valid PNG, JPEG or WebP image") from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return _user_response(updated, request)
 
 
@@ -170,7 +173,7 @@ def get_my_avatar(profile: ProfileServiceDep, user=Depends(get_current_user)) ->
 
 def _avatar_response(profile: ProfileService, user) -> Response:
     try:
-        avatar = profile.read_avatar(user.avatar_key, user.avatar_media_type)
+        avatar = profile.read_avatar(user.avatar_key, user.avatar_media_type, getattr(user, "avatar_artifact_id", None))
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail="Profile avatar not found") from exc
     if avatar is None:
@@ -196,6 +199,42 @@ def get_user_avatar(
     if user is None:
         raise HTTPException(status_code=404, detail="Profile avatar not found")
     return _avatar_response(profile, user)
+
+
+@router.post("/me/images", response_model=UserArtifactResponse, status_code=status.HTTP_201_CREATED)
+async def upload_my_image(
+    profile: ProfileServiceDep,
+    idempotency_key: Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=119)],
+    file: UploadFile = File(...),
+    user=Depends(get_current_user),
+) -> UserArtifactResponse:
+    content = await file.read(MAX_AVATAR_BYTES + 1)
+    try:
+        artifact = profile.upload_image(user.id, file.filename or "image.png", content, idempotency_key)
+    except AvatarTooLargeError as exc:
+        raise HTTPException(status_code=413, detail="Image exceeds 5 MiB") from exc
+    except InvalidAvatarError as exc:
+        raise HTTPException(status_code=415, detail="Use a valid PNG, JPEG or WebP image") from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return UserArtifactResponse(id=str(artifact.id), kind=artifact.kind, media_type=artifact.media_type, size_bytes=artifact.size_bytes)
+
+
+@router.get("/me/images/{artifact_id}")
+def get_my_image(artifact_id: UUID, profile: ProfileServiceDep, user=Depends(get_current_user)) -> Response:
+    image = profile.read_user_image(user.id, artifact_id)
+    if image is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    artifact, content = image
+    return Response(content=content, media_type=artifact.media_type,
+                    headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"})
+
+
+@router.delete("/me/images/{artifact_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_image(artifact_id: UUID, profile: ProfileServiceDep, user=Depends(get_current_user)) -> Response:
+    if not profile.remove_user_image(user.id, artifact_id):
+        raise HTTPException(status_code=404, detail="Image not found")
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/users", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
@@ -271,6 +310,7 @@ async def upload_user_avatar(
     request: Request,
     profile: ProfileServiceDep,
     repository: IdentityRepositoryDep,
+    idempotency_key: Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=119)],
     file: UploadFile = File(...),
     owner=Depends(require_owner),
 ) -> UserResponse:
@@ -279,11 +319,13 @@ async def upload_user_avatar(
         raise HTTPException(status_code=404, detail="User not found")
     content = await file.read(MAX_AVATAR_BYTES + 1)
     try:
-        updated = profile.update_avatar(user.id, file.content_type or "", content)
+        updated = profile.update_avatar(user.id, file.content_type or "", content, idempotency_key)
     except AvatarTooLargeError as exc:
         raise HTTPException(status_code=413, detail="Avatar exceeds 5 MiB") from exc
     except InvalidAvatarError as exc:
         raise HTTPException(status_code=415, detail="Use a valid PNG, JPEG or WebP image") from exc
+    except IdempotencyConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     return _user_response(updated, request)
 
 

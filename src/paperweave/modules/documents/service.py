@@ -15,7 +15,7 @@ class DocumentService:
             raise SourceNotFoundError
         run = self.repository.create_run(file.id, PROCESSOR, PROCESSOR_VERSION)
         try:
-            pages = extract_pdf_pages(self.storage.read(file.storage_key))
+            pages = extract_pdf_pages(self.storage.read(file.storage_key, backend=file.artifact.backend if file.artifact else "local"))
         except Exception as exc:
             return self.repository.fail_run(run.id, f"PDF extraction failed: {type(exc).__name__}")
         failed = [page for page in pages if page.error]

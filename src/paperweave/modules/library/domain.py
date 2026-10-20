@@ -26,3 +26,4 @@ class SourceFile:
     sha256: str
     created_at: datetime
     storage_key: str
+    backend: str = "local"

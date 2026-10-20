@@ -22,9 +22,9 @@ export function listSources(projectId: string): Promise<Source[]> { return fetch
 export function createSource(projectId: string, input: { title: string; authors?: string; year?: number; doi?: string }): Promise<Source> {
   return fetch(endpoint(`/projects/${encodeURIComponent(projectId)}/sources`), { method: "POST", credentials: "include", headers: { "Content-Type": "application/json" }, body: JSON.stringify(input) }).then(parse<Source>);
 }
-export function uploadSourceFile(projectId: string, sourceId: string, file: File): Promise<SourceFile> {
+export function uploadSourceFile(projectId: string, sourceId: string, file: File, idempotencyKey = crypto.randomUUID()): Promise<SourceFile> {
   const form = new FormData(); form.append("file", file);
-  return fetch(endpoint(`/projects/${encodeURIComponent(projectId)}/sources/${encodeURIComponent(sourceId)}/files`), { method: "POST", credentials: "include", body: form }).then(parse<SourceFile>);
+  return fetch(endpoint(`/projects/${encodeURIComponent(projectId)}/sources/${encodeURIComponent(sourceId)}/files`), { method: "POST", credentials: "include", headers: { "Idempotency-Key": idempotencyKey }, body: form }).then(parse<SourceFile>);
 }
 export async function downloadSourceFile(projectId: string, sourceId: string, fileId: string): Promise<void> {
   const response = await fetch(endpoint(`/projects/${encodeURIComponent(projectId)}/sources/${encodeURIComponent(sourceId)}/files/${encodeURIComponent(fileId)}`), { credentials: "include" });

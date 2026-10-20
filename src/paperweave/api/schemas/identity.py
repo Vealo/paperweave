@@ -138,5 +138,12 @@ class UserResponse(BaseModel):
     is_active: bool = True
 
 
+class UserArtifactResponse(BaseModel):
+    id: str
+    kind: str
+    media_type: str
+    size_bytes: int
+
+
 class AuthStatusResponse(BaseModel):
     owner_exists: bool

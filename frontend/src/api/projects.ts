@@ -64,6 +64,36 @@ export async function requestApi<T>(path: string, init?: RequestInit): Promise<T
   return (await response.json()) as T;
 }
 
+export async function requestApiFormData<T>(path: string, formData: FormData, idempotencyKey = crypto.randomUUID()): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(endpoint(path), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Idempotency-Key": idempotencyKey },
+      body: formData,
+    });
+  } catch {
+    throw new Error("Не удалось связаться с API. Проверьте, что приложение запущено.");
+  }
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      window.dispatchEvent(new Event("paperweave:session-expired"));
+    }
+    let message = "Не удалось выполнить запрос.";
+    try {
+      const body = (await response.json()) as { detail?: string };
+      if (body.detail) message = body.detail;
+    } catch {
+      // The API may return an empty or non-JSON error response.
+    }
+    throw new ApiError(message, response.status);
+  }
+
+  return (await response.json()) as T;
+}
+
 export async function getReadiness(): Promise<boolean> {
   let response: Response;
   try {

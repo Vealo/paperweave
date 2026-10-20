@@ -23,5 +23,14 @@ name = "paperweave"
 user = "paperweave_app"
 password = "change_me"
 
+[storage]
+backend = "local"
+local_path = "/app/data/files"
+s3_endpoint_url = "http://seaweedfs:8333"
+s3_region = "us-east-1"
+s3_bucket = "paperweave-artifacts"
+s3_access_key = "paperweave-local"
+s3_secret_key = "change_me_storage_secret"
+
 [deployment]
 bind_host = "127.0.0.1"

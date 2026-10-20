@@ -1,8 +1,6 @@
 """Request-scoped application service and identity dependencies."""
 
 from collections.abc import Iterator
-import os
-from pathlib import Path
 
 from fastapi import Depends, HTTPException, Request, status
 from paperweave.infrastructure.db.identity_repository import IdentityRepository
@@ -12,7 +10,7 @@ from paperweave.modules.identity.security import hash_session_token
 from paperweave.modules.projects.service import ProjectService
 from paperweave.modules.manuscripts.service import ManuscriptService
 from paperweave.infrastructure.db.library_repository import SqlAlchemyLibraryRepository
-from paperweave.infrastructure.storage.local import LocalFileStorage
+from paperweave.infrastructure.storage.factory import create_storage
 from paperweave.modules.library.service import LibraryService
 from paperweave.infrastructure.db.document_repository import SqlAlchemyDocumentRepository
 from paperweave.modules.documents.service import DocumentService
@@ -54,11 +52,11 @@ def get_manuscript_service(request: Request) -> Iterator[ManuscriptService]:
 
 def get_library_service(request: Request) -> Iterator[LibraryService]:
     with request.app.state.session_factory() as session:
-        root = Path(os.getenv("PW_FILE_STORAGE", "/app/data/files"))
-        yield LibraryService(SqlAlchemyLibraryRepository(session), LocalFileStorage(root))
+        storage = create_storage(request.app.state.config)
+        yield LibraryService(SqlAlchemyLibraryRepository(session, storage), storage)
 
 
 def get_document_service(request: Request) -> Iterator[DocumentService]:
     with request.app.state.session_factory() as session:
-        root = Path(os.getenv("PW_FILE_STORAGE", "/app/data/files"))
-        yield DocumentService(SqlAlchemyDocumentRepository(session), LocalFileStorage(root))
+        storage = create_storage(request.app.state.config)
+        yield DocumentService(SqlAlchemyDocumentRepository(session), storage)

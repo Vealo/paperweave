@@ -16,6 +16,8 @@ from paperweave.config import load_config
 from paperweave.api.router import api_router
 from paperweave.infrastructure.db.connection import build_database_url
 from paperweave.infrastructure.db.session import create_session_factory
+from paperweave.infrastructure.db.artifact_lifecycle import reconcile_pending_deletes
+from paperweave.infrastructure.storage.factory import create_storage
 
 
 def create_app(
@@ -33,9 +35,13 @@ def create_app(
         )
         config = load_config(selected_config)
         engine = engine_factory(database_url or build_database_url(config))
+        storage = create_storage(config)
         app.state.config = config
+        app.state.storage = storage
         app.state.engine = engine
         app.state.session_factory = create_session_factory(engine)
+        with app.state.session_factory() as session:
+            reconcile_pending_deletes(session, storage)
         try:
             yield
         finally:
@@ -52,7 +58,7 @@ def create_app(
         allow_origins=sorted(trusted_origins),
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
-        allow_headers=["Content-Type"],
+        allow_headers=["Content-Type", "Idempotency-Key"],
     )
 
     @app.middleware("http")

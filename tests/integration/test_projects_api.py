@@ -18,7 +18,7 @@ def test_live_and_ready_report_database_state(client: TestClient, database_url: 
     assert client.get("/api/v1/health/live").status_code == 200
     ready = client.get("/api/v1/health/ready")
     assert ready.status_code == 200
-    assert ready.json() == {"status": "ok", "database": "available"}
+    assert ready.json() == {"status": "ok", "database": "available", "storage": "available"}
 
     unavailable_engine = create_engine(
         database_url.replace("test-db:5432", "127.0.0.1:1"),
@@ -57,6 +57,21 @@ def test_cors_allows_only_the_configured_local_ui_origin(client: TestClient) -> 
         },
     )
     assert denied.status_code == 400
+
+
+def test_cors_preflight_allows_idempotency_key_for_uploads(client: TestClient) -> None:
+    response = client.options(
+        "/api/v1/auth/me/avatar",
+        headers={
+            "Origin": TEST_ORIGIN,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "idempotency-key, content-type",
+        },
+    )
+
+    assert response.status_code == 200
+    allowed_headers = response.headers.get("access-control-allow-headers", "").lower()
+    assert "idempotency-key" in allowed_headers
 
 
 def test_authentication_owner_bootstrap_and_session_cookie(client: TestClient) -> None:
@@ -184,6 +199,7 @@ def test_owner_manages_users_and_project_access_is_isolated(client: TestClient, 
         private_file = client.post(
             f"/api/v1/projects/{owner_project['id']}/sources/{private_source['id']}/files",
             files={"file": ("private.pdf", b"%PDF-1.7 private", "application/pdf")},
+            headers={"Idempotency-Key": "private-pdf"},
         ).json()
         member_project_response = member.post("/api/v1/projects", json={"name": "Member project"})
         assert member_project_response.status_code == 201
@@ -212,7 +228,7 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
     engine = create_engine(database_url)
     try:
         inspector = inspect(engine)
-        assert {"alembic_version", "projects", "users", "user_settings", "sessions", "manuscripts", "sources", "source_files", "source_file_references", "extraction_runs", "source_passages", "claims", "evidence_links", "review_decisions", "ai_proposals", "manuscript_revisions"} <= set(inspector.get_table_names())
+        assert {"alembic_version", "projects", "users", "user_settings", "sessions", "file_artifacts", "manuscripts", "sources", "source_files", "source_file_references", "extraction_runs", "source_passages", "claims", "evidence_links", "review_decisions", "ai_proposals", "manuscript_revisions"} <= set(inspector.get_table_names())
         columns = {column["name"]: column for column in inspector.get_columns("projects")}
         assert set(columns) == {"owner_id", "id", "name", "description", "created_at"}
         assert columns["owner_id"]["nullable"] is False
@@ -228,7 +244,7 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
         assert {"run_id", "file_id", "page_number", "text"} <= passage_columns
         with engine.connect() as connection:
             revision = connection.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
-        assert revision == "20261020_0009"
+        assert revision == "20261020_0010"
         assert {"manuscript_id", "block_position", "text", "version", "manuscript_version"} <= {column["name"] for column in inspector.get_columns("claims")}
         assert {"claim_id", "claim_version", "passage_id", "passage_file_id", "relation", "review_state", "manuscript_version", "version"} <= {column["name"] for column in inspector.get_columns("evidence_links")}
         assert {"reviewer_id", "link_version", "decision", "note", "decided_at"} <= {column["name"] for column in inspector.get_columns("review_decisions")}
@@ -275,6 +291,98 @@ def test_user_settings_migration_backfills_existing_accounts(
             ).scalar_one()
         assert settings == "system"
         assert is_active is True
+    finally:
+        with admin_engine.begin() as connection:
+            connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))
+        admin_engine.dispose()
+
+
+def test_file_artifact_migration_backfills_existing_files_and_avatars(
+    database_url: str, monkeypatch
+) -> None:
+    schema = f"artifact_migration_{uuid4().hex}"
+    admin_engine = create_engine(database_url)
+    schema_url = make_url(database_url).update_query_dict(
+        {"options": f"-csearch_path={schema}"}
+    )
+    user_id, project_id, source_id, file_id = (str(uuid4()) for _ in range(4))
+    try:
+        with admin_engine.begin() as connection:
+            connection.execute(text(f'CREATE SCHEMA "{schema}"'))
+
+        monkeypatch.setenv("TEST_DATABASE_URL", schema_url.render_as_string(hide_password=False))
+        monkeypatch.setenv("PAPERWEAVE_CONFIG_FILE", str(PROJECT_ROOT / "config.example.toml"))
+        alembic_config = Config(str(PROJECT_ROOT / "alembic.ini"))
+        command.upgrade(alembic_config, "20261020_0009")
+
+        with create_engine(schema_url).begin() as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO users (id, email, display_name, role, avatar_key, avatar_media_type) "
+                    "VALUES (:id, 'legacy@example.test', 'Legacy', 'member', 'avatars/legacy.png', 'image/png')"
+                ),
+                {"id": user_id},
+            )
+            connection.execute(
+                text("INSERT INTO projects (id, owner_id, name) VALUES (:id, :owner, 'Legacy project')"),
+                {"id": project_id, "owner": user_id},
+            )
+            connection.execute(
+                text(
+                    "INSERT INTO sources (id, project_id, title, metadata_provenance) "
+                    "VALUES (:id, :project, 'Legacy source', 'manual')"
+                ),
+                {"id": source_id, "project": project_id},
+            )
+            connection.execute(
+                text(
+                    "INSERT INTO source_files "
+                    "(id, source_id, version, original_name, media_type, size_bytes, sha256, storage_key) "
+                    "VALUES (:id, :source, 3, 'paper.pdf', 'application/pdf', 1234, :sha, 'sources/legacy.pdf')"
+                ),
+                {"id": file_id, "source": source_id, "sha": "a" * 64},
+            )
+
+        command.upgrade(alembic_config, "head")
+        with create_engine(schema_url).connect() as connection:
+            file_artifact = connection.execute(
+                text(
+                    "SELECT owner_user_id, kind, domain_id, domain_parent_id, backend, object_key, "
+                    "original_name, media_type, size_bytes, checksum_sha256, version "
+                    "FROM file_artifacts WHERE id=:id"
+                ),
+                {"id": file_id},
+            ).one()
+            avatar = connection.execute(
+                text(
+                    "SELECT id, owner_user_id, object_key, media_type FROM file_artifacts "
+                    "WHERE kind='avatar' AND domain_id=:user_id"
+                ),
+                {"user_id": user_id},
+            ).one()
+            source_artifact_id = connection.execute(
+                text("SELECT artifact_id FROM source_files WHERE id=:id"), {"id": file_id}
+            ).scalar_one()
+            avatar_pointer = connection.execute(
+                text("SELECT avatar_artifact_id FROM users WHERE id=:id"), {"id": user_id}
+            ).scalar_one()
+
+        assert str(file_artifact.owner_user_id) == user_id
+        assert file_artifact.kind == "document"
+        assert str(file_artifact.domain_id) == file_id
+        assert str(file_artifact.domain_parent_id) == source_id
+        assert file_artifact.backend == "local"
+        assert file_artifact.object_key == "sources/legacy.pdf"
+        assert file_artifact.original_name == "paper.pdf"
+        assert file_artifact.media_type == "application/pdf"
+        assert file_artifact.size_bytes == 1234
+        assert file_artifact.checksum_sha256 == "a" * 64
+        assert file_artifact.version == 3
+        assert str(source_artifact_id) == file_id
+        assert str(avatar.owner_user_id) == user_id
+        assert avatar.object_key == "avatars/legacy.png"
+        assert avatar.media_type == "image/png"
+        assert avatar_pointer == avatar.id
     finally:
         with admin_engine.begin() as connection:
             connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))

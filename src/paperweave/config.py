@@ -74,6 +74,16 @@ class DatabaseSettings(StrictSettings):
     password: str = Field(min_length=1)
 
 
+class StorageSettings(StrictSettings):
+    backend: Literal["local", "s3"] = "local"
+    local_path: str = "/app/data/files"
+    s3_endpoint_url: str = "http://seaweedfs:8333"
+    s3_region: str = "us-east-1"
+    s3_bucket: str = "paperweave-artifacts"
+    s3_access_key: str = "paperweave-local"
+    s3_secret_key: str = "change_me_storage_secret"
+
+
 class DeploymentSettings(StrictSettings):
     bind_host: str = "127.0.0.1"
 
@@ -95,6 +105,7 @@ class AppConfig(StrictSettings):
     ui: UiSettings
     timeouts: TimeoutSettings
     database: DatabaseSettings
+    storage: StorageSettings = Field(default_factory=StorageSettings)
     deployment: DeploymentSettings
 
     @model_validator(mode="after")

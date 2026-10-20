@@ -3,6 +3,7 @@
 **/.ua/
 .env
 config.toml
+.paperweave-secrets/
 .venv/
 __pycache__/
 *.py[cod]

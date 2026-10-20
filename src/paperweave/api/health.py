@@ -4,6 +4,9 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 
+from paperweave.infrastructure.storage.factory import create_storage
+
+
 
 router = APIRouter(prefix="/health", tags=["health"])
 
@@ -23,4 +26,11 @@ def readiness(request: Request) -> JSONResponse:
             status_code=503,
             content={"status": "not_ready", "database": "unavailable"},
         )
-    return JSONResponse(status_code=200, content={"status": "ok", "database": "available"})
+    try:
+        create_storage(request.app.state.config).check()
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "database": "available", "storage": "unavailable"},
+        )
+    return JSONResponse(status_code=200, content={"status": "ok", "database": "available", "storage": "available"})

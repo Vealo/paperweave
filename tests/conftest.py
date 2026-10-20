@@ -41,6 +41,8 @@ def client(database_url: str) -> Iterator[TestClient]:
         connection.execute(text("DELETE FROM source_passages"))
         connection.execute(text("DELETE FROM extraction_runs"))
         connection.execute(text("DELETE FROM projects"))
+        connection.execute(text("UPDATE users SET avatar_artifact_id = NULL"))
+        connection.execute(text("DELETE FROM file_artifacts"))
         connection.execute(text("DELETE FROM users WHERE id != :owner_id"), {"owner_id": str(BOOTSTRAP_OWNER_ID)})
         connection.execute(
             text(

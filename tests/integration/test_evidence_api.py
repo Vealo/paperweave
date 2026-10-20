@@ -28,7 +28,7 @@ def _evidence_fixture(client: TestClient, tmp_path, monkeypatch):
     manuscript = client.post(manuscript_url, json={"content": {"type": "doc", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "The claim text"}]}]}}).json()
     sources_url = f"/api/v1/projects/{project_id}/sources"
     source = client.post(sources_url, json={"title": "Evidence paper"}).json()
-    uploaded = client.post(f"{sources_url}/{source['id']}/files", files={"file": ("evidence.pdf", _pdf_with_text(), "application/pdf")}).json()
+    uploaded = client.post(f"{sources_url}/{source['id']}/files", files={"file": ("evidence.pdf", _pdf_with_text(), "application/pdf")}, headers={"Idempotency-Key": "evidence-pdf"}).json()
     document_url = f"{sources_url}/{source['id']}/files/{uploaded['id']}"
     run = client.post(f"{document_url}/extractions")
     assert run.status_code == 201
@@ -111,7 +111,7 @@ def test_replacing_source_file_marks_existing_evidence_stale(client: TestClient,
     claims_url = f"/api/v1/projects/{project_id}/claims"
     claim = client.post(claims_url, json={"text": "A claim", "block_position": 0}).json()
     link = client.post(f"{claims_url}/{claim['id']}/links", json={"passage_id": passage["id"], "relation": "supports"}).json()
-    replacement = client.post(f"{sources_url}/{source['id']}/files", files={"file": ("replacement.pdf", _pdf_with_text("Replacement source text"), "application/pdf")})
+    replacement = client.post(f"{sources_url}/{source['id']}/files", files={"file": ("replacement.pdf", _pdf_with_text("Replacement source text"), "application/pdf")}, headers={"Idempotency-Key": "replacement-pdf"})
     assert replacement.status_code == 201
     listed = client.get(claims_url).json()
     assert listed[0]["links"][0]["review_state"] == "needs_review"

@@ -3,9 +3,9 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid, func, UniqueConstraint
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text, Uuid, func, UniqueConstraint, BigInteger, CheckConstraint
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from paperweave.infrastructure.db.base import Base
 
@@ -18,6 +18,7 @@ class UserRecord(Base):
     display_name: Mapped[str] = mapped_column(String(120), nullable=False)
     avatar_key: Mapped[str | None] = mapped_column(String(255), nullable=True)
     avatar_media_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    avatar_artifact_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), ForeignKey("file_artifacts.id", ondelete="SET NULL", use_alter=True, name="fk_users_avatar_artifact"), nullable=True)
     password_hash: Mapped[str | None] = mapped_column(String(256), nullable=True)
     role: Mapped[str] = mapped_column(String(16), nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="true")
@@ -139,7 +140,41 @@ class SourceFileRecord(Base):
     size_bytes: Mapped[int] = mapped_column(Integer, nullable=False)
     sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     storage_key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    artifact_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), ForeignKey("file_artifacts.id", ondelete="RESTRICT"), nullable=True, unique=True)
+    artifact: Mapped["FileArtifactRecord | None"] = relationship("FileArtifactRecord", foreign_keys=[artifact_id])
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+
+
+class FileArtifactRecord(Base):
+    __tablename__ = "file_artifacts"
+    __table_args__ = (
+        UniqueConstraint("backend", "bucket", "object_key", name="uq_file_artifacts_backend_object"),
+        UniqueConstraint("owner_user_id", "idempotency_key", name="uq_file_artifacts_owner_idempotency"),
+        CheckConstraint("kind IN ('avatar', 'image', 'document')", name="ck_file_artifacts_kind"),
+        CheckConstraint("lifecycle IN ('pending_upload', 'active', 'pending_delete', 'deleted', 'failed')", name="ck_file_artifacts_lifecycle"),
+    )
+
+    id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid4)
+    owner_user_id: Mapped[UUID] = mapped_column(Uuid(as_uuid=True), ForeignKey("users.id", ondelete="RESTRICT"), nullable=False, index=True)
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    domain_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    domain_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True, index=True)
+    domain_parent_id: Mapped[UUID | None] = mapped_column(Uuid(as_uuid=True), nullable=True, index=True)
+    backend: Mapped[str] = mapped_column(String(16), nullable=False)
+    bucket: Mapped[str] = mapped_column(String(128), nullable=False, default="")
+    object_key: Mapped[str] = mapped_column(String(512), nullable=False)
+    original_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    media_type: Mapped[str] = mapped_column(String(120), nullable=False)
+    size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    checksum_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    lifecycle: Mapped[str] = mapped_column(String(24), nullable=False, default="pending_upload", index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False)
+    cleanup_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    last_cleanup_error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now())
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
 class SourceFileReferenceRecord(Base):
