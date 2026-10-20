@@ -1,0 +1,47 @@
+schema_version: 1
+task_id: TASK-027
+repo: /home/denis/Projects/paperweave
+baseline_ref: main
+baseline_sha: c04821966430e6b81ce4bb50009972dff88a262f
+checks:
+  - id: migration_rehearsal
+    status: passed
+    environment: disposable Compose PostgreSQL with tmpfs database
+    project: paperweave-task027-migration
+    command: >-
+      uv run --frozen alembic upgrade head && uv run --frozen pytest -q
+      tests/integration/test_projects_api.py::test_user_settings_migration_backfills_existing_accounts
+    result: 1 passed in 0.98s
+    verifies:
+      - system/dark/light backfill to light
+      - default light for newly created settings
+      - downgrade to 20261020_0010 retains light, then upgrade to head succeeds
+      - email, display_name, password_hash, role and is_active remain unchanged
+      - isolated schema is dropped after the test
+  - id: migration_and_settings_api
+    status: passed
+    environment: disposable Compose PostgreSQL with tmpfs database
+    project: paperweave-task027-theme-api
+    command: >-
+      uv run --frozen alembic upgrade head && uv run --frozen pytest -q
+      tests/integration/test_projects_api.py::test_user_settings_migration_backfills_existing_accounts
+      tests/integration/test_identity_profiles_api.py::test_user_settings_have_defaults_and_are_isolated
+    result: 2 passed in 2.35s
+    verifies:
+      - migration rehearsal and preservation of unrelated user fields
+      - GET/PATCH returns light, accepts transitional system/dark/light payloads, rejects sepia
+      - member settings do not change owner settings
+      - isolated Compose project and test database are removed after the run
+environment_safety:
+  shared_or_production_database_used: false
+  paperweave_application_database_changed: false
+  persistent_database_snapshot_created: false
+  note: >-
+    The disposable PostgreSQL tests use tmpfs and do not constitute a persistent local,
+    shared, or production migration. A snapshot is required before any separately
+    authorized persistent local database migration if prior theme values must be restored.
+  setup_incident: >-
+    An initial sandboxed Docker build stopped before test execution because Buildx could not
+    write its external activity file. Its attempted cleanup did not remove paperweave_files;
+    Docker confirmed that volume remained attached to the healthy paperweave-api-1 container.
+    The successful reruns used distinct Compose project and file-volume names.

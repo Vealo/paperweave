@@ -38,11 +38,14 @@ criteria:
     ссылки и post-integration checks подтверждены; unrelated dirty baseline не включён.'
   checked: false
   evidence: []
-status: todo
-revision: 1
+status: in_progress
+revision: 3
 blockers: []
 created_at: '2026-10-20T11:41:34Z'
-updated_at: '2026-10-20T11:41:34Z'
+updated_at: '2026-10-20T13:28:03Z'
+next_action: Проверить архитектурные контракты, ссылки и закрыть ветку TASK-027
+progress_note: 2 scoped theme migration/API tests passed in disposable PostgreSQL;
+  P1/P2 plan checklist reconciled
 ---
 
 ## Outcome
