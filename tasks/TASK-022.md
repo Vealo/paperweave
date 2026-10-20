@@ -14,18 +14,19 @@ criteria:
     миграции и Compose project; затем отдельный вложенный блок хранилища со статусами
     SeaweedFS/S3, endpoint и bucket без credentials, оформленный с одинаковыми отступами
     и выравниванием подписей.
-  checked: false
+  checked: true
   evidence:
   - 'tests/unit/test_cli.py: 7 passed; mocked up/restart summaries and Compose JSON
     status parser'
-status: in_progress
-revision: 5
+  - 'tests/unit/test_cli.py: 7 passed after merge; service summary precedes nested
+    storage block for up/restart; git merge f1f512e'
+status: done
+revision: 6
 blockers: []
 created_at: '2026-10-20T11:04:00Z'
-updated_at: '2026-10-20T11:14:25Z'
-next_action: Получить review, затем интегрировать ветку в main и завершить финализацию.
-progress_note: 'CLI-поведенческие проверки: 7 passed; проверены up, restart и разбор
-  статусов Compose.'
+updated_at: '2026-10-20T11:17:03Z'
+progress_note: 'Интегрировано в main; post-merge CLI-проверка: 7 passed; task-store/TODO
+  валидны.'
 ---
 
 ## Outcome
