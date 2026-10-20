@@ -16,24 +16,27 @@ criteria:
   checked: true
   evidence:
   - docs/evidence/verification/TASK-025-acceptance-ledger.yaml
+  - commit:3884a7a30dafdb6c293efe1e4a04be7e6b147103
 - id: AC-2
   text: 'AC-P3-002: ни route transition, ни настройка пользователя/ОС не устанавливают
     .p-dark.'
   checked: true
   evidence:
   - docs/evidence/verification/TASK-025-acceptance-ledger.yaml
+  - commit:3884a7a30dafdb6c293efe1e4a04be7e6b147103
 - id: AC-3
   text: 'AC-P3-003: персональная тема не дублируется в системном placeholder menu.'
   checked: true
   evidence:
   - docs/evidence/verification/TASK-025-acceptance-ledger.yaml
-status: in_progress
-revision: 3
+  - commit:3884a7a30dafdb6c293efe1e4a04be7e6b147103
+status: done
+revision: 4
 blockers: []
 created_at: '2026-10-20T11:41:26Z'
-updated_at: '2026-10-20T12:24:18Z'
-next_action: Зафиксировать проверенную реализацию и acceptance ledger.
-progress_note: Убрал двойное управление темой; typecheck, 7 тестов и build прошли.
+updated_at: '2026-10-20T12:25:34Z'
+progress_note: TASK-025 завершена и интегрирована в main; 7 frontend-тестов, typecheck
+  и build прошли.
 ---
 
 ## Outcome

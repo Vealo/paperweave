@@ -32,7 +32,7 @@ phases: 4
 phase_statuses:
   P1: verified
   P2: verified
-  P3: ready
+  P3: active
   P4: pending
 progress: 2/4
 analysis_status: complete
@@ -71,10 +71,10 @@ deployment_mode: not_applicable
 | Child skill | `imp-analysis` |
 | Analysis status | complete |
 | Analysis artifact | [Analysis](../../evidence/plan-analysis/imp-2026-003-light-design-system-user-settings.md) |
-| Analysis verdict | ready_with_blockers |
+| Analysis verdict | ready_with_blockers at analysis time; IMP-BL-01 is now resolved. |
 | Architecture status | complete |
 | Architecture artifact | [Architecture control](../../evidence/architecture/imp-2026-003-light-design-system-user-settings.json) |
-| Open blocker refs | IMP-BL-01 |
+| Open blocker refs | None; IMP-BL-01 resolved by checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`. |
 
 ## Audited context
 
@@ -132,7 +132,7 @@ deployment_mode: not_applicable
 
 ## Target model
 
-`user_settings` остаётся связанной с `users` один-к-одному; `IdentityRepository` владеет persistence, API — boundary, frontend auth API — транспорт. Сервер хранит `theme = light`; интерфейс всегда активирует светлую схему и не вычисляет её по ОС. App shell отвечает за единое оформление. Профиль отображает личные данные и фиксированную светлую тему. Пункт «Настройки» в header остаётся заглушкой системных настроек и не становится вторым местом выбора пользовательской темы. Поверхности, текст, focus и действия используют shared semantic tokens PrimeVue/Aura и PaperWeave; экраны не задают палитру повторно.
+`user_settings` остаётся связанной с `users` один-к-одному; `IdentityRepository` владеет persistence, API — boundary, frontend auth API — транспорт. Сервер хранит `theme = light`; интерфейс всегда активирует светлую схему и не вычисляет её по ОС. Bootstrap в `main.ts` очищает устаревший маркер тёмного режима до первого render; других runtime writers/listeners нет. Профиль отображает личные данные и не предлагает выбор темы. Пункт «Настройки» в header остаётся заглушкой системных настроек и не становится вторым местом выбора пользовательской темы. Поверхности, текст, focus и действия используют shared semantic tokens PrimeVue/Aura и PaperWeave; экраны не задают палитру повторно.
 
 ## Work groups and dependency graph
 
@@ -291,7 +291,7 @@ Phase ID: `P3`; dependency: P2; precondition: IMP-BL-01 снят.
 
 ### Preconditions and scope / non-scope
 
-- Profile показывает зафиксированную тему «Светлая»; `Системная` и `Тёмная` не предлагаются как доступные.
+- Profile показывает личные данные; тема не настраивается в профиле, `Системная` и `Тёмная` не предлагаются.
 - «Настройки» в account menu остаются заглушкой системных настроек.
 - Не удалять settings API/table для сокрытия неподдерживаемой опции.
 
@@ -305,19 +305,19 @@ Phase ID: `P3`; dependency: P2; precondition: IMP-BL-01 снят.
 
 ### Tasks and ownership
 
-**Package Task:** [TASK-025 — Устранить конфликт настроек и активной схемы](../../../tasks/TASK-025.md); depends on TASK-024.
+**Package Task:** [TASK-025 — Устранить конфликт настроек и активной схемы](../../../tasks/TASK-025.md); `done`, committed on `main` as `3884a7a30dafdb6c293efe1e4a04be7e6b147103`; [acceptance](../../evidence/verification/TASK-025-acceptance-ledger.yaml), [finalization](../../evidence/verification/TASK-025-finalization.yaml); depends on TASK-024.
 
 | # | Task | Files / owner | Tests | Status |
 |---|---|---|---|---|
-| 3.1 | Удалить дублирующиеся loaders/`applyTheme` и оставить одно владение отображением текущих настроек. | `App.vue`, `ProfileView.vue` | Один bootstrap/update path | `pending` |
-| 3.2 | Отключить применение `.p-dark` и `prefers-color-scheme`. | `main.ts`, `App.vue`, styles | Проверить системные light/dark preference | `pending` |
-| 3.3 | Убрать недоступный theme selector и разделить личный профиль от системной заглушки. | `ProfileView.vue`, `App.vue` | UI/content/action review | `pending` |
+| 3.1 | Удалить дублирующиеся loaders/`applyTheme` и оставить одно владение отображением текущих настроек. | `App.vue`, `ProfileView.vue` | Один bootstrap/update path | `done`, TASK-025 |
+| 3.2 | Отключить применение `.p-dark` и `prefers-color-scheme`. | `main.ts`, `App.vue`, styles | Проверить системные light/dark preference | `implementation done`; local browser matrix pending |
+| 3.3 | Убрать недоступный theme selector и разделить личный профиль от системной заглушки. | `ProfileView.vue`, `App.vue` | UI/content/action review | `done`, TASK-025 |
 
 ### Data and compatibility
 
-- [ ] Не добавлять localStorage для темы.
+- [x] Не добавлять localStorage для темы.
 - [ ] Logout/login между разными пользователями не переносит профильные поля; видимая схема остаётся светлой.
-- [ ] При сбое API ошибка показывается в профиле отдельно; основной shell остаётся читаемым.
+- [x] Settings API не участвует в загрузке профиля или выборе схемы; ошибка этого API не меняет оформление.
 
 ### Acceptance criteria
 
@@ -327,15 +327,15 @@ Phase ID: `P3`; dependency: P2; precondition: IMP-BL-01 снят.
 
 ### Verification
 
-- [ ] `npm --prefix frontend run test` покрывает bootstrap, read/save профиля, logout/login и API failure.
-- [ ] В браузере с `prefers-color-scheme: dark` прямые загрузки и переходы остаются светлыми.
+- [x] `npm --prefix frontend run test` проверяет очистку `.p-dark` до mount, отсутствие параллельной загрузки/применения темы и отсутствие неактивного theme selector.
+- [ ] В браузере с `prefers-color-scheme: dark` прямые загрузки и переходы остаются светлыми. Проверка ожидает обновлённый локальный runtime; доступный Playwright не имеет установленного Chromium.
 
 ### Evidence contract
 
 | Type | Command/source | Environment | Result | Observed at | Artifact |
 |---|---|---|---|---|---|
-| `test` | `npm --prefix frontend run test` | `test` | `pass/fail/unavailable` | при исполнении | Task evidence |
-| `manual` | Проверка прямой загрузки, route transitions и профиля | `local` | `pass/fail/unavailable` | при исполнении | Screenshots/checklist |
+| `test` | `npm --prefix frontend run test` | `test` | pass (7 tests) | 2026-10-20 | [TASK-025 acceptance](../../evidence/verification/TASK-025-acceptance-ledger.yaml) |
+| `manual` | Проверка прямой загрузки, route transitions и профиля | `local` | unavailable | 2026-10-20 | [TASK-025 finalization](../../evidence/verification/TASK-025-finalization.yaml) |
 
 ### Exit criteria
 
@@ -414,7 +414,7 @@ Phase ID: `P4`; dependencies: P1–P3.
 
 | ID | Phase/task | Severity | Status | Evidence | Impact | Owner | Exit condition | Next action |
 |---|---|---|---|---|---|---|---|---|
-| IMP-BL-01 | P1, затем P2–P4 по зависимостям | `blocking` | `open` | На `main` при HEAD `74901be` изменены без checkpoint `frontend/src/App.vue`, `frontend/src/main.ts`, `frontend/src/styles/main.css`, `docs/design-system.md`, `docs/data-model.md`, `DOCS.md`; все пересекаются с целевой поверхностью. | Риск смешать или затереть существующую пользовательскую работу; зависимые фазы нельзя исполнять в обход P1. | Denis Karmalak / текущий владелец изменений | Изменения checkpointed/integrated или доступен task-owned worktree от их checkpoint. | Сохранить изменения и определить checkpoint до P1. |
+| IMP-BL-01 | P1, затем P2–P4 по зависимостям | `blocking` | `resolved` | Checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5` сохранил ранее накопленные изменения; P1/TASK-023 прошла scoped проверки и интегрирована в `main` коммитом `433c739ec5f38f2484c3871c4fbbdac46805326a`. | Риск смешать или затереть пользовательскую работу снят; зависимые фазы могут продолжаться по своим воротам. | Denis Karmalak / текущий владелец изменений | Выполнено: checkpoint создан, P1 проверена и интегрирована. | Нет; продолжить P3 после её локальной визуальной проверки. |
 
 ## Risks & Mitigations
 
@@ -422,7 +422,7 @@ Phase ID: `P4`; dependencies: P1–P3.
 |---|---|---|---|
 | Старый frontend отправляет `system/dark` после обновления API. | Medium | Ошибка профиля или временное расхождение UI/API. | Переходная совместимость до удаления недоступных UI вариантов; проверить старый payload и response. |
 | Локальные CSS overrides оставляют несовместимые пары foreground/background. | Medium | Контраст остаётся нарушенным после внедрения палитры. | Семантические токены и визуальная матрица экранов/общих controls. |
-| Пересекающиеся незакоммиченные правки смешаются с реализацией. | High | Потеря существующего diff или регрессия. | IMP-BL-01: checkpoint либо отдельный worktree до редактирования. |
+| Пересекающиеся незакоммиченные правки смешаются с реализацией. | High | Потеря существующего diff или регрессия. | IMP-BL-01 resolved: checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`; перед новыми фазами сохранять точную границу изменений. |
 | Владелец захочет восстановить прежний выбор темы. | Low | Исходные значения намеренно нормализованы. | Snapshot перед миграцией; точное восстановление только из него. |
 
 ## Handoff for another agent
@@ -494,3 +494,4 @@ IMP may become `complete` only after P1–P4 and its final verification Task hav
 |---|---|
 | 2026-10-20 | Initial standalone IMP; implementation blocked until overlapping worktree changes are checkpointed. |
 | 2026-10-20 | Expanded into TASK-023–TASK-026 plus final verification TASK-027; P1 remains blocked by IMP-BL-01. |
+| 2026-10-20 | Resolved IMP-BL-01 with checkpoint `5bed8bfa1966fbf815fbaad0d6cd001215d5dbe5`; P1 and P2 verified; TASK-025 implementation committed. P3 remains active pending its local browser matrix; GitNexus is stale and the app runtime was not rebuilt. |

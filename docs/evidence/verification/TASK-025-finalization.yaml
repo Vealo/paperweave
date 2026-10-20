@@ -1,0 +1,37 @@
+schema_version: 1
+task_id: TASK-025
+acceptance_ref: docs/evidence/verification/TASK-025-acceptance-ledger.yaml
+commit:
+  required: true
+  created: true
+  id: 3884a7a30dafdb6c293efe1e4a04be7e6b147103
+  reason: Source, test, and acceptance evidence committed locally.
+gitflow:
+  applicable: true
+  receipt_ref: null
+  integrated: true
+  integration_ref: main
+  merge_commit: null
+  parent_head: 3884a7a30dafdb6c293efe1e4a04be7e6b147103
+  task_commit_reachable: true
+  reason: User-designated main branch; reachability check returned reachable=true.
+tracker:
+  status: done
+  updated: true
+  evidence_ref: tasks/TASK-025.md
+documentation_graph:
+  required_updates:
+    - IMP.md
+    - DOCS.md
+    - docs/plans/imp/imp-2026-003-light-design-system-user-settings.md
+    - TODO.md
+  completed: true
+todo:
+  reconciled: true
+  snapshot_complete: true
+  evidence_ref: python3 /home/denis/.agents/skills/todo/scripts/validate-todo.py TODO.md --store tasks
+linked_open_outcomes:
+  - P3 phase browser matrix remains pending; local UI runtime was not rebuilt and Playwright Chromium is unavailable.
+  - GitNexus graph remains stale by four commits; bounded source/diff fallback passed and no concrete unresolved task risk remains.
+result: finalized
+next_action: Run the authorized local browser matrix for P3, then begin TASK-026.
