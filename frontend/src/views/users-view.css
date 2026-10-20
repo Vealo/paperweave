@@ -1,0 +1,52 @@
+.users-create-card.auth-card {
+  width: min(100%, 680px);
+}
+
+.users-create-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.users-create-header__title {
+  margin: 0;
+  color: var(--p-text-color);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.users-create-header .profile-identity {
+  flex: 0 1 auto;
+  max-width: 260px;
+}
+
+.users-avatar-field {
+  display: grid;
+  gap: 16px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--p-content-border-color);
+}
+
+.users-data-block {
+  display: grid;
+  gap: 18px;
+  padding: 18px;
+  border: 1px solid var(--p-content-border-color);
+  border-radius: var(--p-content-border-radius);
+}
+
+.users-data-block h2 {
+  margin: 0;
+  color: var(--p-text-color);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .users-create-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
