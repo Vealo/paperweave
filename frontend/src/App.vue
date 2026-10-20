@@ -32,7 +32,8 @@ onUnmounted(() => window.removeEventListener("paperweave:session-expired", onSes
         </RouterLink>
         <div class="app-header__account">
           <span>{{ currentUser.display_name }}</span>
-          <RouterLink v-if="currentUser.role === 'owner'" :to="{ name: 'users-new' }">Пользователи</RouterLink>
+          <RouterLink :to="{ name: 'profile' }">Профиль</RouterLink>
+          <RouterLink v-if="currentUser.role === 'owner'" :to="{ name: 'users' }">Пользователи</RouterLink>
           <Button label="Выйти" severity="secondary" text @click="signOut" />
         </div>
       </div>

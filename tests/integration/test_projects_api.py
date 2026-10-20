@@ -1,8 +1,12 @@
 from datetime import UTC, datetime
 from pathlib import Path
+from uuid import uuid4
 
+from alembic import command
+from alembic.config import Config
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine, inspect, text
+from sqlalchemy.engine import make_url
 
 from paperweave.modules.identity.security import hash_session_token
 
@@ -230,6 +234,51 @@ def test_alembic_migration_created_the_expected_postgres_schema(database_url: st
         assert {"reviewer_id", "link_version", "decision", "note", "decided_at"} <= {column["name"] for column in inspector.get_columns("review_decisions")}
     finally:
         engine.dispose()
+
+
+def test_user_settings_migration_backfills_existing_accounts(
+    database_url: str, monkeypatch
+) -> None:
+    schema = f"migration_{uuid4().hex}"
+    admin_engine = create_engine(database_url)
+    schema_url = make_url(database_url).update_query_dict(
+        {"options": f"-csearch_path={schema}"}
+    )
+    try:
+        with admin_engine.begin() as connection:
+            connection.execute(text(f'CREATE SCHEMA "{schema}"'))
+
+        monkeypatch.setenv("TEST_DATABASE_URL", schema_url.render_as_string(hide_password=False))
+        monkeypatch.setenv("PAPERWEAVE_CONFIG_FILE", str(PROJECT_ROOT / "config.example.toml"))
+        alembic_config = Config(str(PROJECT_ROOT / "alembic.ini"))
+        command.upgrade(alembic_config, "20261020_0008")
+
+        existing_user_id = "00000000-0000-0000-0000-000000000987"
+        with create_engine(schema_url).begin() as connection:
+            connection.execute(
+                text(
+                    "INSERT INTO users (id, email, display_name, role) "
+                    "VALUES (:id, 'existing@example.test', 'Existing User', 'member')"
+                ),
+                {"id": existing_user_id},
+            )
+
+        command.upgrade(alembic_config, "head")
+        with create_engine(schema_url).connect() as connection:
+            settings = connection.execute(
+                text("SELECT theme FROM user_settings WHERE user_id=:user_id"),
+                {"user_id": existing_user_id},
+            ).scalar_one()
+            is_active = connection.execute(
+                text("SELECT is_active FROM users WHERE id=:user_id"),
+                {"user_id": existing_user_id},
+            ).scalar_one()
+        assert settings == "system"
+        assert is_active is True
+    finally:
+        with admin_engine.begin() as connection:
+            connection.execute(text(f'DROP SCHEMA IF EXISTS "{schema}" CASCADE'))
+        admin_engine.dispose()
 
 
 def test_create_list_get_and_update_project_contract(client: TestClient) -> None:
